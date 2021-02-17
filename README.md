@@ -20,3 +20,7 @@ Once you have installed the compiler, run the command:
 npm start
 
 This command will start the server and transpile changes made. Then, you can nagivate to localhost:3000 to view the mackintosh compiler.
+
+# Code Refrences
+
+TypeScript and Express server setup refrenced: https://www.digitalocean.com/community/tutorials/setting-up-a-node-project-with-typescript
