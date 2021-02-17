@@ -13,13 +13,18 @@
         <p>Input source code here:</p>
         <div>
             <textarea id="input"></textarea>
-            <input type="button" id="compile" value="Compile">
+            <input type="button" id="compile" value="Compile" onclick="compile_click();">
             <p>Output:</p>
             <textarea id="output"></textarea>
         </div>
         
-        
-        <!--Scripts-->
-        <script>src="./app.js"</script>
+        <!--Import Scripts-->
+        <script type="text/javascript" src="./app.js"></script>
+        <script type="text/javascript">
+            function compile_click() {
+                //placeholder function for when the button needs to be implimented. if only it were actually this easy...
+                console.log("Compile!");
+            }
+        </script>
     </body>
 </html>
