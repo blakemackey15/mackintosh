@@ -19,4 +19,4 @@ This command will install all of the node packages used in this project, includi
 Once you have installed the compiler, run the command:
 npm start
 
-This command will start the server. Then, you can nagivate to localhost:3000 to view the mackintosh compiler.
+This command will start the server and transpile changes made. Then, you can nagivate to localhost:3000 to view the mackintosh compiler.
