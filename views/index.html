@@ -3,6 +3,11 @@
     <head>
         <title>mackintosh Compiler</title>
         <link rel="stylesheet" href="/css/mackComp.css">
+                
+        <!--Import Scripts-->
+        <script type="text/javascript" src="/src/app.js"></script>
+        <script type="text/javascript" src="/src/index.js">
+        </script>
     </head>
 
     <body>
@@ -17,17 +22,14 @@
         <div>
             <textarea id="input" rows="15" cols="30"></textarea>
             <br>
-            <input type="button" id="compile" value="Compile" onclick="compile_click();">
+            <input type="button" id="compile" value="Compile" onclick="compile();">
             <p>Output:</p>
             <textarea id="output" rows="15" cols="30"></textarea>
         </div>
-        
-        <!--Import Scripts-->
-        <script type="text/javascript" src="/src/app.ts"></script>
         <script type="text/javascript">
-            function compile_click() {
+            function compile() {
                 //placeholder function for when the button needs to be implimented. if only it were actually this easy...
-                console.log("Compile!");
+                document.getElementById("output").innerHTML = "Compile!"
             }
         </script>
     </body>
