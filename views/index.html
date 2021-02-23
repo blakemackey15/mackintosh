@@ -2,11 +2,11 @@
 <html lang="en">
     <head>
         <title>mackintosh Compiler</title>
-        <link rel="stylesheet" href="/css/mackComp.css">
+        <link rel='stylesheet' href='/css/mackComp.css'>
                 
         <!--Import Scripts-->
-        <script type="text/javascript" src="/src/app.js"></script>
-        <script type="text/javascript" src="/src/index.js">
+        <script type='text/javascript' src='/src/app.js'></script>
+        <script type='text/javascript' src='/src/index.js'>
         </script>
     </head>
 
@@ -14,22 +14,22 @@
         <h1>mackintosh Online Compiler</h1>
         <!--Link to source language reference sheet from class website-->
         <div>
-            <a href="https://www.labouseur.com/courses/compilers/grammar.pdf" target="_blank">Language Grammar Reference</a>
+            <a href='https://www.labouseur.com/courses/compilers/grammar.pdf' target='_blank'>Language Grammar Reference</a>
         </div>
 
         <!--Input and output forms-->
         <p>Input source code here:</p>
         <div>
-            <textarea id="input" rows="15" cols="30"></textarea>
+            <textarea id='input' rows='15' cols='30'></textarea>
             <br>
-            <input type="button" id="compile" value="Compile" onclick="compile();">
+            <input type='button' id='compile' value='Compile' onclick='compile();'>
             <p>Output:</p>
-            <textarea id="output" rows="15" cols="30"></textarea>
+            <textarea id='output' rows='15' cols='30'></textarea>
         </div>
-        <script type="text/javascript">
+        <script type='text/javascript'>
             function compile() {
                 //placeholder function for when the button needs to be implimented. if only it were actually this easy...
-                document.getElementById("output").innerHTML = "Compile!"
+                document.getElementById('output').innerHTML = 'Compile!';
             }
         </script>
     </body>
