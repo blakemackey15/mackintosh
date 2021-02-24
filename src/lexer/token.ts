@@ -10,18 +10,58 @@ Characters: a, b, c, space, etc.
 Digits: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9.
 Identifiers: 
 */
-
 export class token {
 
-    private tokenName : String;
-    //Represents integer digits 0-9.
-    private digits = new RegExp('[0-9]');
-    //Regular expression catches all characters from any language using unicode including spaces.
+    private tokenCode : String;
+    /*
+    Represents any combination of integer digits 0-9. Must match with 0 or a n
+    umber beginning with any digit in range 1-9, followed by any digit.
+    */
+    private digits = new RegExp('[(?:0|[1-9]\d*)]');
     private characters = new RegExp('[\p{L}\s]')
-    //Represents relevant symbols for the compiler.
+    private seperator = new RegExp('');
+    private operator = new RegExp('');
     private symbols = new RegExp('[-!$*()+={}\[\]"\/]')
 
-    constructor(name: String) {
-        this.tokenName = name;
+    /**
+     * Tokens Needed
+     * 
+     */
+    
+    private isDigit : boolean;
+    private isChar : boolean;
+    private isSymbol : boolean;
+
+    constructor() {
+
+    }
+
+    public setTokenCode(code : string) {
+        this.tokenCode = code;
+    }
+
+    public getTokenCode() {
+        return this.tokenCode;
+    }
+
+    /**
+     * CheckTokenType: Takes an input from the user and generates a token by 
+     * matching it against the regular expressions and transition tables.
+     */
+    public CheckTokenType(input : string) { 
+        if(this.digits.test(input)) {
+            this.isDigit = true;
+            return this.isDigit;
+        }
+
+        if(this.characters.test(input)) {
+            this.isChar = true;
+            return this.isChar
+        }
+
+        if(this.symbols.test(input)) {
+            this.isSymbol = true;
+            return this.isSymbol;
+        }
     }
 }
