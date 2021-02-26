@@ -22,10 +22,13 @@ export class lex {
          */
         for(let i = 0; i < inputtedCode.length; i++) {
             console.log('Lexing line ' + i + 1);
-            this.tokenStream[i] = inputtedCode.charAt(i);
             this.tokenFlag = this.token.CheckTokenType(this.tokenStream[i]);
 
-            
+            if(this.tokenFlag) {
+                //Add current token to the token stream.
+                this.tokenStream[i] = inputtedCode.charAt(i);
+                this.tokenBuffer++;
+            }
         }
     }
 

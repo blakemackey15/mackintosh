@@ -56,45 +56,54 @@ export class token {
     /**
      * CheckTokenType: Takes an input from the user and generates a token by 
      * matching it against the regular expressions and transition tables.
+     * Sets corresponding token code and returns boolean value.
      */
     public CheckTokenType(input : string) { 
         if(this.digits.test(input)) {
             this.isDigit = true;
+            this.setTokenCode('Digit');
             return this.isDigit;
         }
 
         if(this.characters.test(input)) {
             this.isChar = true;
+            this.setTokenCode('Character');
             return this.isChar
         }
 
         if(this.symbols.test(input)) {
             this.isSymbol = true;
+            this.setTokenCode('Symbol');
             return this.isSymbol;
         }
 
         if(this.leftBlock.test(input)) {
             this.isLeftBlock = true;
+            this.setTokenCode('Start Block');
             return this.isLeftBlock;
         }
 
         if(this.rightBlock.test(input)) {
             this.isRightBlock = true;
+            this.setTokenCode('End Block');
             return this.isRightBlock;
         }
 
         if(this.operator.test(input)) {
             this.isOperator = true;
+            this.setTokenCode('Operator');
             return this.isOperator;
         }
 
         if(this.boolOperator.test(input)) {
             this.isBoolOperator = true;
+            this.setTokenCode('Boolean Operator');
             return this.isBoolOperator;
         }
 
         if(this.endProgram.test(input)) {
             this.isEndProgram = true;
+            this.setTokenCode('End Program');
             return this.isEndProgram;
         }
     }
