@@ -5,9 +5,3 @@ https://www.debuggex.com/ - Useful tool I used to test my regular expressions fo
 
 import {lex} from './lexer/lex';
 import {token} from './lexer/token';
-
-const input : HTMLFormElement = document.querySelector('#input');
-let _Lexer : lex;
-let tokenStream : Array<token>;
-let curToken : number;
-let errors : number;
