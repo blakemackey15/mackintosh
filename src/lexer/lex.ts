@@ -1,11 +1,15 @@
 import {token} from "./token";
 
 
-class lex {
-    //regular expressions to represent our language's grammar. these expressions are declared in the rule order
+export class lex {
 
     constructor() {
 
+    }
+
+    public lex() { 
+        let inputCode = (<HTMLInputElement>document.getElementById('input')).value;
+        return inputCode;
     }
 
 }
