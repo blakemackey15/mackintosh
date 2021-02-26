@@ -19,18 +19,27 @@ export class token {
     */
     private digits = new RegExp('[(?:0|[1-9]\d*)]');
     private characters = new RegExp('[\p{L}\s]')
-    private seperator = new RegExp('');
-    private operator = new RegExp('');
+    private leftBlock = new RegExp('[{]');
+    private rightBlock = new RegExp('[}]');
+    private operator = new RegExp('[+]');
+    private boolOperator = new RegExp('[(?:^|[^!=])([!=]=)(?!=)]');
+    private endProgram = new RegExp('[$]');
     private symbols = new RegExp('[-!$*()+={}\[\]"\/]')
 
     /**
      * Tokens Needed
-     * 
+     * Digits 0-9
+     * {}, +, ==. !=. 
      */
     
     private isDigit : boolean;
     private isChar : boolean;
     private isSymbol : boolean;
+    private isLeftBlock : boolean;
+    private isRightBlock : boolean;
+    private isOperator : boolean;
+    private isBoolOperator : boolean;
+    private isEndProgram : boolean;
 
     constructor() {
 
@@ -62,6 +71,31 @@ export class token {
         if(this.symbols.test(input)) {
             this.isSymbol = true;
             return this.isSymbol;
+        }
+
+        if(this.leftBlock.test(input)) {
+            this.isLeftBlock = true;
+            return this.isLeftBlock;
+        }
+
+        if(this.rightBlock.test(input)) {
+            this.isRightBlock = true;
+            return this.isRightBlock;
+        }
+
+        if(this.operator.test(input)) {
+            this.isOperator = true;
+            return this.isOperator;
+        }
+
+        if(this.boolOperator.test(input)) {
+            this.isBoolOperator = true;
+            return this.isBoolOperator;
+        }
+
+        if(this.endProgram.test(input)) {
+            this.isEndProgram = true;
+            return this.isEndProgram;
         }
     }
 }
