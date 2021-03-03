@@ -13,6 +13,7 @@ Identifiers:
 export class token {
 
     private tokenCode : String;
+    private tokenValue : String;
     /*
     Represents any combination of integer digits 0-9. Must match with 0 or a n
     umber beginning with any digit in range 1-9, followed by any digit.
@@ -42,7 +43,8 @@ export class token {
     private isEndProgram : boolean;
 
     constructor() {
-
+        this.tokenCode = "";
+        this.tokenValue = "";
     }
 
     public setTokenCode(code : string) {
@@ -51,6 +53,14 @@ export class token {
 
     public getTokenCode() {
         return this.tokenCode;
+    }
+
+    public setTokenValue(value : string) {
+        this.tokenValue = value;
+    }
+
+    public getTokenValue() {
+        return this.tokenValue;
     }
 
     /**
@@ -105,6 +115,61 @@ export class token {
             this.isEndProgram = true;
             this.setTokenCode('End Program');
             return this.isEndProgram;
+        }
+    }
+
+    /**
+     * Generates token by checking against the regular expressions generated.
+     */
+    public GenerateToken(isTokenFlag : boolean, input : string) {
+        /**
+         * Use switch statements to check against each RegEx.
+         */
+        switch(this.digits.test(input)) {
+            case true:
+                this.setTokenValue(input);
+                this.setTokenCode("DIGIT - " + input);
+                break;
+        }
+
+        switch(this.boolOperator.test(input)) {
+            case true:
+                this.setTokenValue(input);
+
+                if(this.tokenValue === "==") {
+                    this.setTokenCode("BOOLEAN CHECK EQUAL");
+                }
+
+                else if(this.tokenValue === "!=") {
+                    this.setTokenCode("BOOLEAN CHECK NOT EQUAL");
+                }
+                break;
+        }
+
+        switch(this.operator.test(input)) {
+            case true:
+                this.setTokenValue(input);
+        }
+
+        switch(this.leftBlock.test(input)) {
+            case true:
+                this.setTokenValue(input);
+                this.setTokenCode("OPENING CODE BLOCK");
+                break;
+        }
+
+        switch(this.rightBlock.test(input)) {
+            case true:
+                this.setTokenValue(input);
+                this.setTokenCode("CLOSING CODE BLOCK");
+                break;
+        }
+
+        switch(this.endProgram.test(input)) {
+            case true:
+                this.setTokenValue(input);
+                this.setTokenCode("END PROGRAM");
+                break;
         }
     }
 }
