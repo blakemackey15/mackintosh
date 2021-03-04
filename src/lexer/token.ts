@@ -14,6 +14,7 @@ export class token {
 
     private tokenCode : String;
     private tokenValue : String;
+    private isToken : boolean;
     /*
     Represents any combination of integer digits 0-9. Must match with 0 or a n
     umber beginning with any digit in range 1-9, followed by any digit.
@@ -59,7 +60,7 @@ export class token {
     /**
      * Generates token by checking against the regular expressions generated.
      */
-    public GenerateToken(isTokenFlag : boolean, input : string) {
+    public GenerateToken(input : string) {
         /**
          * Use switch statements to check against each RegEx.
          */
@@ -67,12 +68,14 @@ export class token {
             case true:
                 this.setTokenValue(input);
                 this.setTokenCode("DIGIT - " + input);
+                this.isToken = true;
                 break;
         }
 
         switch(this.boolOperator.test(input)) {
             case true:
                 this.setTokenValue(input);
+                this.isToken = true;
 
                 if(this.tokenValue === "==") {
                     this.setTokenCode("BOOLEAN CHECK EQUAL");
@@ -87,6 +90,7 @@ export class token {
         switch(this.quotes.test(input)) {
             case true:
                 this.setTokenValue(input);
+                this.isToken = true;
                 this.quoteCount++;
 
                 if(this.quoteCount == 1) {
@@ -102,6 +106,7 @@ export class token {
         switch(this.characters.test(input)) {
             case true:
                 this.setTokenValue(input);
+                this.isToken = true;
 
                 if(this.quoteCount > 0) {
                     this.setTokenCode("CHARACTER " + input);
@@ -116,6 +121,8 @@ export class token {
         switch(this.operator.test(input)) {
             case true:
                 this.setTokenValue(input);
+                this.setTokenCode("ADDITION OPERATOR" + input);
+                this.isToken = true;
                 break;
         }
 
@@ -123,6 +130,7 @@ export class token {
             case true:
                 this.setTokenValue(input);
                 this.setTokenCode("OPENING CODE BLOCK");
+                this.isToken = true;
                 break;
         }
 
@@ -130,6 +138,7 @@ export class token {
             case true:
                 this.setTokenValue(input);
                 this.setTokenCode("CLOSING CODE BLOCK");
+                this.isToken = true;
                 break;
         }
 
@@ -137,7 +146,10 @@ export class token {
             case true:
                 this.setTokenValue(input);
                 this.setTokenCode("END PROGRAM");
+                this.isToken = true;
                 break;
         }
+
+        return this.isToken;
     }
 }

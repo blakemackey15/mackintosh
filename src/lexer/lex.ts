@@ -22,7 +22,7 @@ export class lex {
          */
         for(let i = 0; i < inputtedCode.length; i++) {
             console.log('Lexing line ' + i + 1);
-            this.tokenFlag = this.token.CheckTokenType(this.tokenStream[i]);
+            this.tokenFlag = this.token.GenerateToken(this.tokenStream[i]);
 
             if(this.tokenFlag) {
                 //Add current token to the token stream.
