@@ -25,22 +25,15 @@ export class token {
     private operator = new RegExp('[+]');
     private boolOperator = new RegExp('[(?:^|[^!=])([!=]=)(?!=)]');
     private endProgram = new RegExp('[$]');
-    private symbols = new RegExp('[-!$*()+={}\[\]"\/]')
+    private quotes = new RegExp('["]');
+    private quoteCount : number;
 
     /**
      * Tokens Needed
      * Digits 0-9
-     * {}, +, ==. !=. 
+     * Characters
+     * {}, +, ==. !=, "", comments
      */
-    
-    private isDigit : boolean;
-    private isChar : boolean;
-    private isSymbol : boolean;
-    private isLeftBlock : boolean;
-    private isRightBlock : boolean;
-    private isOperator : boolean;
-    private isBoolOperator : boolean;
-    private isEndProgram : boolean;
 
     constructor() {
         this.tokenCode = "";
@@ -61,61 +54,6 @@ export class token {
 
     public getTokenValue() {
         return this.tokenValue;
-    }
-
-    /**
-     * CheckTokenType: Takes an input from the user and generates a token by 
-     * matching it against the regular expressions and transition tables.
-     * Sets corresponding token code and returns boolean value.
-     */
-    public CheckTokenType(input : string) { 
-        if(this.digits.test(input)) {
-            this.isDigit = true;
-            this.setTokenCode('Digit');
-            return this.isDigit;
-        }
-
-        if(this.characters.test(input)) {
-            this.isChar = true;
-            this.setTokenCode('Character');
-            return this.isChar
-        }
-
-        if(this.symbols.test(input)) {
-            this.isSymbol = true;
-            this.setTokenCode('Symbol');
-            return this.isSymbol;
-        }
-
-        if(this.leftBlock.test(input)) {
-            this.isLeftBlock = true;
-            this.setTokenCode('Start Block');
-            return this.isLeftBlock;
-        }
-
-        if(this.rightBlock.test(input)) {
-            this.isRightBlock = true;
-            this.setTokenCode('End Block');
-            return this.isRightBlock;
-        }
-
-        if(this.operator.test(input)) {
-            this.isOperator = true;
-            this.setTokenCode('Operator');
-            return this.isOperator;
-        }
-
-        if(this.boolOperator.test(input)) {
-            this.isBoolOperator = true;
-            this.setTokenCode('Boolean Operator');
-            return this.isBoolOperator;
-        }
-
-        if(this.endProgram.test(input)) {
-            this.isEndProgram = true;
-            this.setTokenCode('End Program');
-            return this.isEndProgram;
-        }
     }
 
     /**
@@ -146,9 +84,39 @@ export class token {
                 break;
         }
 
+        switch(this.quotes.test(input)) {
+            case true:
+                this.setTokenValue(input);
+                this.quoteCount++;
+
+                if(this.quoteCount == 1) {
+                    this.setTokenCode("OPEN QUOTES");
+                }
+
+                else if(this.quoteCount == 2) {
+                    this.setTokenCode("CLOSED QUOTES");
+                    this.quoteCount = 0;
+                }
+        }
+
+        switch(this.characters.test(input)) {
+            case true:
+                this.setTokenValue(input);
+
+                if(this.quoteCount > 0) {
+                    this.setTokenCode("CHARACTER " + input);
+                }
+
+                else if(this.quoteCount == 0) {
+                    this.setTokenCode("IDENTIFIER " + input);
+                }
+                break;
+        }
+
         switch(this.operator.test(input)) {
             case true:
                 this.setTokenValue(input);
+                break;
         }
 
         switch(this.leftBlock.test(input)) {
