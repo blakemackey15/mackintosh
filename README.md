@@ -25,3 +25,7 @@ tsc
 # Code Refrences
 
 TypeScript and Express server setup refrenced: https://www.digitalocean.com/community/tutorials/setting-up-a-node-project-with-typescript
+
+# Grading
+
+At the time of the due date, all current changes will be merged into master. Project development will take place on a corresponding branch.
