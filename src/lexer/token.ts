@@ -28,6 +28,13 @@ export class token {
     private endProgram = new RegExp('[$]');
     private quotes = new RegExp('["]');
     private quoteCount : number;
+    private intRegEx = new RegExp('in(t)');
+    private stringRegEx = new RegExp('strin(g)');
+    private printRegEx = new RegExp('prin(t)');
+    private falseRegEx = new RegExp('fals(e)');
+    private trueRegEx = new RegExp('tru(e)');
+    private ifRegEx = new RegExp('i(f)');
+    private whileRegEx = new RegExp('whil(e)');
 
     /**
      * Tokens Needed
@@ -38,7 +45,7 @@ export class token {
 
     constructor() {
         this.tokenCode = "";
-        this.tokenValue = "";
+        this.tokenValue = "";        
     }
 
     public setTokenCode(code : string) {
@@ -78,11 +85,11 @@ export class token {
                 this.isToken = true;
 
                 if(this.tokenValue === "==") {
-                    this.setTokenCode("BOOLEAN CHECK EQUAL");
+                    this.setTokenCode("BOOLEAN CHECK EQUAL ");
                 }
 
                 else if(this.tokenValue === "!=") {
-                    this.setTokenCode("BOOLEAN CHECK NOT EQUAL");
+                    this.setTokenCode("BOOLEAN CHECK NOT EQUAL ");
                 }
                 break;
         }
@@ -94,11 +101,11 @@ export class token {
                 this.quoteCount++;
 
                 if(this.quoteCount == 1) {
-                    this.setTokenCode("OPEN QUOTES");
+                    this.setTokenCode("OPEN QUOTES ");
                 }
 
                 else if(this.quoteCount == 2) {
-                    this.setTokenCode("CLOSED QUOTES");
+                    this.setTokenCode("CLOSED QUOTES ");
                     this.quoteCount = 0;
                 }
         }
@@ -121,7 +128,7 @@ export class token {
         switch(this.operator.test(input)) {
             case true:
                 this.setTokenValue(input);
-                this.setTokenCode("ADDITION OPERATOR" + input);
+                this.setTokenCode("ADDITION OPERATOR " + input);
                 this.isToken = true;
                 break;
         }
@@ -129,7 +136,7 @@ export class token {
         switch(this.leftBlock.test(input)) {
             case true:
                 this.setTokenValue(input);
-                this.setTokenCode("OPENING CODE BLOCK");
+                this.setTokenCode("OPENING CODE BLOCK ");
                 this.isToken = true;
                 break;
         }
@@ -137,7 +144,7 @@ export class token {
         switch(this.rightBlock.test(input)) {
             case true:
                 this.setTokenValue(input);
-                this.setTokenCode("CLOSING CODE BLOCK");
+                this.setTokenCode("CLOSING CODE BLOCK ");
                 this.isToken = true;
                 break;
         }
@@ -148,6 +155,66 @@ export class token {
                 this.setTokenCode("END PROGRAM");
                 this.isToken = true;
                 break;
+        }
+
+        switch(this.intRegEx.test(input)) {
+            case true:
+                this.setTokenValue(input);
+                this.setTokenCode("KEYWORD VAR DECLARATION " + input);
+                this.isToken = true;
+                break;
+        }
+
+        switch(this.stringRegEx.test(input)) {
+            case true:
+                this.setTokenValue(input);
+                this.setTokenCode("KEYWORD VAR DECLARATION " + input);
+                this.isToken = true;
+                break;
+        }
+
+        switch(this.printRegEx.test(input)) {
+            case true:
+                this.setTokenValue(input);
+                this.setTokenCode("KEYWORD PRINT STATEMENT " + input);
+                this.isToken = true;
+                break;
+        }
+
+        switch(this.trueRegEx.test(input)) {
+            case true:
+                this.setTokenValue(input);
+                this.setTokenCode("BOOLEAN " + input);
+                this.isToken = true;
+                break;
+        }
+
+        switch(this.falseRegEx.test(input)) {
+            case true:
+                this.setTokenValue(input);
+                this.setTokenCode("BOOLEAN " + input);
+                this.isToken = true;
+                break;
+        }
+
+        switch(this.ifRegEx.test(input)) {
+            case true:
+                this.setTokenValue(input);
+                this.setTokenCode("BRANCHING STATEMENT " + input);
+                this.isToken = true;
+                break;
+        }
+
+        switch(this.whileRegEx.test(input)) {
+            case true:
+                this.setTokenValue(input);
+                this.setTokenCode("");
+                this.isToken = true;
+                break;
+        }
+
+        if(this.isToken == false) {
+            this.setTokenCode("ERROR - INVALID TOKEN " + input);
         }
 
         return this.isToken;
