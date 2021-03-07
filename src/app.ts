@@ -5,6 +5,8 @@ const port = 3000;
 var bodyParser = require('body-parser');
 
 app.use(express.static('public'));
+
+
 app.use(bodyParser.json({ type: 'application/json' }));
 app.get('/', (req, res) => {
   res.sendFile('index.html', {root: './views'});
