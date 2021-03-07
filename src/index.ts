@@ -23,7 +23,6 @@ export class index {
 
     constructor() {
         this._lexer = new lex();
-        console.log('pee pee');
         this.startCompile();
     }
 

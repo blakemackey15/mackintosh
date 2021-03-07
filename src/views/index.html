@@ -4,7 +4,7 @@
         <title>mackintosh Compiler</title>
         <link rel='stylesheet' href='/css/mackComp.css'>
         <script type='text/javascript' src='/dist/index.js'></script>
-        <script type='text/javascript' src='/dist/lexer/lex.js'></script>
+        <script type='text/javascript' src=></script>
     </head>
 
     <body onload='startCompile()'>
@@ -30,6 +30,10 @@
             <p>Output:</p>
             <textarea id='output' rows='15', cols='30'></textarea>
         <script type='text/javascript'>
+
+            function startCompile() {
+
+            }
             function compile() {
                 //placeholder function for when the button needs to be implimented. if only it were actually this easy...
                 document.getElementById('output').innerHTML = 'Compile!';

@@ -6,10 +6,9 @@ var bodyParser = require('body-parser');
 
 app.use(express.static('public'));
 
-
 app.use(bodyParser.json({ type: 'application/json' }));
 app.get('/', (req, res) => {
-  res.sendFile('index.html', {root: './views'});
+  res.sendFile('index.html', {root: './src/views'});
 });
 
 app.listen(port, () => {
