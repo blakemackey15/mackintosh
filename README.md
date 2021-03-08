@@ -13,18 +13,22 @@ If you do not have Node.js or Npm installed, you can follow this link to install
 Once you have downloaded Node.js and Npm and have successfully cloned the repository, navigate to the directory your respository is stored in. Then, run the command:
 npm install
 
-This command will install all of the node packages used in this project, including TypeScript and Express. This should create a folder called node_modules and a package-lock.json file.
+This command will install all of the node packages used in this project, including TypeScript and Gulp. This should create a folder called node_modules and a package-lock.json file.
 
 # Running mackintosh
 Once you have installed the compiler, run the command:
-npm start
+gulp
 
-This command will start the server and transpile changes made. Compile changes can be verified in the dist output folder. Then, you can nagivate to localhost:3000 to view the mackintosh compiler. Alternitvely, the project can be compiled without starting the server by running the command:
-tsc
+This command will run the gulp file and compile TypeScript files. Alternitively, the project can be compiled using the tsc command.
+
+Once you have compiled the project, run the command:
+node dist/index.js
+
+To start the compiler in the command line.
 
 # Code Refrences
 
-TypeScript and Express server setup refrenced: https://www.digitalocean.com/community/tutorials/setting-up-a-node-project-with-typescript
+TypeScript and gulp setup: https://www.typescriptlang.org/docs/handbook/gulp.html
 
 # Grading
 
