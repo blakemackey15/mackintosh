@@ -85,11 +85,11 @@ export class token {
                 this.isToken = true;
 
                 if(this.tokenValue === "==") {
-                    this.setTokenCode("BOOLEAN CHECK EQUAL ");
+                    this.setTokenCode("BOOLEAN CHECK EQUAL " + input);
                 }
 
                 else if(this.tokenValue === "!=") {
-                    this.setTokenCode("BOOLEAN CHECK NOT EQUAL ");
+                    this.setTokenCode("BOOLEAN CHECK NOT EQUAL " + input);
                 }
                 break;
         }
@@ -101,11 +101,11 @@ export class token {
                 this.quoteCount++;
 
                 if(this.quoteCount == 1) {
-                    this.setTokenCode("OPEN QUOTES ");
+                    this.setTokenCode("OPEN QUOTES " + input);
                 }
 
                 else if(this.quoteCount == 2) {
-                    this.setTokenCode("CLOSED QUOTES ");
+                    this.setTokenCode("CLOSED QUOTES " + input);
                     this.quoteCount = 0;
                 }
         }
@@ -136,7 +136,7 @@ export class token {
         switch(this.leftBlock.test(input)) {
             case true:
                 this.setTokenValue(input);
-                this.setTokenCode("OPENING CODE BLOCK ");
+                this.setTokenCode("OPENING CODE BLOCK " + input);
                 this.isToken = true;
                 break;
         }
@@ -144,7 +144,7 @@ export class token {
         switch(this.rightBlock.test(input)) {
             case true:
                 this.setTokenValue(input);
-                this.setTokenCode("CLOSING CODE BLOCK ");
+                this.setTokenCode("CLOSING CODE BLOCK " + input);
                 this.isToken = true;
                 break;
         }
@@ -152,7 +152,7 @@ export class token {
         switch(this.endProgram.test(input)) {
             case true:
                 this.setTokenValue(input);
-                this.setTokenCode("END PROGRAM");
+                this.setTokenCode("END PROGRAM" + input);
                 this.isToken = true;
                 break;
         }
@@ -208,7 +208,7 @@ export class token {
         switch(this.whileRegEx.test(input)) {
             case true:
                 this.setTokenValue(input);
-                this.setTokenCode("");
+                this.setTokenCode("WHILE LOOP" + input);
                 this.isToken = true;
                 break;
         }

@@ -17,9 +17,10 @@ https://regex101.com/ - Useful tool I used to test my regular expressions for my
 
 import { lex } from './lexer/lex';
 import * as readline from 'readline';
+const prompt = require('prompt');
 
 //Allows the user to input their source code.
-var rl = readline.createInterface({
+const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
 });
@@ -39,17 +40,22 @@ export class index {
 
     //Method to get src code input using readline interface.
     public getSrcCode() {
-        rl.question("Please enter source code to be compiled: ", function(answer) {
-            console.log("SRC INPUT RECIEVED " + answer);
-            this.srcCode = answer;
-            rl.close();
-        });
+        // rl.question("Please enter source code to be compiled: ", function(answer) {
+        //     console.log("SRC INPUT RECIEVED " + answer);
+        //     rl.close();
+        //     this.srcCode = answer;
+        // });
     }
 
     public startCompile() : boolean {
-        console.log('BEGINNING COMPILATION...');
-        let inputtedCode = this._lexer.testProgram(this.srcCode);
+        console.log('INFO: BEGINNING COMPILATION...');
+        let inputtedCode = this._lexer.testProgram("1");
         this._lexer.lex(inputtedCode);
+
+        //Check if there is a $ at the end of the program, if not display warning.s
+        if(inputtedCode.charAt(inputtedCode.length) != '$') {
+            console.log("LEXER WARNING - PROGRAM END $ NOT FOUND");
+        }
         return true;
     }
 
