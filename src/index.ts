@@ -15,7 +15,8 @@ https://regex101.com/ - Useful tool I used to test my regular expressions for my
 //     return false;
 // };
 
-import {lex} from './lexer/lex';
+import { lex } from './lexer/lex';
+console.log("test");
 
 export class index {
     private _lexer : lex;
@@ -38,3 +39,5 @@ export class index {
     }
 
 }
+
+let compiler : index = new index();

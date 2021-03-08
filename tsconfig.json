@@ -1,11 +1,12 @@
 {
+  "files": ["src/index.ts", "src/lexer/lex.ts", "src/lexer/token.ts"],
   "compilerOptions": {
     "module": "commonjs",
     "esModuleInterop": true,
-    "target": "es6",
+    "target": "es5",
     "moduleResolution": "node",
     "sourceMap": true,
-    "outDir": "public/dist"
+    "outDir": "dist",
   },
   "lib": ["es2015"]
 }
