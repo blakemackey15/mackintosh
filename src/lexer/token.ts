@@ -19,12 +19,12 @@ export class token {
     Represents any combination of integer digits 0-9. Must match with 0 or a n
     umber beginning with any digit in range 1-9, followed by any digit.
     */
-    private digits = new RegExp('[(?:0|[1-9]\d*)]');
+    private digits = new RegExp('(?:0|[1-9]\d*)');
     private characters = new RegExp('[\p{L}\s]')
     private leftBlock = new RegExp('[{]');
     private rightBlock = new RegExp('[}]');
     private operator = new RegExp('[+]');
-    private boolOperator = new RegExp('[(?:^|[^!=])([!=]=)(?!=)]');
+    private boolOperator = new RegExp('(?:^|[^!=])([!=]=)(?!=)');
     private endProgram = new RegExp('[$]');
     private quotes = new RegExp('["]');
     private quoteCount : number;
