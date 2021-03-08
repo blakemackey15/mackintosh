@@ -20,7 +20,7 @@ export class token {
     umber beginning with any digit in range 1-9, followed by any digit.
     */
     private digits = new RegExp('(?:0|[1-9]\d*)');
-    private characters = new RegExp('[\p{L}\s]')
+    private characters = new RegExp('[a-z][A-Z]')
     private leftBlock = new RegExp('[{]');
     private rightBlock = new RegExp('[}]');
     private operator = new RegExp('[+]');

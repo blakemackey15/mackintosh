@@ -49,11 +49,11 @@ export class index {
 
     public startCompile() : boolean {
         console.log('INFO: BEGINNING COMPILATION...');
-        let inputtedCode = this._lexer.testProgram("1");
-        this._lexer.lex(inputtedCode);
+        let inputtedCode = this._lexer.testProgram("{}");
+        this._lexer.lex();
 
-        //Check if there is a $ at the end of the program, if not display warning.s
-        if(inputtedCode.charAt(inputtedCode.length) != '$') {
+        //Check if there is a $ at the end of the program, if not display warning.
+        if(inputtedCode[inputtedCode.length] != '$') {
             console.log("LEXER WARNING - PROGRAM END $ NOT FOUND");
         }
         return true;

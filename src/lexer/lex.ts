@@ -7,6 +7,7 @@ export class lex {
     private errorCount : number;
     private tokenStream = new Array<string>("");
     private tokenFlag : boolean;
+    private program = new Array<string>("");
     private tokens : Array<token>;
 
     constructor() {
@@ -16,31 +17,31 @@ export class lex {
         this.tokenFlag = false;
     }
 
-    public testProgram(input : string) : string {
+    public testProgram(input : string) : Array<string> {
         //Remove white spaces.
         input.trim();
+        this.program.pop();
 
         //Push characters in string to token stream.
         for(let i = 0; i < input.length; i++) {
             console.log(input.charAt(i));
-            this.tokenStream[i] = input.charAt(i);
-            //Print characters in the token stream.
+            this.program.push(input.charAt(i));
         }
 
-        return input;
+        return this.program;
     }
+    
     //inputtedCode : string
-    public lex(srcCode : string) { 
+    public lex() { 
         
         //Loop through the length of the inputted string, and check each character.
-        for(let i = 0; i < srcCode.length; i++) {
-            console.log('LEXER - Lexing line ' + i + 1);
-            this.tokenFlag = this.token.GenerateToken(this.tokenStream[i]);
+        for(let i = 0; i < this.program.length; i++) {
+            console.log('LEXER - Lexing line ' + i);
+            this.tokenFlag = this.token.GenerateToken(this.program[i]);
 
             if(this.tokenFlag) {
                 //Add current token to the token stream.
                 console.log('LEXER - ' + this.token.getTokenCode() + ' Found on line: Position: ');
-                this.tokenStream[i] = srcCode.charAt(i);
                 this.tokenBuffer++;
             }
 
