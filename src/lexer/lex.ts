@@ -5,7 +5,7 @@ export class lex {
     private token : token;
     private tokenBuffer : number;
     private errorCount : number;
-    private tokenStream : Array<string>
+    private tokenStream = new Array<string>("");
     private tokenFlag : boolean;
     private tokens : Array<token>;
 
@@ -16,38 +16,36 @@ export class lex {
         this.tokenFlag = false;
     }
 
-    public testProgram() : string {
-        let testProgram = '$';
+    public testProgram(input : string) : string {
         //Remove white spaces.
-        testProgram.trim();
+        input.trim();
 
         //Push characters in string to token stream.
-        for(let i = 0; i < testProgram.length; i++) {
-            this.tokenStream.push(testProgram.charAt(i));
+        for(let i = 0; i < input.length; i++) {
+            console.log(input.charAt(i));
+            this.tokenStream[i] = input.charAt(i);
             //Print characters in the token stream.
-            console.log(testProgram.charAt(i));
         }
 
-        return testProgram;
+        return input;
     }
     //inputtedCode : string
-    public lex() { 
-        let code = this.testProgram();
+    public lex(srcCode : string) { 
         
         //Loop through the length of the inputted string, and check each character.
-        for(let i = 0; i < code.length; i++) {
+        for(let i = 0; i < srcCode.length; i++) {
             console.log('LEXER - Lexing line ' + i + 1);
             this.tokenFlag = this.token.GenerateToken(this.tokenStream[i]);
 
             if(this.tokenFlag) {
                 //Add current token to the token stream.
-                console.log('LEXER - ' + this.token.getTokenCode() + 'Found on line: Position: ');
-                this.tokenStream[i] = code.charAt(i);
+                console.log('LEXER - ' + this.token.getTokenCode() + ' Found on line: Position: ');
+                this.tokenStream[i] = srcCode.charAt(i);
                 this.tokenBuffer++;
             }
 
             else {
-                console.log('LEXER ERROR - ' + this.token.getTokenCode() + 'Found on line: Position: ');
+                console.log('LEXER ERROR - ' + this.token.getTokenCode() + ' Found on line: Position: ');
             }
         }
     }
