@@ -15,6 +15,7 @@ export class token {
     private tokenCode : string;
     private tokenValue : string;
     private isToken : boolean;
+
     /*
     Represents any combination of integer digits 0-9. Must match with 0 or a n
     umber beginning with any digit in range 1-9, followed by any digit.
@@ -71,6 +72,7 @@ export class token {
         /**
          * Use switch statements to check against each RegEx.
          */
+
         switch(this.digits.test(input)) {
             case true:
                 this.setTokenValue(input);

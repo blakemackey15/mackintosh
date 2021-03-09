@@ -25,8 +25,6 @@ const rl = readline.createInterface({
     output: process.stdout
 });
 
-console.log("test");
-
 export class index {
     private _lexer : lex;
     public isCompiling : boolean = false;
