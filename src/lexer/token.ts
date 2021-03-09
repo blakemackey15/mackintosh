@@ -15,6 +15,7 @@ export class token {
     private tokenCode : string;
     private tokenValue : string;
     private isToken : boolean;
+    private isKeyword : boolean;
 
     /*
     Represents any combination of integer digits 0-9. Must match with 0 or a n
@@ -46,7 +47,8 @@ export class token {
 
     constructor() {
         this.tokenCode = "";
-        this.tokenValue = "";        
+        this.tokenValue = "";
+        this.isKeyword = false;  
     }
 
     public setTokenCode(code : string) {
@@ -110,10 +112,17 @@ export class token {
                     this.setTokenCode("CLOSED QUOTES " + input);
                     this.quoteCount = 0;
                 }
+                break;
         }
 
         switch(this.characters.test(input)) {
             case true:
+                let buildStrign = new Array<string>("");
+                buildStrign.pop();
+
+                while(this.isKeyword != true) {
+                    
+                }
                 this.setTokenValue(input);
                 this.isToken = true;
 

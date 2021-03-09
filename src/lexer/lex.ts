@@ -10,6 +10,7 @@ export class lex {
     private program = new Array<string>("");
     private tokens : Array<token>;
     private programCount : number;
+    private lineNum : number;
 
     constructor() {
         this.tokenBuffer = 0;
@@ -17,6 +18,7 @@ export class lex {
         this.token = new token;
         this.tokenFlag = false;
         this.programCount = 1;
+        this.lineNum = 1;
     }
 
     public testProgram(input : string) : Array<string> {
@@ -44,6 +46,11 @@ export class lex {
         for(let i = 0; i < this.program.length; i++) {
             this.tokenFlag = this.token.GenerateToken(this.program[i]);
 
+            //Check for new lines of code.
+            if(this.program[i] === '/n') {
+                this.lineNum++;
+            }
+
             //Check for EOP $ and start lexing next program.
             if(this.program[i] == '$' && i == this.program.length - 1) {
                 if(this.errorCount == 0) {
@@ -61,12 +68,12 @@ export class lex {
 
             if(this.tokenFlag) {
                 //Add current token to the token stream.
-                console.log('LEXER - ' + this.token.getTokenCode() + ' Found on line: Position: ');
+                console.log('LEXER - ' + this.token.getTokenCode() + ' Found on line: ' + this.lineNum);
                 this.tokenBuffer++;
             }
 
             else {
-                console.log('LEXER ERROR - ' + this.token.getTokenCode() + ' Found on line: Position: ');
+                console.log('LEXER ERROR - ' + this.token.getTokenCode() + ' Found on line: Position: ' + this.lineNum);
                 this.errorCount++;
             }
         }

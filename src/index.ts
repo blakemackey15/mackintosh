@@ -56,13 +56,13 @@ export class index {
             console.log('LEXER WARNING - PROGRAM END $ NOT FOUND');
             this.warningCount++;
         }
+
         return true;
     }
 
     public endCompile() : boolean {
         return false;
     }
-
 }
 
 let compiler : index = new index();
