@@ -129,8 +129,9 @@ export class token {
                 buildStrign.pop();
 
                 while(this.isKeyword != true) {
-
+                    
                 }
+
                 this.setTokenValue(input);
                 this.isToken = true;
 
@@ -171,7 +172,7 @@ export class token {
         switch(this.endProgram.test(input)) {
             case true:
                 this.setTokenValue(input);
-                this.setTokenCode("END PROGRAM" + input);
+                this.setTokenCode("END PROGRAM " + input);
                 this.isToken = true;
                 break;
         }

@@ -62,11 +62,11 @@ export class lex {
             //Check for EOP $ and start lexing next program.
             if(this.program[i] == '$' && i == this.program.length - 1) {
                 if(this.errorCount == 0) {
-                    console.log('LEX COMPLETED WITH ' +  this.errorCount);
+                    console.log('LEX COMPLETED WITH ' +  this.errorCount + ' ERRORS');
                 }
 
                 else {
-                    console.log('LEX FAILED WITH ' + this.errorCount);
+                    console.log('LEX FAILED WITH ' + this.errorCount) + ' ERRORS';
                 }
             }
 
@@ -81,7 +81,7 @@ export class lex {
             }
 
             else {
-                console.log('LEXER ERROR - ' + this.token.getTokenCode() + ' Found on line: Position: ' + this.lineNum);
+                console.log('LEXER ERROR - ' + this.token.getTokenCode() + ' Found on line: ' + this.lineNum);
                 this.errorCount++;
             }
         }
