@@ -30,12 +30,13 @@ console.log("test");
 export class index {
     private _lexer : lex;
     public isCompiling : boolean = false;
-    private srcCode : string;
+    private warningCount : number; 
 
     constructor() {
         this._lexer = new lex();
         this.getSrcCode();
         this.startCompile();
+        this.endCompile();
     }
 
     //Method to get src code input using readline interface.
@@ -48,13 +49,14 @@ export class index {
     }
 
     public startCompile() : boolean {
-        console.log('INFO: BEGINNING COMPILATION...');
-        let inputtedCode = this._lexer.testProgram("{}");
+        console.log('INFO: BEGINNING PROGRAM COMPILATION...');
+        let inputtedCode = this._lexer.testProgram('{}');
         this._lexer.lex();
 
         //Check if there is a $ at the end of the program, if not display warning.
         if(inputtedCode[inputtedCode.length] != '$') {
-            console.log("LEXER WARNING - PROGRAM END $ NOT FOUND");
+            console.log('LEXER WARNING - PROGRAM END $ NOT FOUND');
+            this.warningCount++;
         }
         return true;
     }

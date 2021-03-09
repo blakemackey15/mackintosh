@@ -9,15 +9,18 @@ export class lex {
     private tokenFlag : boolean;
     private program = new Array<string>("");
     private tokens : Array<token>;
+    private programCount : number;
 
     constructor() {
         this.tokenBuffer = 0;
         this.errorCount = 0;
         this.token = new token;
         this.tokenFlag = false;
+        this.programCount = 1;
     }
 
     public testProgram(input : string) : Array<string> {
+        console.log('LEXER - Lexing Program ' + this.programCount);
         //Remove white spaces.
         input.trim();
         this.program.pop();
@@ -30,14 +33,31 @@ export class lex {
 
         return this.program;
     }
+
+    public getErrorCount() : number {
+        return this.errorCount;
+    }
     
     //inputtedCode : string
     public lex() { 
-        
         //Loop through the length of the inputted string, and check each character.
         for(let i = 0; i < this.program.length; i++) {
-            console.log('LEXER - Lexing line ' + i);
             this.tokenFlag = this.token.GenerateToken(this.program[i]);
+
+            //Check for EOP $ and start lexing next program.
+            if(this.program[i] == '$' && i == this.program.length - 1) {
+                if(this.errorCount == 0) {
+                    console.log('LEX COMPLETED WITH ' +  this.errorCount);
+                }
+
+                else {
+                    console.log('LEX FAILED WITH ' + this.errorCount);
+                }
+            }
+
+            else if(this.program[i] == '$' && i != this.program.length - 1) {
+                console.log('LEXER - Lexing Program ' + this.programCount);
+            }
 
             if(this.tokenFlag) {
                 //Add current token to the token stream.
@@ -47,6 +67,7 @@ export class lex {
 
             else {
                 console.log('LEXER ERROR - ' + this.token.getTokenCode() + ' Found on line: Position: ');
+                this.errorCount++;
             }
         }
     }
