@@ -11,6 +11,8 @@ export class lex {
     private tokens : Array<token>;
     private programCount : number;
     private lineNum : number;
+    private openComments = new RegExp('[\/\*]');
+    private closeComments = new RegExp('[\*\/]');
 
     constructor() {
         this.tokenBuffer = 0;
@@ -21,6 +23,7 @@ export class lex {
         this.lineNum = 1;
     }
 
+    //Populate program array.
     public testProgram(input : string) : Array<string> {
         console.log('LEXER - Lexing Program ' + this.programCount);
         //Remove white spaces.
@@ -44,7 +47,12 @@ export class lex {
     public lex() { 
         //Loop through the length of the inputted string, and check each character.
         for(let i = 0; i < this.program.length; i++) {
-            this.tokenFlag = this.token.GenerateToken(this.program[i]);
+            this.tokenFlag = this.token.GenerateToken(this.program[i], this.program, i);
+
+            if(this.openComments.test(this.token.getTokenValue())) {
+                let end = this.token.updateIndex();
+                this.program.slice(i, end);
+            }
 
             //Check for new lines of code.
             if(this.program[i] === '/n') {

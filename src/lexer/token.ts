@@ -12,10 +12,12 @@ Identifiers:
 */
 export class token {
 
+    //Token identifying information
     private tokenCode : string;
     private tokenValue : string;
     private isToken : boolean;
     private isKeyword : boolean;
+    private index : number;
 
     /*
     Represents any combination of integer digits 0-9. Must match with 0 or a n
@@ -37,7 +39,8 @@ export class token {
     private trueRegEx = new RegExp('tru(e)');
     private ifRegEx = new RegExp('i(f)');
     private whileRegEx = new RegExp('whil(e)');
-
+    private openComments = new RegExp('[\/\*]');
+    private closeComments = new RegExp('[\*\/]');
     /**
      * Tokens Needed
      * Digits 0-9
@@ -67,10 +70,15 @@ export class token {
         return this.tokenValue;
     }
 
+    //Updates program array index if a comment is found.
+    public updateIndex() : number {
+        return this.index;
+    }
+
     /**
      * Generates token by checking against the regular expressions generated.
      */
-    public GenerateToken(input : string) : boolean {
+    public GenerateToken(input : string, program : string[], counter : number) : boolean {
         /**
          * Use switch statements to check against each RegEx.
          */
@@ -121,7 +129,7 @@ export class token {
                 buildStrign.pop();
 
                 while(this.isKeyword != true) {
-                    
+
                 }
                 this.setTokenValue(input);
                 this.isToken = true;
@@ -219,9 +227,24 @@ export class token {
         switch(this.whileRegEx.test(input)) {
             case true:
                 this.setTokenValue(input);
-                this.setTokenCode("WHILE LOOP" + input);
+                this.setTokenCode("WHILE KEYWORD " + input);
                 this.isToken = true;
                 break;
+        }
+
+        switch(this.openComments.test(input)) {
+            case true:
+                this.setTokenValue(input);
+                this.setTokenCode("OPEN COMMENT " + input);
+                let comment = new Array<string>("");
+                comment.pop();
+
+                while(this.closeComments.test(input) != true) {
+                    comment.push(program[counter]);
+                    counter++;
+                    this.index = counter;
+                }
+
         }
 
         if(this.isToken == false) {
