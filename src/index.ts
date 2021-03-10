@@ -44,6 +44,7 @@ export class index {
         srcCode.replace(/\s+/g, '');
         let newline = new RegExp('\r?\n|\r');
         srcCode.replace(newline, '');
+        srcCode.replace('\t', '');
         return srcCode;
     }
 

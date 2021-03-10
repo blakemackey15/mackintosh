@@ -13,7 +13,7 @@ export class lex {
     private lineNum : number;
     private openComments = new RegExp('[\/\*]');
     private closeComments = new RegExp('[\*\/]');
-    private keywords = new Array<String>("int", "print", "while", "string", 
+    private keywords = new Array<string>("int", "print", "while", "string", 
     "boolean", "while", "true", "false", "if");
 
     constructor() {
@@ -57,8 +57,9 @@ export class lex {
 
             for(let j = 0; j < this.keywords.length; j++) {
                 if(this.token.getTokenValue().toLowerCase() === this.keywords[i]) {
+                    this.token.setTokenValue(this.keywords[i]);
                     let end2 = this.token.updateIndex();
-                    this.program.slice(j, end2);
+                    this.program.slice(i, end2);
                 }
             }
 
@@ -68,7 +69,7 @@ export class lex {
             }
 
             //Check for EOP $ and start lexing next program.
-            if(this.program[i] == '$' && i == this.program.length - 1) {
+            if(this.program[i] == '$') {
                 if(this.errorCount == 0) {
                     console.log('LEX COMPLETED WITH ' +  this.errorCount + ' ERRORS');
                 }
