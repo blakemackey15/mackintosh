@@ -33,7 +33,6 @@ export class index {
 
     constructor() {
         this._lexer = new lex();
-        this.getSrcCode();
         this.startCompile();
         this.endCompile();
     }

@@ -1,1 +1,1 @@
-{inta}$
+{intaa=astringba=b}$

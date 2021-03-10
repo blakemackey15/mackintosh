@@ -217,6 +217,10 @@ export class token {
                     }
                 }
 
+                if(this.isKeyword == false) {
+                    input = saveChar[0].toString();
+                }
+
                 if(this.quoteCount > 0) {
                     this.setTokenCode("CHARACTER " + saveChar[0]);
                     this.setTokenValue(saveChar[0].toString());
@@ -225,9 +229,10 @@ export class token {
 
                 else if(this.quoteCount == 0 && this.isKeyword == false) {
                     this.setTokenCode("IDENTIFIER " + saveChar[0].toString());
-                    this.setTokenValue(input);
+                    this.setTokenValue(saveChar[0].toString());
                     this.isToken = true;
                 }
+                this.isKeyword = false;
                 break;
         }
 
