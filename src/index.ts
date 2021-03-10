@@ -37,7 +37,7 @@ export class index {
         this.endCompile();
     }
 
-    //Method to get src code input using readline interface.
+    //Method to get src code input using readline interface and remove whitespaces.
     public getSrcCode() : string {
         let srcCode = readFileSync('./src/srcCode.txt', 'utf-8');
         srcCode.replace(/\s+/g, '');
