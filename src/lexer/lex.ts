@@ -33,7 +33,6 @@ export class lex {
 
         //Push characters in string to token stream.
         for(let i = 0; i < input.length; i++) {
-            console.log(input.charAt(i));
             this.program.push(input.charAt(i));
         }
 
@@ -53,6 +52,7 @@ export class lex {
             if(this.openComments.test(this.token.getTokenValue())) {
                 let end = this.token.updateIndex();
                 this.program.slice(i, end);
+                i = end;
             }
 
             for(let j = 0; j < this.keywords.length; j++) {
@@ -60,6 +60,7 @@ export class lex {
                     //this.token.setTokenValue(this.keywords[i]);
                     let end2 = this.token.updateIndex();
                     this.program.slice(i, end2);
+                    i = end2;
                 }
             }
 

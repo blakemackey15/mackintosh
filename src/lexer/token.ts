@@ -42,6 +42,7 @@ export class token {
     private boolRegEx = new RegExp('boolea(n)');
     private openComments = new RegExp('[\/\*]');
     private closeComments = new RegExp('[\*\/]');
+    private assignment = new RegExp('[=]');
 
     constructor() {
         this.tokenCode = "";
@@ -86,6 +87,14 @@ export class token {
             case true:
                 this.setTokenValue(input);
                 this.setTokenCode("DIGIT - " + input);
+                this.isToken = true;
+                break;
+        }
+
+        switch(this.assignment.test(input)) {
+            case true:
+                this.setTokenValue(input);
+                this.setTokenCode("ASSIGNMENT OPERATOR - " + input);
                 this.isToken = true;
                 break;
         }
