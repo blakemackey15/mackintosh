@@ -26,6 +26,8 @@ node dist/index.js
 
 To start the compiler in the command line.
 
+To change the code being compiled, edit the file srcCode.txt. The program takes the code from that file as input.
+
 # Code Refrences
 
 TypeScript and gulp setup: https://www.typescriptlang.org/docs/handbook/gulp.html
