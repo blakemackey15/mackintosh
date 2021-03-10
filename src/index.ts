@@ -15,6 +15,7 @@ https://regex101.com/ - Useful tool I used to test my regular expressions for my
 //     return false;
 // };
 
+import { readFileSync } from 'fs';
 import { lex } from './lexer/lex';
 import * as readline from 'readline';
 const prompt = require('prompt');
@@ -38,17 +39,18 @@ export class index {
     }
 
     //Method to get src code input using readline interface.
-    public getSrcCode() {
-        // rl.question("Please enter source code to be compiled: ", function(answer) {
-        //     console.log("SRC INPUT RECIEVED " + answer);
-        //     rl.close();
-        //     this.srcCode = answer;
-        // });
+    public getSrcCode() : string {
+        let srcCode = readFileSync('./src/srcCode.txt', 'utf-8');
+        srcCode.replace(/\s+/g, '');
+        let newline = new RegExp('\r?\n|\r');
+        srcCode.replace(newline, '');
+        return srcCode;
     }
 
     public startCompile() : boolean {
         console.log('INFO: BEGINNING PROGRAM COMPILATION...');
-        let inputtedCode = this._lexer.testProgram('{}$');
+        let code = this.getSrcCode();
+        let inputtedCode = this._lexer.testProgram(code);
         this._lexer.lex();
 
         //Check if there is a $ at the end of the program, if not display warning.

@@ -13,6 +13,8 @@ export class lex {
     private lineNum : number;
     private openComments = new RegExp('[\/\*]');
     private closeComments = new RegExp('[\*\/]');
+    private keywords = new Array<String>("int", "print", "while", "string", 
+    "boolean", "while", "true", "false", "if");
 
     constructor() {
         this.tokenBuffer = 0;
@@ -27,7 +29,6 @@ export class lex {
     public testProgram(input : string) : Array<string> {
         console.log('LEXER - Lexing Program ' + this.programCount);
         //Remove white spaces.
-        input.trim();
         this.program.pop();
 
         //Push characters in string to token stream.
@@ -54,6 +55,13 @@ export class lex {
                 this.program.slice(i, end);
             }
 
+            for(let j = 0; j < this.keywords.length; j++) {
+                if(this.token.getTokenValue().toLowerCase() === this.keywords[i]) {
+                    let end2 = this.token.updateIndex();
+                    this.program.slice(j, end2);
+                }
+            }
+
             //Check for new lines of code.
             if(this.program[i] === '/n') {
                 this.lineNum++;
@@ -66,7 +74,7 @@ export class lex {
                 }
 
                 else {
-                    console.log('LEX FAILED WITH ' + this.errorCount) + ' ERRORS';
+                    console.log('LEX FAILED WITH ' + this.errorCount + ' ERRORS');
                 }
             }
 
