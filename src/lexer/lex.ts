@@ -56,8 +56,8 @@ export class lex {
             }
 
             for(let j = 0; j < this.keywords.length; j++) {
-                if(this.token.getTokenValue().toLowerCase() === this.keywords[i]) {
-                    this.token.setTokenValue(this.keywords[i]);
+                if(this.token.getTokenValue().toLowerCase() === this.keywords[j]) {
+                    //this.token.setTokenValue(this.keywords[i]);
                     let end2 = this.token.updateIndex();
                     this.program.slice(i, end2);
                 }
