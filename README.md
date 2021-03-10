@@ -25,7 +25,7 @@ Once you have compiled the project, run the command:
 npm start
 To start the compiler in the command line. This command will runs the tsc and node dist/index.js commands at the same time, so it will compile the TypeScript code, and then run it once compilation has completed.
 
-To change the code being compiled, edit the file srcCode.txt. The program takes the code from that file as input.
+To change the code being compiled, edit the file srcCode.txt. The program takes the code from that file as input. Currently, code has to be all on one line. This is something that will be fixed in the future.
 
 # Code Refrences
 
