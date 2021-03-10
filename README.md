@@ -22,9 +22,8 @@ gulp
 This command will run the gulp file and compile TypeScript files. Alternitively, the project can be compiled using the tsc command.
 
 Once you have compiled the project, run the command:
-node dist/index.js
-
-To start the compiler in the command line.
+npm start
+To start the compiler in the command line. This command will runs the tsc and node dist/index.js commands at the same time, so it will compile the TypeScript code, and then run it once compilation has completed.
 
 To change the code being compiled, edit the file srcCode.txt. The program takes the code from that file as input.
 
