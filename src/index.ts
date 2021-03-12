@@ -17,6 +17,7 @@ https://regex101.com/ - Useful tool I used to test my regular expressions for my
 
 import { readFileSync } from 'fs';
 import { lex } from './lexer/lex';
+import { parse } from './parse/parse';
 import * as readline from 'readline';
 const prompt = require('prompt');
 
@@ -28,6 +29,7 @@ const rl = readline.createInterface({
 
 export class index {
     private _lexer : lex;
+    private _parser : parse;
     public isCompiling : boolean = false;
     private warningCount : number; 
 
@@ -58,6 +60,8 @@ export class index {
             console.log('LEXER WARNING - PROGRAM END $ NOT FOUND');
             this.warningCount++;
         }
+
+
 
         return true;
     }

@@ -87,6 +87,7 @@ export class lex {
             if(this.tokenFlag) {
                 //Add current token to the token stream.
                 console.log('LEXER - ' + this.token.getTokenCode() + ' Found on line: ' + this.lineNum);
+                this.tokens.push(this.token);
                 this.tokenBuffer++;
             }
 
