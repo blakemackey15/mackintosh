@@ -22,10 +22,13 @@
         <a href="https://www.labouseur.com/courses/compilers/grammar.pdf" target="_blank">Language Grammar Reference</a>
     </div>
 
+    <!-- Fix exports and require is not defined issue-->
+    <script>var exports = {};</script>
+
     <!-- Import compiled ts script files -->
-    <script type="text/javascript" src="/dist/lexer/lex.js"></script>
-    <script type="text/javascript" src="/dist/index.js"></script>
-    <script type="text/javascript" src="/dist/lexer/token.js"></script>
+    <script type="module" src="/dist/lexer/lex.js"></script>
+    <script type="module" src="/dist/index.js"></script>
+    <script type="module" src="/dist/lexer/token.js"></script>
 
     <script type="text/javascript">
 

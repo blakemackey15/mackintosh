@@ -4,6 +4,7 @@ import path from 'path';
 const app = express();
 const port = 3000;
 var bodyParser = require('body-parser');
+require('typescript-require');
 
 app.use(express.static('public'));
 

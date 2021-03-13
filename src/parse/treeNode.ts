@@ -5,6 +5,8 @@ export class treeNode {
     private value : number
     private leftNode : treeNode;
     private rightNode : treeNode;
+    //Notes a valid syntax token in the grammar.
+    private isLeaf : boolean;
 
     //Initialize a tree node.
     constructor(nodeVal: number) {
