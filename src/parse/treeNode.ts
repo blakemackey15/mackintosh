@@ -1,5 +1,5 @@
 //Class that represents a singular node in a tree.
-class treeNode {
+export class treeNode {
     //Decalre tree variables.
     //Hold values of node, refrence to left and right child node.
     private value : number
@@ -13,6 +13,7 @@ class treeNode {
         this.rightNode = null;
     }
 
+    //Get and set methods for node attributes.
     public getValue() : number {
         return this.value
     }
@@ -21,22 +22,20 @@ class treeNode {
         this.value = num;
     }
 
-    public getRightNode() : treeNode {
+    public get RightNode() : treeNode {
         return this.rightNode;
     }
 
-    public setRightNode(node : treeNode) {
+    public set RightNode(node : treeNode) {
         this.rightNode = node;
     }
 
-    public getLeftNode() {
+    public get LeftNode() {
         return this.leftNode;
     }
 
-    public setLeftNoode(node : treeNode) {
+    public set LeftNode(node : treeNode) {
         this.leftNode = node;
     }
-
-
 
 }
