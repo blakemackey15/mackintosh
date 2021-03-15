@@ -5,7 +5,7 @@ var _parser : mackintosh.parse;
 var _token : mackintosh.token;
 
 //Initialize token stream, error counter, and the token index.
-var tokens = new Array<mackintosh.token>();
+var tokens;
 var errCount = 0;
 var tokenIndex = 0;
 var curToken;

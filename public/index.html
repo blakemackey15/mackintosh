@@ -9,6 +9,7 @@
     <h1>Mackintosh Compiler</h1>
     <div>
         <input type="button" id="compile" value="Compile" onclick="compile()"></input>
+        <input type="button" id="clear" value="Clear" onclick="clear()"></input>
     </div>
     <div>
         <div class="srcCode">
@@ -22,8 +23,9 @@
         <a href="https://www.labouseur.com/courses/compilers/grammar.pdf" target="_blank">Language Grammar Reference</a>
     </div>
 
-    <!-- Import global variables needed for compiler -->
-    <script src="dist/compiler.js"></script>
+    <!-- Import global variables/functions needed for compiler -->
+    <script src="dist/compilerGlobals.js"></script>
+    <script src="dist/compilerFunctions.js"></script>
 
     <!-- Import compiled ts script files -->
     <script src="dist/lexer/lex.js"></script>
@@ -40,10 +42,16 @@
         //Compile 
         function compile() {
             clear();
-            log();
+            log("Compilation Started...");
+            tokens = "";
+            tokenIndex = 0;
+            curToken = "";
+            errCount = 0;
+            log("LEXER - Beginning Lex...");
+
         }
 
-        //Used to output to output text area.
+        //Logging function used to output to output text area.
         function log(message) {
             document.getElementById("output").value += message + "/n";
         }
