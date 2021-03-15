@@ -1,5 +1,5 @@
-import { token } from "../lexer/token";
-import { CST } from "../parse/CST";
+module mackintosh {
+
 
 //Class that represents parse/
 export class parse {
@@ -29,7 +29,11 @@ export class parse {
         return this.isMatch;
     }
 
-    //Methods for recursive descent parser.
+    //Methods for recursive descent parser - Start symbol: program.
+
+    public parseProgram() {
+        
+    }
 
     //Expected tokens: { statementList }
     public parseBlock() {
@@ -39,9 +43,9 @@ export class parse {
     //Expected tokens: statement statementList
     //OR - empty
     public parseStatementList() {
-        else {
-            //Not an empty else, represents do nothing.
-        }
+        // else {
+        //     //Not an empty else, represents do nothing.
+        // }
     }
 
     //Expected tokens: print, assignment, var declaration, while, if, block
@@ -103,9 +107,9 @@ export class parse {
 
     //Expected tokens: char charlist, space charlist, empty
     public parseCharList() {
-        else {
-            //Not an empty else, represents do nothing.
-        }
+        // else {
+        //     //Not an empty else, represents do nothing.
+        // }
     }
 
     //Expected tokens: int, string, boolean
@@ -143,4 +147,5 @@ export class parse {
 
     }
 
+}
 }

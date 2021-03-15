@@ -1,4 +1,7 @@
 //Class that represents a singular node in a tree.
+module mackintosh {
+
+
 export class treeNode {
     //Decalre tree variables.
     //Hold values of node, refrence to left and right child node.
@@ -40,4 +43,5 @@ export class treeNode {
         this.leftNode = node;
     }
 
+}
 }

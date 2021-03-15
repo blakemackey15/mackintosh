@@ -1,6 +1,4 @@
-import { token } from "./token";
-
-
+module mackintosh {
 export class lex {
     private token : token;
     private tokenBuffer : number;
@@ -98,4 +96,5 @@ export class lex {
         }
     }
 
+}
 }

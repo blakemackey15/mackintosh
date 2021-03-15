@@ -1,4 +1,5 @@
-import { treeNode } from './treeNode';
+module mackintosh {
+
 
 export class CST {
     private rootNode : treeNode;
@@ -56,4 +57,5 @@ export class CST {
         return visit;
     }
 
+}
 }

@@ -15,60 +15,60 @@ https://regex101.com/ - Useful tool I used to test my regular expressions for my
 //     return false;
 // };
 
-import { readFileSync } from 'fs';
-import { lex } from './lexer/lex';
-import { parse } from './parse/parse';
-import * as readline from 'readline';
-const prompt = require('prompt');
+// import { readFileSync } from 'fs';
+// import * as readline from 'readline';
 
-//Allows the user to input their source code.
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
-
-export class index {
-    private _lexer : lex;
-    private _parser : parse;
-    public isCompiling : boolean = false;
-    private warningCount : number; 
-
-    constructor() {
-        this._lexer = new lex();
-        this.startCompile();
-        this.endCompile();
-    }
-
-    //Method to get src code input using readline interface and remove whitespaces.
-    public getSrcCode() : string {
-        let srcCode = readFileSync('./src/srcCode.txt', 'utf-8');
-        srcCode.replace(/\s+/g, '');
-        let newline = new RegExp('\r?\n|\r');
-        srcCode.replace(newline, '');
-        srcCode.replace('\t', '');
-        return srcCode;
-    }
-
-    public startCompile() : boolean {
-        console.log('INFO: BEGINNING PROGRAM COMPILATION...');
-        let code = this.getSrcCode();
-        let inputtedCode = this._lexer.testProgram(code);
-        this._lexer.lex();
-
-        //Check if there is a $ at the end of the program, if not display warning.
-        if(inputtedCode[inputtedCode.length - 1] != '$') {
-            console.log('LEXER WARNING - PROGRAM END $ NOT FOUND');
-            this.warningCount++;
-        }
+// //Allows the user to input their source code.
+// const rl = readline.createInterface({
+//     input: process.stdin,
+//     output: process.stdout
+// });
+// module mackintosh {
 
 
+// export class index {
+//     private _lexer : lex;
+//     private _parser : parse;
+//     public isCompiling : boolean = false;
+//     private warningCount : number; 
 
-        return true;
-    }
+//     constructor() {
+//         this._lexer = new lex();
+//         this.startCompile();
+//         this.endCompile();
+//     }
 
-    public endCompile() : boolean {
-        return false;
-    }
-}
+//     //Method to get src code input using readline interface and remove whitespaces.
+//     public getSrcCode() : string {
+//         let srcCode = readFileSync('./src/srcCode.txt', 'utf-8');
+//         srcCode.replace(/\s+/g, '');
+//         let newline = new RegExp('\r?\n|\r');
+//         srcCode.replace(newline, '');
+//         srcCode.replace('\t', '');
+//         return srcCode;
+//     }
 
-let compiler : index = new index();
+//     public startCompile() : boolean {
+//         console.log('INFO: BEGINNING PROGRAM COMPILATION...');
+//         let code = this.getSrcCode();
+//         let inputtedCode = this._lexer.testProgram(code);
+//         this._lexer.lex();
+
+//         //Check if there is a $ at the end of the program, if not display warning.
+//         if(inputtedCode[inputtedCode.length - 1] != '$') {
+//             console.log('LEXER WARNING - PROGRAM END $ NOT FOUND');
+//             this.warningCount++;
+//         }
+
+
+
+//         return true;
+//     }
+
+//     public endCompile() : boolean {
+//         return false;
+//     }
+// }
+
+// let compiler : index = new index();
+// }
