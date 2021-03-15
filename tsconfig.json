@@ -3,7 +3,7 @@
     "esModuleInterop": true,
     "target": "es5",
     "sourceMap": true,
-    "outDir": "public/dist",
+    "outDir": "dist",
   },
   "lib": ["es2017"]
 }

@@ -42,12 +42,17 @@
         //Compile 
         function compile() {
             clear();
-            log("Compilation Started...");
+            log("INFO - Compilation Started...");
             tokens = "";
             tokenIndex = 0;
             curToken = "";
             errCount = 0;
+
+            //Get src code and begin lex.
+            let code = document.getElementById("inputCode").value;
+            
             log("LEXER - Beginning Lex...");
+            log(code);
 
         }
 
