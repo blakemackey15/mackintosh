@@ -68,6 +68,11 @@ module mackintosh {
             /**
              * Use switch statements to check against each RegEx.
              */
+            switch(newLine.test(input)) {
+                case true:
+                    programCount++;
+                    break;
+            }
             switch(digits.test(input)) {
                 case true:
                     this.setTokenValue(input);

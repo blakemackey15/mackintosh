@@ -36,19 +36,14 @@ module mackintosh {
                     }
                 }
 
-                //Check for new lines of code.
-                if(program[i] === '/n') {
-                    lineNum++;
-                }
-
                 //Check for EOP $ and start lexing next program.
                 if(program[i] == '$') {
                     if(errCount == 0) {
-                        _Functions.log('LEX COMPLETED WITH ' +  errCount + ' ERRORS');
+                        _Functions.log('LEXER - Lex Completed With ' +  errCount + ' Errors and ' + warnCount + ' Warnings');
                     }
 
                     else {
-                        _Functions.log('LEX FAILED WITH ' + errCount + ' ERRORS');
+                        _Functions.log('LEXER - Lex Failed With ' + errCount + ' Errors and ' + warnCount + ' Warnings');
                     }
                 }
 

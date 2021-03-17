@@ -10,7 +10,7 @@ module mackintosh {
         //Logs a message to the html output area. Was originally in the index.html file but I moved it here
         //so it can be used by other classes in the mackintosh module. Just makes it a bit more simple (I hope).
         public static log(message : string) {
-            (<HTMLInputElement>document.getElementById("output")).value += message + " ";
+            (<HTMLInputElement>document.getElementById("output")).value += message + "\n";
         }
     }
 }

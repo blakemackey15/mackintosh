@@ -8,11 +8,11 @@ module mackintosh {
     export class index {
 
         //Begins the compilation of the inputted code.
-        public static startCompile() : boolean {
+        public static startCompile() {
             //Set compilation flag to true.
             isCompiling = true;
             
-            _Functions.log('INFO: BEGINNING PROGRAM COMPILATION...');
+            _Functions.log('INFO: Beginning Compilation...');
 
             //Get source code from text area input.
             let code = (<HTMLInputElement>document.getElementById("inputCode")).value;
@@ -23,14 +23,14 @@ module mackintosh {
 
             //Check if there is a $ at the end of the program, if not display warning.
             if(program[program.length - 1] != '$') {                
-                _Functions.log('LEXER WARNING - PROGRAM END $ NOT FOUND');
+                _Functions.log('LEXER WARNING: End of Program $ Not Found.');
                 warnCount++;
             }
 
             return isCompiling;
         }
 
-        public static endCompile() : boolean {
+        public static endCompile() {
             isCompiling == false;
             return isCompiling;
         }

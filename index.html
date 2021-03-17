@@ -39,7 +39,8 @@
     <script type="text/javascript">
         //Clear output text area.
         function clear() {
-            document.getElementById("output").value = "";
+            document.getElementById("output").value = " ";
+
         }
 
         //Compile 
@@ -54,10 +55,7 @@
             let code = document.getElementById("inputCode").value;
             _Functions.log(code);
             _Compiler.startCompile();
-            _Compiler.sayHi();
-            
-            //log(code);
-            //Pass the inputted code to the compiler and begin the compilation process.
+            _Functions.log("INFO - Compilation Completed.");
         }
 
     </script>
