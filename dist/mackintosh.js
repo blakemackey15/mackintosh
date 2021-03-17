@@ -262,11 +262,12 @@ var mackintosh;
             switch (characters.test(input)) {
                 case true:
                     var saveChar = new Array('');
+                    var loops = 0;
                     saveChar.pop();
                     saveChar.push(input);
                     //Checks if the next element in the array is undefined. If this isn't here the program gets stuck in an
                     //infinate loop, and thats bad.
-                    while (this.isKeyword != true) {
+                    while (this.isKeyword != true && loops <= 7) {
                         if (typeof program[counter + 1] != undefined) {
                             counter++;
                             input += program[counter];
@@ -347,6 +348,7 @@ var mackintosh;
                             if (typeof program[counter + 1] === 'undefined' || this.isKeyword == true) {
                                 break;
                             }
+                            loops++;
                         }
                         //Break out of the loop if the next element is undefined.
                         else {
