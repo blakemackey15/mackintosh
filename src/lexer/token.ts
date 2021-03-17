@@ -27,25 +27,7 @@ module mackintosh {
         /*
         Regular Expressions.
         */
-        private digits = new RegExp('(?:0|[1-9]\d*)');
-        private characters = new RegExp('^[a-zA-Z]*$');
-        private leftBlock = new RegExp('[{]');
-        private rightBlock = new RegExp('[}]');
-        private operator = new RegExp('[+]');
-        private boolOperator = new RegExp('(?:^|[^!=])([!=]=)(?!=)');
-        private endProgram = new RegExp('[$]');
-        private quotes = new RegExp('["]');
-        private intRegEx = new RegExp('in(t)');
-        private stringRegEx = new RegExp('strin(g)');
-        private printRegEx = new RegExp('prin(t)');
-        private falseRegEx = new RegExp('fals(e)');
-        private trueRegEx = new RegExp('tru(e)');
-        private ifRegEx = new RegExp('i(f)');
-        private whileRegEx = new RegExp('whil(e)');
-        private boolRegEx = new RegExp('boolea(n)');
-        private openComments = new RegExp('[\/\*]');
-        private closeComments = new RegExp('[\*\/]');
-        private assignment = new RegExp('[=]');
+
 
         constructor() {
             this.tokenCode = "";
@@ -58,7 +40,7 @@ module mackintosh {
             this.tokenCode = code;
         }
 
-        public getTokenCode() : string {
+        public  getTokenCode() : string {
             return this.tokenCode;
         }
 
@@ -86,7 +68,7 @@ module mackintosh {
             /**
              * Use switch statements to check against each RegEx.
              */
-            switch(this.digits.test(input)) {
+            switch(digits.test(input)) {
                 case true:
                     this.setTokenValue(input);
                     this.setTokenCode("DIGIT - " + input);
@@ -94,7 +76,7 @@ module mackintosh {
                     break;
             }
 
-            switch(this.assignment.test(input)) {
+            switch(assignment.test(input)) {
                 case true:
                     this.setTokenValue(input);
                     this.setTokenCode("ASSIGNMENT OPERATOR - " + input);
@@ -102,7 +84,7 @@ module mackintosh {
                     break;
             }
 
-            switch(this.boolOperator.test(input)) {
+            switch(boolOperator.test(input)) {
                 case true:
                     this.setTokenValue(input);
                     this.isToken = true;
@@ -117,7 +99,7 @@ module mackintosh {
                     break;
             }
 
-            switch(this.quotes.test(input)) {
+            switch(quotes.test(input)) {
                 case true:
                     this.setTokenValue(input);
                     this.isToken = true;
@@ -134,7 +116,7 @@ module mackintosh {
                     break;
             }
 
-            switch(this.characters.test(input)) {
+            switch(characters.test(input)) {
                 case true:
                     let saveChar = new Array<String>('');
                     saveChar.pop();
@@ -144,7 +126,7 @@ module mackintosh {
                         counter++;
                         input += program[counter];
 
-                        switch(this.intRegEx.test(input)) {
+                        switch(intRegEx.test(input)) {
                             case true:
                                 this.setTokenValue(input);
                                 this.setTokenCode("KEYWORD VAR DECLARATION " + input);
@@ -154,7 +136,7 @@ module mackintosh {
                                 break;
                         }
                 
-                        switch(this.stringRegEx.test(input)) {
+                        switch(stringRegEx.test(input)) {
                             case true:
                                 this.setTokenValue(input);
                                 this.setTokenCode("KEYWORD VAR DECLARATION " + input);
@@ -164,7 +146,7 @@ module mackintosh {
                                 break;
                         }
                 
-                        switch(this.printRegEx.test(input)) {
+                        switch(printRegEx.test(input)) {
                             case true:
                                 this.setTokenValue(input);
                                 this.setTokenCode("KEYWORD PRINT STATEMENT " + input);
@@ -174,7 +156,7 @@ module mackintosh {
                                 break;
                         }
                 
-                        switch(this.trueRegEx.test(input)) {
+                        switch(trueRegEx.test(input)) {
                             case true:
                                 this.setTokenValue(input);
                                 this.setTokenCode("BOOLEAN " + input);
@@ -184,7 +166,7 @@ module mackintosh {
                                 break;
                         }
                 
-                        switch(this.falseRegEx.test(input)) {
+                        switch(falseRegEx.test(input)) {
                             case true:
                                 this.setTokenValue(input);
                                 this.setTokenCode("BOOLEAN " + input);
@@ -194,7 +176,7 @@ module mackintosh {
                                 break;
                         }
                 
-                        switch(this.ifRegEx.test(input)) {
+                        switch(ifRegEx.test(input)) {
                             case true:
                                 this.setTokenValue(input);
                                 this.setTokenCode("BRANCHING STATEMENT " + input);
@@ -204,7 +186,7 @@ module mackintosh {
                                 break;
                         }
                 
-                        switch(this.whileRegEx.test(input)) {
+                        switch(whileRegEx.test(input)) {
                             case true:
                                 this.setTokenValue(input);
                                 this.setTokenCode("WHILE KEYWORD " + input);
@@ -214,7 +196,7 @@ module mackintosh {
                                 break;
                         }
 
-                        switch(this.boolRegEx.test(input)) {
+                        switch(boolRegEx.test(input)) {
                             case true:
                                 this.setTokenValue(input);
                                 this.setTokenCode("BOOLEAN KEYWORD " + input);
@@ -248,7 +230,7 @@ module mackintosh {
                     break;
             }
 
-            switch(this.operator.test(input)) {
+            switch(operator.test(input)) {
                 case true:
                     this.setTokenValue(input);
                     this.setTokenCode("ADDITION OPERATOR " + input);
@@ -256,7 +238,7 @@ module mackintosh {
                     break;
             }
 
-            switch(this.leftBlock.test(input)) {
+            switch(leftBlock.test(input)) {
                 case true:
                     this.setTokenValue(input);
                     this.setTokenCode("OPENING CODE BLOCK " + input);
@@ -264,7 +246,7 @@ module mackintosh {
                     break;
             }
 
-            switch(this.rightBlock.test(input)) {
+            switch(rightBlock.test(input)) {
                 case true:
                     this.setTokenValue(input);
                     this.setTokenCode("CLOSING CODE BLOCK " + input);
@@ -272,7 +254,7 @@ module mackintosh {
                     break;
             }
 
-            switch(this.endProgram.test(input)) {
+            switch(endProgram.test(input)) {
                 case true:
                     this.setTokenValue(input);
                     this.setTokenCode("END PROGRAM " + input);
@@ -280,7 +262,7 @@ module mackintosh {
                     break;
             }
 
-            switch(this.openComments.test(input)) {
+            switch(openComments.test(input)) {
                 case true:
                     this.setTokenValue(input);
                     this.setTokenCode("OPEN COMMENT " + input);
@@ -288,7 +270,7 @@ module mackintosh {
                     let comment = new Array<string>("");
                     comment.pop();
 
-                    while(this.closeComments.test(program[counter]) != true) {
+                    while(closeComments.test(program[counter]) != true) {
                         comment.push(program[counter]);
                         counter++;
                         this.index = counter;

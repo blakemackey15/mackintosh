@@ -8,8 +8,8 @@
 <body onload="clear()">
     <h1>Mackintosh Compiler</h1>
     <div>
-        <input type="button" id="compile" value="Compile" onclick="compile()"></input>
-        <input type="button" id="clear" value="Clear" onclick="clear()"></input>
+        <input type="button" id="compile" value="Compile" onclick="compile();"></input>
+        <input type="button" id="clear" value="Clear" onclick="clear();"></input>
     </div>
     <div>
         <div class="srcCode">
@@ -23,17 +23,20 @@
         <a href="https://www.labouseur.com/courses/compilers/grammar.pdf" target="_blank">Language Grammar Reference</a>
     </div>
 
-    <!-- Import global variables/functions needed for compiler -->
-    <script src="dist/compilerGlobals.js"></script>
-    <script src="dist/compilerFunctions.js"></script>
-
     <!-- Import compiled ts script files -->
-    <script src="dist/lexer/lex.js"></script>
-    <script src="dist/index.js"></script>
-    <script src="dist/lexer/token.js"></script>
+    <script type="text/javascript" src="dist/lexer/lex.js"></script>
+    <script type="text/javascript" src="dist/index.js"></script>
+    <script type="text/javascript" src="dist/lexer/token.js"></script>
+    <script type="text/javascript" src="dist/parse/CST.js"></script>
+    <script type="text/javascript" src="dist/parse/parse.js"></script>
+    <script type="text/javascript" src="dist/parse/treeNode.js"></script>
+    <script type="text/javascript" src="dist/mackintosh.js"></script>
+
+    <!-- Import global variables/functions needed for compiler -->
+    <script type="text/javascript" src="dist/compilerGlobals.js"></script>
+    <script type="text/javascript" src="dist/compilerFunctions.js"></script>
 
     <script type="text/javascript">
-
         //Clear output text area.
         function clear() {
             document.getElementById("output").value = "";
@@ -42,7 +45,7 @@
         //Compile 
         function compile() {
             clear();
-            log("INFO - Compilation Started...");
+            _Functions.log("INFO - Compilation Started...");
             tokens = "";
             tokenIndex = 0;
             curToken = "";
@@ -50,15 +53,13 @@
 
             //Get src code and begin lex.
             let code = document.getElementById("inputCode").value;
+            _Functions.log("LEXER - Beginning Lex...");
+            _Functions.log(code);
+            _Compiler.startCompile();
+            _Compiler.sayHi();
             
-            log("LEXER - Beginning Lex...");
-            log(code);
-
-        }
-
-        //Logging function used to output to output text area.
-        function log(message) {
-            document.getElementById("output").value += message + "/n";
+            //log(code);
+            //Pass the inputted code to the compiler and begin the compilation process.
         }
 
     </script>

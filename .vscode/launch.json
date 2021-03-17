@@ -7,8 +7,8 @@
         {
             "type": "pwa-chrome",
             "request": "launch",
-            "name": "Launch Chrome against localhost",
-            "file": "/Users/blakemackey015/Documents/GitHub/mackintosh/public/index.html",
+            "name": "Launch Chrome",
+            "file": "file://Users/blakemackey015/Documents/GitHub/mackintosh/index.html",
             "webRoot": "${workspaceFolder}"
         }
     ]
