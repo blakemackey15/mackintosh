@@ -135,8 +135,8 @@ module mackintosh {
 
                     //Checks if the next element in the array is undefined. If this isn't here the program gets stuck in an
                     //infinate loop, and thats bad.
-                    if(typeof program[counter+1] == undefined) {
-                        while(this.isKeyword != true) {
+                    while(this.isKeyword != true) {
+                        if(typeof program[counter+1] != undefined) {
                             counter++;
                             input += program[counter];
 
@@ -220,9 +220,16 @@ module mackintosh {
                                     break;
                             }
 
-                            if(counter == 7 || this.isKeyword == true) {
+                            //Break out of the loop if the token is a keyword it has become too long to be a token.
+                            //Or, break out of the loop if the next element in the array is undefined.
+                            if(typeof program[counter + 1] === 'undefined' || this.isKeyword == true) {
                                 break;
                             }
+                        }
+
+                        //Break out of the loop if the next element is undefined.
+                        else {
+                            break;
                         }
                     }
 
