@@ -16,7 +16,7 @@ module mackintosh {
 
             //Get source code from text area input.
             let code = (<HTMLInputElement>document.getElementById("inputCode")).value;
-            code = mackintosh.compilerFunctions.trim(code);
+            //code = mackintosh.compilerFunctions.trim(code);
 
             _Lexer.populateProgram(code);
             _Lexer.lex();

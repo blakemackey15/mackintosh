@@ -14,7 +14,7 @@ var mackintosh;
             _Functions.log('INFO: Beginning Compilation...');
             //Get source code from text area input.
             var code = document.getElementById("inputCode").value;
-            code = mackintosh.compilerFunctions.trim(code);
+            //code = mackintosh.compilerFunctions.trim(code);
             _Lexer.populateProgram(code);
             _Lexer.lex();
             //Check if there is a $ at the end of the program, if not display warning.

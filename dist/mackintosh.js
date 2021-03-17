@@ -76,7 +76,7 @@ var mackintosh;
             _Functions.log('INFO: Beginning Compilation...');
             //Get source code from text area input.
             var code = document.getElementById("inputCode").value;
-            code = mackintosh.compilerFunctions.trim(code);
+            //code = mackintosh.compilerFunctions.trim(code);
             _Lexer.populateProgram(code);
             _Lexer.lex();
             //Check if there is a $ at the end of the program, if not display warning.
@@ -93,6 +93,13 @@ var mackintosh;
         return index;
     }());
     mackintosh.index = index;
+})(mackintosh || (mackintosh = {}));
+var mackintosh;
+(function (mackintosh) {
+    var test = "/n";
+    var isDigit = digits.test(test);
+    //let isTrue = newLine.test(test);
+    console.log(isDigit);
 })(mackintosh || (mackintosh = {}));
 var mackintosh;
 (function (mackintosh) {
@@ -170,9 +177,6 @@ Identifiers:
 var mackintosh;
 (function (mackintosh) {
     var token = /** @class */ (function () {
-        /*
-        Regular Expressions.
-        */
         function token() {
             this.tokenCode = "";
             this.tokenValue = "";
@@ -207,7 +211,9 @@ var mackintosh;
              */
             switch (newLine.test(input)) {
                 case true:
-                    programCount++;
+                    this.setTokenCode("");
+                    this.setTokenValue("");
+                    this.isToken == false;
                     break;
             }
             switch (digits.test(input)) {

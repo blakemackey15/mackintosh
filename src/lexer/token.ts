@@ -22,12 +22,6 @@ module mackintosh {
         private isKeyword : boolean;
         private index : number;
         private quoteCount : number;
-        private buildStrings : string;
-
-        /*
-        Regular Expressions.
-        */
-
 
         constructor() {
             this.tokenCode = "";
@@ -70,7 +64,9 @@ module mackintosh {
              */
             switch(newLine.test(input)) {
                 case true:
-                    programCount++;
+                    this.setTokenCode("");
+                    this.setTokenValue("");
+                    this.isToken == false;
                     break;
             }
             switch(digits.test(input)) {

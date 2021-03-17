@@ -12,9 +12,6 @@ Identifiers:
 var mackintosh;
 (function (mackintosh) {
     var token = /** @class */ (function () {
-        /*
-        Regular Expressions.
-        */
         function token() {
             this.tokenCode = "";
             this.tokenValue = "";
@@ -49,7 +46,9 @@ var mackintosh;
              */
             switch (newLine.test(input)) {
                 case true:
-                    programCount++;
+                    this.setTokenCode("");
+                    this.setTokenValue("");
+                    this.isToken == false;
                     break;
             }
             switch (digits.test(input)) {
