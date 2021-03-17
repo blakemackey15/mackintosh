@@ -32,27 +32,26 @@ var mackintosh;
                         i = end2;
                     }
                 }
-                //Check for EOP $ and start lexing next program.
-                if (program[i] == '$') {
-                    if (errCount == 0) {
-                        _Functions.log('LEXER - Lex Completed With ' + errCount + ' Errors and ' + warnCount + ' Warnings');
-                    }
-                    else {
-                        _Functions.log('LEXER - Lex Failed With ' + errCount + ' Errors and ' + warnCount + ' Warnings');
-                    }
-                }
-                else if (program[i] == '$' && i != program.length - 1) {
-                    _Functions.log('LEXER - Lexing Program ' + programCount);
-                }
                 if (tokenFlag) {
                     //Add current token to the token stream.
                     _Functions.log('LEXER - ' + curToken.getTokenCode() + ' Found on line: ' + lineNum);
-                    tokens[tokenBuffer] = curToken.getTokenValue();
-                    //tokens.push(curToken);
                 }
                 else {
                     _Functions.log('LEXER ERROR - ' + curToken.getTokenCode() + ' Found on line: ' + lineNum);
                     errCount++;
+                }
+                //Check for EOP $ and start lexing next program.
+                if (program[i] == '$') {
+                    if (errCount == 0) {
+                        _Functions.log('LEXER - Lex Completed With ' + errCount + ' Errors and ' + warnCount + ' Warnings');
+                        //Check if this is the end of the program. If not, begin lexing the next program.
+                        if (typeof program[i] != undefined) {
+                            _Functions.log('LEXER - Lexing Program ' + programCount);
+                        }
+                    }
+                    else {
+                        _Functions.log('LEXER - Lex Failed With ' + errCount + ' Errors and ' + warnCount + ' Warnings');
+                    }
                 }
             }
         };

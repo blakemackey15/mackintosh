@@ -273,6 +273,7 @@ module mackintosh {
                 case true:
                     this.setTokenValue(input);
                     this.setTokenCode("END PROGRAM " + input);
+                    programCount++;
                     this.isToken = true;
                     break;
             }
