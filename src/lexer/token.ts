@@ -59,10 +59,20 @@ module mackintosh {
          * Generates token by checking against the regular expressions generated.
          */
         public GenerateToken(input : string, program : string[], counter : number) : boolean {
+            debugger;
             /**
              * Use switch statements to check against each RegEx.
              */
             switch(newLine.test(input)) {
+                case true:
+                    this.setTokenCode("");
+                    this.setTokenValue("");
+                    this.isToken == false;
+                    lineNum++;
+                    break;
+            }
+
+            switch(whitespace.test(input)) {
                 case true:
                     this.setTokenCode("");
                     this.setTokenValue("");

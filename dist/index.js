@@ -9,6 +9,7 @@ var mackintosh;
         }
         //Begins the compilation of the inputted code.
         index.startCompile = function () {
+            debugger;
             //Set compilation flag to true.
             isCompiling = true;
             _Functions.log('INFO: Beginning Compilation...');

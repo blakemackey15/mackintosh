@@ -40,5 +40,6 @@ var boolRegEx = new RegExp('boolea(n)');
 var openComments = new RegExp('[\/\*]');
 var closeComments = new RegExp('[\*\/]');
 var assignment = new RegExp('[=]');
-var newLine = new RegExp('/n');
+var newLine = new RegExp('\n');
+var whitespace = new RegExp('[ \t]');
 //# sourceMappingURL=compilerGlobals.js.map

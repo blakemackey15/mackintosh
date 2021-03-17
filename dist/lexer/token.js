@@ -41,10 +41,19 @@ var mackintosh;
          * Generates token by checking against the regular expressions generated.
          */
         token.prototype.GenerateToken = function (input, program, counter) {
+            debugger;
             /**
              * Use switch statements to check against each RegEx.
              */
             switch (newLine.test(input)) {
+                case true:
+                    this.setTokenCode("");
+                    this.setTokenValue("");
+                    this.isToken == false;
+                    lineNum++;
+                    break;
+            }
+            switch (whitespace.test(input)) {
                 case true:
                     this.setTokenCode("");
                     this.setTokenValue("");

@@ -59,7 +59,8 @@ var boolRegEx = new RegExp('boolea(n)');
 var openComments = new RegExp('[\/\*]');
 var closeComments = new RegExp('[\*\/]');
 var assignment = new RegExp('[=]');
-var newLine = new RegExp('/n');
+var newLine = new RegExp('\n');
+var whitespace = new RegExp('[ \t]');
 /*
 References: Here is a list of the resources I referenced while developing this project.
 https://regex101.com/ - Useful tool I used to test my regular expressions for my tokens.
@@ -71,6 +72,7 @@ var mackintosh;
         }
         //Begins the compilation of the inputted code.
         index.startCompile = function () {
+            debugger;
             //Set compilation flag to true.
             isCompiling = true;
             _Functions.log('INFO: Beginning Compilation...');
@@ -93,13 +95,6 @@ var mackintosh;
         return index;
     }());
     mackintosh.index = index;
-})(mackintosh || (mackintosh = {}));
-var mackintosh;
-(function (mackintosh) {
-    var test = "/n";
-    var isDigit = digits.test(test);
-    //let isTrue = newLine.test(test);
-    console.log(isDigit);
 })(mackintosh || (mackintosh = {}));
 var mackintosh;
 (function (mackintosh) {
@@ -206,10 +201,19 @@ var mackintosh;
          * Generates token by checking against the regular expressions generated.
          */
         token.prototype.GenerateToken = function (input, program, counter) {
+            debugger;
             /**
              * Use switch statements to check against each RegEx.
              */
             switch (newLine.test(input)) {
+                case true:
+                    this.setTokenCode("");
+                    this.setTokenValue("");
+                    this.isToken == false;
+                    lineNum++;
+                    break;
+            }
+            switch (whitespace.test(input)) {
                 case true:
                     this.setTokenCode("");
                     this.setTokenValue("");
