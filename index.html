@@ -45,7 +45,6 @@
         //Compile 
         function compile() {
             clear();
-            _Functions.log("INFO - Compilation Started...");
             tokens = "";
             tokenIndex = 0;
             curToken = "";
@@ -53,7 +52,6 @@
 
             //Get src code and begin lex.
             let code = document.getElementById("inputCode").value;
-            _Functions.log("LEXER - Beginning Lex...");
             _Functions.log(code);
             _Compiler.startCompile();
             _Compiler.sayHi();
