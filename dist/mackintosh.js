@@ -24,6 +24,7 @@ var mackintosh;
 var _Compiler = mackintosh.index;
 var _Lexer = mackintosh.lex;
 var _Parser = mackintosh.parse;
+var _CST = mackintosh.CST;
 var _Token = mackintosh.token;
 var _Functions = mackintosh.compilerFunctions;
 //Initialize token stream, error counter, and the token index.
@@ -105,9 +106,8 @@ var mackintosh;
         lex.populateProgram = function (input) {
             _Functions.log('LEXER - Lexing Program ' + programCount);
             //Remove white spaces.
-            //Push characters in string to token stream.
+            //Push characters in string to the program array.
             for (var i = 0; i < input.length; i++) {
-                _Functions.log(input.charAt(i));
                 program.push(input.charAt(i));
             }
         };
@@ -117,25 +117,34 @@ var mackintosh;
             var curToken = new mackintosh.token();
             for (var i = 0; i < program.length; i++) {
                 tokenFlag = curToken.GenerateToken(program[i], program, i);
+                //Update the pointer and remove commented code.
                 if (openComments.test(curToken.getTokenValue())) {
                     var end = curToken.updateIndex();
                     program.slice(i, end);
                     i = end;
                 }
+                //Update the pointer after finding boolop.
+                if (curToken.getBoolOp()) {
+                    var end2 = curToken.updateIndex();
+                    program.slice(i, end2);
+                    i = end2;
+                    curToken.setBoolOp(false);
+                }
+                //Update the pointer after a keyword is found.
                 for (var j = 0; j < keywords.length; j++) {
                     if (curToken.getTokenValue().toLowerCase() === keywords[j]) {
-                        //this.token.setTokenValue(this.keywords[i]);
-                        var end2 = curToken.updateIndex();
-                        program.slice(i, end2);
-                        i = end2;
+                        var end3 = curToken.updateIndex();
+                        program.slice(i, end3);
+                        i = end3;
                     }
                 }
                 if (tokenFlag) {
                     //Add current token to the token stream.
-                    _Functions.log('LEXER - ' + curToken.getTokenCode() + ' Found on line: ' + lineNum);
+                    _Functions.log('LEXER - ' + curToken.getTokenCode() + ' Found on line: ' + lineNum + ' Position: ' + i);
                 }
                 else {
-                    _Functions.log('LEXER ERROR - ' + curToken.getTokenCode() + ' Found on line: ' + lineNum);
+                    _Functions.log('LEXER ERROR - Invalid Token ' + curToken.getTokenCode() + ' Found on line: '
+                        + lineNum + ' Position: ' + 1);
                     errCount++;
                 }
                 //Check for EOP $ and start lexing next program.
@@ -176,6 +185,7 @@ var mackintosh;
             this.tokenValue = "";
             this.isKeyword = false;
             this.quoteCount = 0;
+            this.isBoolOp = false;
         }
         token.prototype.setTokenCode = function (code) {
             this.tokenCode = code;
@@ -195,6 +205,12 @@ var mackintosh;
         };
         token.prototype.setIsToken = function (isToken) {
             this.isToken = isToken;
+        };
+        token.prototype.setBoolOp = function (isBoolOp) {
+            this.isBoolOp = isBoolOp;
+        };
+        token.prototype.getBoolOp = function () {
+            return this.isBoolOp;
         };
         /**
          * Generates token by checking against the regular expressions generated.
@@ -228,9 +244,49 @@ var mackintosh;
             }
             switch (assignment.test(input)) {
                 case true:
-                    this.setTokenValue(input);
-                    this.setTokenCode("ASSIGNMENT OPERATOR - " + input);
-                    this.isToken = true;
+                    counter++;
+                    //Check if the next token is a ==. If not, set token value to be assignment op.
+                    if (assignment.test(program[counter])) {
+                        input += program[counter];
+                        switch (boolOperator.test(input)) {
+                            case true:
+                                this.setTokenValue(input);
+                                this.setTokenCode("BOOLEAN CHECK EQUAL" + input);
+                                this.isToken;
+                                this.index = counter;
+                                this.setBoolOp(true);
+                                break;
+                        }
+                    }
+                    else {
+                        counter--;
+                        this.setTokenValue(input);
+                        this.setTokenCode("ASSIGNMENT OPERATOR - " + input);
+                        this.isToken = true;
+                    }
+                    break;
+            }
+            switch (input == '!') {
+                case true:
+                    counter++;
+                    //Check if the next token is a =. If not, report invalid token error.
+                    if (assignment.test(program[counter])) {
+                        //Add the next character to the token.
+                        input += program[counter];
+                        switch (boolOperator.test(input)) {
+                            case true:
+                                this.setTokenValue(input);
+                                this.setTokenCode("BOOLEAN CHECK NOT EQUAL" + input);
+                                this.isToken;
+                                this.index = counter;
+                                this.setBoolOp(true);
+                                break;
+                        }
+                    }
+                    else {
+                        counter--;
+                        this.isToken = false;
+                    }
                     break;
             }
             switch (boolOperator.test(input)) {
@@ -239,9 +295,6 @@ var mackintosh;
                     this.isToken = true;
                     if (this.tokenValue === "==") {
                         this.setTokenCode("BOOLEAN CHECK EQUAL " + input);
-                    }
-                    else if (this.tokenValue === "!=") {
-                        this.setTokenCode("BOOLEAN CHECK NOT EQUAL " + input);
                     }
                     break;
             }

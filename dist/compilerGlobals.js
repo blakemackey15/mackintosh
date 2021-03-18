@@ -5,6 +5,7 @@
 var _Compiler = mackintosh.index;
 var _Lexer = mackintosh.lex;
 var _Parser = mackintosh.parse;
+var _CST = mackintosh.CST;
 var _Token = mackintosh.token;
 var _Functions = mackintosh.compilerFunctions;
 //Initialize token stream, error counter, and the token index.

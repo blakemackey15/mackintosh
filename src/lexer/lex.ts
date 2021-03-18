@@ -7,32 +7,41 @@ module mackintosh {
             _Functions.log('LEXER - Lexing Program ' + programCount);
             //Remove white spaces.
 
-            //Push characters in string to token stream.
+            //Push characters in string to the program array.
             for(let i = 0; i < input.length; i++) {
-                _Functions.log(input.charAt(i));
                 program.push(input.charAt(i));
             }
         }
         
         //inputtedCode : string
         public static lex() { 
+
             //Loop through the length of the inputted string, and check each character.
             let curToken = new token();
             for(let i = 0; i < program.length; i++) {
                 tokenFlag = curToken.GenerateToken(program[i], program, i);
 
+                //Update the pointer and remove commented code.
                 if(openComments.test(curToken.getTokenValue())) {
                     let end = curToken.updateIndex();
                     program.slice(i, end);
                     i = end;
                 }
 
+                //Update the pointer after finding boolop.
+                if(curToken.getBoolOp()) {
+                    let end2 = curToken.updateIndex();
+                    program.slice(i, end2);
+                    i = end2;
+                    curToken.setBoolOp(false);
+                } 
+
+                //Update the pointer after a keyword is found.
                 for(let j = 0; j < keywords.length; j++) {
                     if(curToken.getTokenValue().toLowerCase() === keywords[j]) {
-                        //this.token.setTokenValue(this.keywords[i]);
-                        let end2 = curToken.updateIndex();
-                        program.slice(i, end2);
-                        i = end2;
+                        let end3 = curToken.updateIndex();
+                        program.slice(i, end3);
+                        i = end3;
                     }
                 }
 
@@ -42,7 +51,7 @@ module mackintosh {
                 }
 
                 else {
-                    _Functions.log('LEXER ERROR - ' + curToken.getTokenCode() + ' Found on line: ' + lineNum);
+                    _Functions.log('LEXER ERROR - Invalid Token ' + curToken.getTokenCode() + ' Found on line: ' + lineNum);
                     errCount++;
                 }
 

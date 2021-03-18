@@ -17,6 +17,7 @@ var mackintosh;
             this.tokenValue = "";
             this.isKeyword = false;
             this.quoteCount = 0;
+            this.isBoolOp = false;
         }
         token.prototype.setTokenCode = function (code) {
             this.tokenCode = code;
@@ -36,6 +37,12 @@ var mackintosh;
         };
         token.prototype.setIsToken = function (isToken) {
             this.isToken = isToken;
+        };
+        token.prototype.setBoolOp = function (isBoolOp) {
+            this.isBoolOp = isBoolOp;
+        };
+        token.prototype.getBoolOp = function () {
+            return this.isBoolOp;
         };
         /**
          * Generates token by checking against the regular expressions generated.
@@ -69,9 +76,49 @@ var mackintosh;
             }
             switch (assignment.test(input)) {
                 case true:
-                    this.setTokenValue(input);
-                    this.setTokenCode("ASSIGNMENT OPERATOR - " + input);
-                    this.isToken = true;
+                    counter++;
+                    //Check if the next token is a ==. If not, set token value to be assignment op.
+                    if (assignment.test(program[counter])) {
+                        input += program[counter];
+                        switch (boolOperator.test(input)) {
+                            case true:
+                                this.setTokenValue(input);
+                                this.setTokenCode("BOOLEAN CHECK EQUAL" + input);
+                                this.isToken;
+                                this.index = counter;
+                                this.setBoolOp(true);
+                                break;
+                        }
+                    }
+                    else {
+                        counter--;
+                        this.setTokenValue(input);
+                        this.setTokenCode("ASSIGNMENT OPERATOR - " + input);
+                        this.isToken = true;
+                    }
+                    break;
+            }
+            switch (input == '!') {
+                case true:
+                    counter++;
+                    //Check if the next token is a =. If not, report invalid token error.
+                    if (assignment.test(program[counter])) {
+                        //Add the next character to the token.
+                        input += program[counter];
+                        switch (boolOperator.test(input)) {
+                            case true:
+                                this.setTokenValue(input);
+                                this.setTokenCode("BOOLEAN CHECK NOT EQUAL" + input);
+                                this.isToken;
+                                this.index = counter;
+                                this.setBoolOp(true);
+                                break;
+                        }
+                    }
+                    else {
+                        counter--;
+                        this.isToken = false;
+                    }
                     break;
             }
             switch (boolOperator.test(input)) {
@@ -80,9 +127,6 @@ var mackintosh;
                     this.isToken = true;
                     if (this.tokenValue === "==") {
                         this.setTokenCode("BOOLEAN CHECK EQUAL " + input);
-                    }
-                    else if (this.tokenValue === "!=") {
-                        this.setTokenCode("BOOLEAN CHECK NOT EQUAL " + input);
                     }
                     break;
             }
