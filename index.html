@@ -1,0 +1,64 @@
+<!DOCTYPE HTML>
+<head>
+    <title>Mackintosh Compiler</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <link rel="stylesheet" type="text/css" href="mackintosh.css"></link>
+</head>
+
+<body onload="clear()">
+    <h1>Mackintosh Compiler</h1>
+    <div>
+        <input type="button" id="compile" value="Compile" onclick="compile();"></input>
+        <input type="button" id="clear" value="Clear" onclick="clear();"></input>
+    </div>
+    <div>
+        <div class="srcCode">
+            <textarea id="inputCode" cols="30" rows="15"></textarea>
+            <textarea id="output" cols="30" rows="15"></textarea>
+        </div>
+    </div>
+
+    <!-- Link to the language's grammar -->
+    <div>
+        <a href="https://www.labouseur.com/courses/compilers/grammar.pdf" target="_blank">Language Grammar Reference</a>
+    </div>
+
+    <!-- Import compiled ts script files -->
+    <script type="text/javascript" src="dist/lexer/lex.js"></script>
+    <script type="text/javascript" src="dist/index.js"></script>
+    <script type="text/javascript" src="dist/lexer/token.js"></script>
+    <script type="text/javascript" src="dist/parse/CST.js"></script>
+    <script type="text/javascript" src="dist/parse/parse.js"></script>
+    <script type="text/javascript" src="dist/parse/treeNode.js"></script>
+    <script type="text/javascript" src="dist/mackintosh.js"></script>
+
+    <!-- Import global variables/functions needed for compiler -->
+    <script type="text/javascript" src="dist/compilerGlobals.js"></script>
+    <script type="text/javascript" src="dist/compilerFunctions.js"></script>
+
+    <script type="text/javascript">
+        //Clear output text area.
+        function clear() {
+            document.getElementById("output").value = " ";
+
+        }
+
+        //Compile 
+        function compile() {
+            debugger;
+            clear();
+            tokens = "";
+            tokenIndex = 0;
+            curToken = "";
+            errCount = 0;
+
+            //Get src code and begin lex.
+            let code = document.getElementById("inputCode").value;
+            _Functions.trim(code);
+            _Compiler.startCompile();
+            _Functions.log("INFO - Compilation Completed.");
+        }
+
+    </script>
+</body>
+</HTML>
