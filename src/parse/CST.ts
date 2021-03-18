@@ -1,61 +1,116 @@
 module mackintosh {
 
+    //Code reference: JavaScript tree demo: https://www.labouseur.com/projects/jsTreeDemo/treeDemo.js
 
+    //Class to represent a node in the tree.
+    export class CSTNode {
+        private nodeName;
+        private children : Array<CSTNode>;
+        private parent : CSTNode;
+
+        constructor(nodeName : string) {
+            this.nodeName = nodeName;
+            this.children = [];
+
+        }
+
+        public setNodeName(nodeName : string) {
+            this.nodeName = nodeName;
+        }
+
+        public getNodeName() {
+            return this.nodeName;
+        }
+
+        public getChildren() {
+            return this.children;
+        }
+
+        public addChildren(child : CSTNode) {
+            this.children.push(child)
+        }
+
+        public getParent() {
+            return this.parent;
+        }
+
+        public setParent(parNode : CSTNode) {
+            this.parent = parNode;
+        }
+    }
+    
+    //Class to represent CST.
     export class CST {
-        private rootNode : treeNode;
+        private rootNode : CSTNode;
+        private curNode : CSTNode;
 
         constructor() {
             this.rootNode = null;
         }
 
-        public getRoot() {
-            return this.rootNode;
-        }
+        //Kind represents if the node is a leaf or a branch node.
+        public addNode(nodeName : string, kind : string) {
 
-        public setRoot(node : treeNode) {
-            this.rootNode = node;
-        }
+            //Create a node object. Has a name, child nodes, parent nodes, and if its a leaf or branch node.
+            let node = new CSTNode(nodeName);
 
-        //Add nodes to the tree
-        public addNode(nodeVal : number) : boolean {
-            let newNode = new treeNode(nodeVal)
-
-            //Check if the node is empty. If it is, make the new node the root node.
+            //Check if theres a root node. If not, make the current node the root node.
             if(this.rootNode == null) {
-                this.setRoot(newNode);
-                return true;
+                this.rootNode = node;
             }
 
-            //If the root node is not empty, add it to the correct spot in the tree.
+            //The current node is a child node.
             else {
+                node.setParent(this.curNode);
+                this.curNode.addChildren(node);
+            }
 
+            //Check what kind of node this node is.
+            if(kind == "branch") {
+                this.curNode = node;
+            }
+
+        }
+
+        public climbTree() {
+            //Move up the tree to the parent node if it exists.
+            if(this.curNode.getParent() !== null && this.curNode.getParent().getNodeName() !== undefined) {
+                this.curNode = this.curNode.getParent();
+            }
+            
+            else {
+                _Functions.log("CST ERROR - Parent node does not exist.");
             }
         }
 
-        //Recursive definition of depth first traversal - needed to get the valid tokens produced by the CST.
-        public depthFirst () : number[] {
-            let visit = new Array<number>();
-            let curNode = this.getRoot();
+        public toString() {
+            let treeString : string = "";
 
-            function traverse(node : treeNode) {
-                
-                //Array of visited node values.
-                visit.push(node.getValue());
-
-                //Check to see if node is right or left and then traverse the corresponding one.
-                if(node.LeftNode) {
-                    traverse(node.LeftNode);
+            //Handles the expansion of nodes using recursion.
+            function expand(node : CSTNode, depth : number) {
+                //Format to show the depth of the tree when displaying.
+                for(let i = 0; i < depth; i++) {
+                    treeString += "-";
                 }
 
-                if(node.RightNode) {
-                    traverse(node.RightNode);
+                //Check if the node is a leaf node. Then add the node and skip to new line.
+                if(node.getChildren().length === 0) {
+                    treeString +=  "[" + node.getNodeName() + "] \n";
                 }
 
+                //Get and display the children.
+                else {
+                    treeString += "<" + node.getNodeName() + "> \n"
+
+                    for(let i = 0; i < node.getChildren().length; i++) {
+                        expand(node.getChildren()[i], depth + 1);
+                    }
+                }
             }
 
-            traverse(curNode);
-            return visit;
+            //Call and expand from the root node.
+            expand(this.rootNode, 0);
+            return treeString;
         }
-
     }
 }
