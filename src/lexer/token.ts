@@ -73,7 +73,7 @@ module mackintosh {
         public getIsComment() {
             return this.isComment;
         }
-
+        
         /**
          * Generates token by checking against the regular expressions generated.
          */
@@ -341,8 +341,6 @@ module mackintosh {
 
             switch(openComments.test(input)) {
                 case true:
-                    this.setTokenValue(input);
-                    this.setTokenCode("OPEN COMMENT " + input);
                     this.isToken = true;
                     let comment = new Array<string>("");
                     comment.pop();
@@ -352,8 +350,9 @@ module mackintosh {
                     let closeCommentAgain = false;
                     this.setIsComment(true);
 
-                    while(closeComment == false && closeCommentAgain == false) {
+                    while(closeComment == false || closeCommentAgain == false) {
                         comment.push(program[counter]);
+                        counter++;
                         counter++;
                         closeComment = closeComments.test(program[counter])
                         closeCommentAgain = closeComments.test(input + programCount[counter]);

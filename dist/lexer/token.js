@@ -50,6 +50,12 @@ var mackintosh;
         token.prototype.getIsComment = function () {
             return this.isComment;
         };
+        token.prototype.setIsWhitespace = function (isWhitespace) {
+            this.isWhitespace = isWhitespace;
+        };
+        token.prototype.getIsWhitespace = function () {
+            return this.isWhitespace;
+        };
         /**
          * Generates token by checking against the regular expressions generated.
          */
@@ -71,6 +77,7 @@ var mackintosh;
                     this.setTokenCode("");
                     this.setTokenValue("");
                     this.isToken == false;
+                    this.isWhitespace == true;
                     break;
             }
             switch (digits.test(input)) {
@@ -284,15 +291,16 @@ var mackintosh;
             }
             switch (openComments.test(input)) {
                 case true:
-                    this.setTokenValue(input);
-                    this.setTokenCode("OPEN COMMENT " + input);
                     this.isToken = true;
                     var comment = new Array("");
                     comment.pop();
+                    //This is kind of a dumb fix but it works.
                     var closeComment = false;
                     var closeCommentAgain = false;
-                    while (closeComment == false && closeCommentAgain == false) {
+                    this.setIsComment(true);
+                    while (closeComment == false || closeCommentAgain == false) {
                         comment.push(program[counter]);
+                        counter++;
                         counter++;
                         closeComment = closeComments.test(program[counter]);
                         closeCommentAgain = closeComments.test(input + programCount[counter]);

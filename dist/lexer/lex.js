@@ -19,10 +19,11 @@ var mackintosh;
             for (var i = 0; i < program.length; i++) {
                 tokenFlag = curToken.GenerateToken(program[i], program, i);
                 //Update the pointer and remove commented code.
-                if (openComments.test(curToken.getTokenValue())) {
+                if (curToken.getIsComment()) {
                     var end = curToken.updateIndex();
                     program.slice(i, end);
                     i = end;
+                    curToken.setIsComment(false);
                 }
                 //Update the pointer after finding boolop.
                 if (curToken.getBoolOp()) {
@@ -41,7 +42,12 @@ var mackintosh;
                 }
                 if (tokenFlag) {
                     //Add current token to the token stream.
-                    _Functions.log('LEXER - ' + curToken.getTokenCode() + ' Found on line: ' + lineNum);
+                    if (curToken.getIsWhitespace() == false) {
+                        _Functions.log('LEXER - ' + curToken.getTokenCode() + ' Found on line: ' + lineNum);
+                    }
+                    else {
+                        curToken.setIsWhitespace(false);
+                    }
                 }
                 else {
                     _Functions.log('LEXER ERROR - Invalid Token ' + curToken.getTokenCode() + ' Found on line: ' + lineNum);
