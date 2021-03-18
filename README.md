@@ -13,19 +13,16 @@ If you do not have Node.js or Npm installed, you can follow this link to install
 Once you have downloaded Node.js and Npm and have successfully cloned the repository, navigate to the directory your respository is stored in. Then, run the command:
 npm install
 
-This command will install all of the node packages used in this project, including TypeScript and Gulp. This should create a folder called node_modules and a package-lock.json file.
+This command will install all of the node packages used in this project, including TypeScript. This should create a folder called node_modules and a package-lock.json file.
 
 # Running mackintosh
-Once you have installed the compiler, run the command:
-gulp
+To compile the project, run the command:
+tsc
 
-This command will run the gulp file and compile TypeScript files. Alternitively, the project can be compiled using the tsc command.
+If changes were made to files in the mackintosh module, be sure to run the command:
+tsc --module none --target es5 --outFile dist/mackintosh.js
 
-Once you have compiled the project, run the command:
-npm start
-To start the compiler in the command line. This command will runs the tsc and node dist/index.js commands at the same time, so it will compile the TypeScript code, and then run it once compilation has completed.
-
-To change the code being compiled, edit the file srcCode.txt. The program takes the code from that file as input. Currently, code has to be all on one line. This is something that will be fixed in the future.
+This command will update the mackintosh.js module to include your changes. Once the project is compiled, the index.html file can be opened in the browser.
 
 # Code Refrences
 
@@ -33,4 +30,4 @@ TypeScript and gulp setup: https://www.typescriptlang.org/docs/handbook/gulp.htm
 
 # Grading
 
-At the time of the due date, all current changes will be merged into master. Project development will take place on a corresponding branch.
+At the time of the due date, all current changes will be merged into main. Project development will take place on a corresponding branch.
