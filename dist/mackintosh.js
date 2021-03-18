@@ -140,11 +140,10 @@ var mackintosh;
                 }
                 if (tokenFlag) {
                     //Add current token to the token stream.
-                    _Functions.log('LEXER - ' + curToken.getTokenCode() + ' Found on line: ' + lineNum + ' Position: ' + i);
+                    _Functions.log('LEXER - ' + curToken.getTokenCode() + ' Found on line: ' + lineNum);
                 }
                 else {
-                    _Functions.log('LEXER ERROR - Invalid Token ' + curToken.getTokenCode() + ' Found on line: '
-                        + lineNum + ' Position: ' + 1);
+                    _Functions.log('LEXER ERROR - Invalid Token ' + curToken.getTokenCode() + ' Found on line: ' + lineNum);
                     errCount++;
                 }
                 //Check for EOP $ and start lexing next program.
@@ -211,6 +210,12 @@ var mackintosh;
         };
         token.prototype.getBoolOp = function () {
             return this.isBoolOp;
+        };
+        token.prototype.setIsComment = function (isComment) {
+            this.isComment = isComment;
+        };
+        token.prototype.getIsComment = function () {
+            return this.isComment;
         };
         /**
          * Generates token by checking against the regular expressions generated.
@@ -286,15 +291,6 @@ var mackintosh;
                     else {
                         counter--;
                         this.isToken = false;
-                    }
-                    break;
-            }
-            switch (boolOperator.test(input)) {
-                case true:
-                    this.setTokenValue(input);
-                    this.isToken = true;
-                    if (this.tokenValue === "==") {
-                        this.setTokenCode("BOOLEAN CHECK EQUAL " + input);
                     }
                     break;
             }
@@ -460,9 +456,14 @@ var mackintosh;
                     this.isToken = true;
                     var comment = new Array("");
                     comment.pop();
-                    while (closeComments.test(program[counter]) != true) {
+                    //This is kind of a dumb fix but it works.
+                    var closeComment = false;
+                    var closeCommentAgain = false;
+                    while (closeComment == false && closeCommentAgain == false) {
                         comment.push(program[counter]);
                         counter++;
+                        closeComment = closeComments.test(program[counter]);
+                        closeCommentAgain = closeComments.test(input + programCount[counter]);
                         this.index = counter;
                     }
             }

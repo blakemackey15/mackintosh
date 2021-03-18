@@ -22,10 +22,11 @@ module mackintosh {
                 tokenFlag = curToken.GenerateToken(program[i], program, i);
 
                 //Update the pointer and remove commented code.
-                if(openComments.test(curToken.getTokenValue())) {
+                if(curToken.getIsComment()) {
                     let end = curToken.updateIndex();
                     program.slice(i, end);
                     i = end;
+                    curToken.setIsComment(false);
                 }
 
                 //Update the pointer after finding boolop.

@@ -44,6 +44,12 @@ var mackintosh;
         token.prototype.getBoolOp = function () {
             return this.isBoolOp;
         };
+        token.prototype.setIsComment = function (isComment) {
+            this.isComment = isComment;
+        };
+        token.prototype.getIsComment = function () {
+            return this.isComment;
+        };
         /**
          * Generates token by checking against the regular expressions generated.
          */
@@ -118,15 +124,6 @@ var mackintosh;
                     else {
                         counter--;
                         this.isToken = false;
-                    }
-                    break;
-            }
-            switch (boolOperator.test(input)) {
-                case true:
-                    this.setTokenValue(input);
-                    this.isToken = true;
-                    if (this.tokenValue === "==") {
-                        this.setTokenCode("BOOLEAN CHECK EQUAL " + input);
                     }
                     break;
             }
@@ -292,9 +289,13 @@ var mackintosh;
                     this.isToken = true;
                     var comment = new Array("");
                     comment.pop();
-                    while (closeComments.test(program[counter]) != true) {
+                    var closeComment = false;
+                    var closeCommentAgain = false;
+                    while (closeComment == false && closeCommentAgain == false) {
                         comment.push(program[counter]);
                         counter++;
+                        closeComment = closeComments.test(program[counter]);
+                        closeCommentAgain = closeComments.test(input + programCount[counter]);
                         this.index = counter;
                     }
             }

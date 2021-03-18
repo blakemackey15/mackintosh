@@ -41,11 +41,10 @@ var mackintosh;
                 }
                 if (tokenFlag) {
                     //Add current token to the token stream.
-                    _Functions.log('LEXER - ' + curToken.getTokenCode() + ' Found on line: ' + lineNum + ' Position: ' + i);
+                    _Functions.log('LEXER - ' + curToken.getTokenCode() + ' Found on line: ' + lineNum);
                 }
                 else {
-                    _Functions.log('LEXER ERROR - Invalid Token ' + curToken.getTokenCode() + ' Found on line: '
-                        + lineNum + ' Position: ' + 1);
+                    _Functions.log('LEXER ERROR - Invalid Token ' + curToken.getTokenCode() + ' Found on line: ' + lineNum);
                     errCount++;
                 }
                 //Check for EOP $ and start lexing next program.

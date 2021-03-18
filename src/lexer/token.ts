@@ -23,6 +23,7 @@ module mackintosh {
         private index : number;
         private quoteCount : number;
         private isBoolOp : boolean;
+        private isComment : boolean;
 
         constructor() {
             this.tokenCode = "";
@@ -63,6 +64,14 @@ module mackintosh {
 
         public getBoolOp() {
             return this.isBoolOp;
+        }
+
+        public setIsComment(isComment : boolean) {
+            this.isComment = isComment;
+        }
+
+        public getIsComment() {
+            return this.isComment;
         }
 
         /**
@@ -149,17 +158,6 @@ module mackintosh {
                     else {
                         counter--;
                         this.isToken = false;
-                    }
-                    break;
-            }
-
-            switch(boolOperator.test(input)) {
-                case true:
-                    this.setTokenValue(input);
-                    this.isToken = true;
-
-                    if(this.tokenValue === "==") {
-                        this.setTokenCode("BOOLEAN CHECK EQUAL " + input);
                     }
                     break;
             }
@@ -349,9 +347,16 @@ module mackintosh {
                     let comment = new Array<string>("");
                     comment.pop();
 
-                    while(closeComments.test(program[counter]) != true) {
+                    //This is kind of a dumb fix but it works.
+                    let closeComment = false;
+                    let closeCommentAgain = false;
+                    this.setIsComment(true);
+
+                    while(closeComment == false && closeCommentAgain == false) {
                         comment.push(program[counter]);
                         counter++;
+                        closeComment = closeComments.test(program[counter])
+                        closeCommentAgain = closeComments.test(input + programCount[counter]);
                         this.index = counter;
                     }
             }
