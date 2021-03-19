@@ -24,6 +24,7 @@ module mackintosh {
         private quoteCount : number;
         private isBoolOp : boolean;
         private isComment : boolean;
+        private tokenType : string;
 
         constructor() {
             this.tokenCode = "";
@@ -73,6 +74,14 @@ module mackintosh {
         public getIsComment() {
             return this.isComment;
         }
+
+        public setTokenType(tokenType : string) {
+            this.tokenType = tokenType;
+        }
+
+        public getTokenType() {
+            return this.tokenType;
+        }
         
         /**
          * Generates token by checking against the regular expressions generated.
@@ -98,6 +107,7 @@ module mackintosh {
                     this.isToken == false;
                     break;
             }
+
             switch(digits.test(input)) {
                 case true:
                     this.setTokenValue(input);
@@ -105,8 +115,6 @@ module mackintosh {
                     this.isToken = true;
                     break;
             }
-
-
 
             switch(assignment.test(input)) {
                 case true:
@@ -148,8 +156,9 @@ module mackintosh {
                             case true:
                                 this.setTokenValue(input);
                                 this.setTokenCode("BOOLEAN CHECK NOT EQUAL" + input);
-                                this.isToken;
+                                this.isToken = true;
                                 this.index = counter;
+                                
                                 this.setBoolOp(true);
                                 break;
                         }

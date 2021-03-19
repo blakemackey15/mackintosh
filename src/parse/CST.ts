@@ -48,6 +48,14 @@ module mackintosh {
             this.rootNode = null;
         }
 
+        public getRoot() {
+            return this.rootNode;
+        }
+
+        public getCurNode() {
+            return this.curNode;
+        }
+
         //Kind represents if the node is a leaf or a branch node.
         public addNode(nodeName : string, kind : string) {
 

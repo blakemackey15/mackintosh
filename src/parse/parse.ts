@@ -9,18 +9,36 @@ module mackintosh {
         private CST : CST;
         private isMatch : boolean;
         private curToken : string;
+        private tokenPointer : number;
         
         //Get token stream from completed lex.
         constructor(tokenStream : Array<token>) {
             this.parseTokens = tokenStream;
+            this.CST = new CST();
         }
 
         //Recursive descent parser implimentation.
         public parse() {
-            //i represents the token pointer.
-            for(let i = 0; i < this.parseTokens.length; i++) {
-                let tokenName = this.parseTokens[i].getTokenValue();
-                this.curToken = tokenName;
+            _Functions.log("PARSER - Parsing Program " + programCount);
+
+            //Check if there are tokens in the token stream.
+            if(this.parseTokens.length <= 0) {
+                _Functions.log("PARSER ERROR - There are no tokens to be parsed.");
+            }
+
+            //Begin parse.
+            else {
+                //Use try catch to check for parse failures and output them.
+                try {
+                    this.parseProgram();
+                    _Functions.log("PARSER - Parse completed.");
+                    return this.CST.getRoot();
+                }
+
+                catch (error){
+                    _Functions.log("PARSER - Error caused parse to end.");
+                }
+
             }
         }
 
@@ -30,9 +48,19 @@ module mackintosh {
         }
 
         //Methods for recursive descent parser - Start symbol: program.
-
+        //Expected tokens - block, $
         public parseProgram() {
-            
+            //Add the program node to the tree. This should be the root node.
+            this.CST.addNode("Program", "branch");
+
+            //Begin parse block.
+            this.parseBlock();
+
+            //Check for EOP at the end of program.
+            if(this.parseTokens[this.tokenPointer].getTokenValue() == "$") {
+                _Functions.log("PARSER - Program successfully parsed.");
+
+            }
         }
 
         //Expected tokens: { statementList }
