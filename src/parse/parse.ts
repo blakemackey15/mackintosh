@@ -10,6 +10,7 @@ module mackintosh {
         private isMatch : boolean;
         private curToken : string;
         private tokenPointer : number;
+        private expectedTokens : Array<token>;
         
         //Get token stream from completed lex.
         constructor(tokenStream : Array<token>) {
@@ -43,8 +44,23 @@ module mackintosh {
         }
 
         //Match function.
-        public match(token : string) : boolean {
-            return this.isMatch;
+        public match(token : string) {
+            //Check if the token is in a the expected token array.
+            for(let i = 0; i < this.expectedTokens.length; i++) {
+                if(this.expectedTokens[i].getTokenValue() == token) {
+                    this.isMatch == true;
+                }
+
+            }
+
+            if(this.isMatch) {
+                _Functions.log("PARSER - Token Matched!" + token);
+            }
+
+            else {
+                _Functions.log("PARSER ERROR - Expected tokens (" + this.expectedTokens.toString() + ") but got " 
+                + token + " instead.");
+            }
         }
 
         //Methods for recursive descent parser - Start symbol: program.
