@@ -42,12 +42,7 @@ var mackintosh;
                 }
                 if (tokenFlag) {
                     //Add current token to the token stream.
-                    if (curToken.getIsWhitespace() == false) {
-                        _Functions.log('LEXER - ' + curToken.getTokenCode() + ' Found on line: ' + lineNum);
-                    }
-                    else {
-                        curToken.setIsWhitespace(false);
-                    }
+                    _Functions.log('LEXER - ' + curToken.getTokenCode() + ' Found on line: ' + lineNum);
                 }
                 else {
                     _Functions.log('LEXER ERROR - Invalid Token ' + curToken.getTokenCode() + ' Found on line: ' + lineNum);

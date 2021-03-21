@@ -5,25 +5,14 @@ module mackintosh {
     export class parse {
 
         //Global Variables.
-        private parseTokens : Array<token>;
-        private CST : CST;
-        private isMatch : boolean;
         private curToken : string;
-        private tokenPointer : number;
-        private expectedTokens : Array<token>;
-        
-        //Get token stream from completed lex.
-        constructor(tokenStream : Array<token>) {
-            this.parseTokens = tokenStream;
-            this.CST = new CST();
-        }
 
         //Recursive descent parser implimentation.
-        public parse() {
+        public static parse(parseTokens : Array<token>) {
             _Functions.log("PARSER - Parsing Program " + programCount);
 
             //Check if there are tokens in the token stream.
-            if(this.parseTokens.length <= 0) {
+            if(parseTokens.length <= 0) {
                 _Functions.log("PARSER ERROR - There are no tokens to be parsed.");
             }
 
@@ -31,9 +20,9 @@ module mackintosh {
             else {
                 //Use try catch to check for parse failures and output them.
                 try {
-                    this.parseProgram();
+                    this.parseProgram(parseTokens);
                     _Functions.log("PARSER - Parse completed.");
-                    return this.CST.getRoot();
+                    return CSTTree.getRoot();
                 }
 
                 catch (error){
@@ -44,150 +33,158 @@ module mackintosh {
         }
 
         //Match function.
-        public match(token : string) {
+        public static match(token : string) {
             //Check if the token is in a the expected token array.
-            for(let i = 0; i < this.expectedTokens.length; i++) {
-                if(this.expectedTokens[i].getTokenValue() == token) {
-                    this.isMatch == true;
+            for(let i = 0; i < expectedTokens.length; i++) {
+                if(expectedTokens[i].getTokenValue() == token) {
+                    isMatch == true;
                 }
 
             }
 
-            if(this.isMatch) {
+            if(isMatch) {
                 _Functions.log("PARSER - Token Matched!" + token);
             }
 
             else {
-                _Functions.log("PARSER ERROR - Expected tokens (" + this.expectedTokens.toString() + ") but got " 
+                _Functions.log("PARSER ERROR - Expected tokens (" + expectedTokens.toString() + ") but got " 
                 + token + " instead.");
+                parseErrCount++;
             }
         }
 
         //Methods for recursive descent parser - Start symbol: program.
         //Expected tokens - block, $
-        public parseProgram() {
+        public static parseProgram(parseTokens : Array<token>) {
             //Add the program node to the tree. This should be the root node.
-            this.CST.addNode("Program", "branch");
+            CSTTree.addNode("Program", "branch");
 
             //Begin parse block.
-            this.parseBlock();
+            this.parseBlock(parseTokens);
 
             //Check for EOP at the end of program.
-            if(this.parseTokens[this.tokenPointer].getTokenValue() == "$") {
+            if(parseTokens[tokenPointer].getTokenValue() == "$") {
                 _Functions.log("PARSER - Program successfully parsed.");
 
+            }
+
+            else {
+                _Functions.log("PARSER ERROR - EOP $ not found at end of program.");
+                parseErrCount++;
             }
         }
 
         //Expected tokens: { statementList }
-        public parseBlock() {
+        public static parseBlock(parseTokens : Array<token>) {
+            CSTTree.addNode("Block", "branch");
+            this.parseStatementList(parseTokens);
             
         }
 
         //Expected tokens: statement statementList
         //OR - empty
-        public parseStatementList() {
+        public static parseStatementList(parseTokens : Array<token>) {
             // else {
             //     //Not an empty else, represents do nothing.
             // }
         }
 
         //Expected tokens: print, assignment, var declaration, while, if, block
-        public parseStatement() {
+        public static parseStatement(parseTokens : Array<token>) {
 
         }
 
         //Expected tokens: print( expr )
-        public parsePrintStatement() {
+        public static parsePrintStatement(parseTokens : Array<token>) {
 
         }
 
         //Expected tokens: id = expr
-        public parseAssignmentStatement() {
+        public static parseAssignmentStatement(parseTokens : Array<token>) {
 
         }
 
         //Expected tokens: type id
-        public parseVarDecl() {
+        public static parseVarDecl(parseTokens : Array<token>) {
 
         }
 
         //Expected tokens: while boolexpr block
-        public parseWhileStatement() {
+        public static parseWhileStatement(parseTokens : Array<token>) {
 
         }
 
         //Expected tokens: if boolexpr block
-        public parseIfStatement() {
+        public static parseIfStatement(parseTokens : Array<token>) {
 
         }
 
         //Expected tokens: intexpr, stringexpr, boolexpr, id
-        public parseExpr() {
+        public static parseExpr(parseTokens : Array<token>) {
 
         }
 
         //Expected tokens: digit intop expr
         //OR: digit
-        public parseIntExpr() {
+        public static parseIntExpr(parseTokens : Array<token>) {
 
         }
 
         //Expected tokens: "charlist"
-        public parseStringExpr() {
+        public static parseStringExpr(parseTokens : Array<token>) {
 
         }
 
         //Expected tokens: ( expr boolop expr)
         //OR: boolval
-        public parseBoolExpr() {
+        public static parseBoolExpr(parseTokens : Array<token>) {
 
         }
 
         //Expected tokens: char
-        public parseId() {
+        public static parseId(parseTokens : Array<token>) {
 
         }
 
         //Expected tokens: char charlist, space charlist, empty
-        public parseCharList() {
+        public static parseCharList(parseTokens : Array<token>) {
             // else {
             //     //Not an empty else, represents do nothing.
             // }
         }
 
         //Expected tokens: int, string, boolean
-        public parseType() {
+        public static parseType(parseTokens : Array<token>) {
 
         }
 
         //Expected tokens: a-z, A-Z
-        public parseChar() {
+        public static parseChar(parseTokens : Array<token>) {
 
         }
 
         //Expected tokens: space
-        public parseSpace() {
+        public static parseSpace(parseTokens : Array<token>) {
 
         }
 
         //Expected tokens: 0-9
-        public parseDigit() {
+        public static parseDigit(parseTokens : Array<token>) {
 
         }
 
         //Expected tokens: ==, !=
-        public parseBoolOp() {
+        public parseBoolOp(parseTokens : Array<token>) {
 
         }
 
         //Expected tokens: false, true
-        public parseBoolVal() {
+        public static parseBoolVal(parseTokens : Array<token>) {
 
         }
 
         //Expected tokens: +
-        public parseIntOp() {
+        public static parseIntOp(parseTokens : Array<token>) {
 
         }
 

@@ -5,21 +5,55 @@ var mackintosh;
         //Get token stream from completed lex.
         function parse(tokenStream) {
             this.parseTokens = tokenStream;
+            this.CST = new mackintosh.CST();
         }
         //Recursive descent parser implimentation.
         parse.prototype.parse = function () {
-            //i represents the token pointer.
-            for (var i = 0; i < this.parseTokens.length; i++) {
-                var tokenName = this.parseTokens[i].getTokenValue();
-                this.curToken = tokenName;
+            _Functions.log("PARSER - Parsing Program " + programCount);
+            //Check if there are tokens in the token stream.
+            if (this.parseTokens.length <= 0) {
+                _Functions.log("PARSER ERROR - There are no tokens to be parsed.");
+            }
+            //Begin parse.
+            else {
+                //Use try catch to check for parse failures and output them.
+                try {
+                    this.parseProgram();
+                    _Functions.log("PARSER - Parse completed.");
+                    return this.CST.getRoot();
+                }
+                catch (error) {
+                    _Functions.log("PARSER - Error caused parse to end.");
+                }
             }
         };
         //Match function.
         parse.prototype.match = function (token) {
-            return this.isMatch;
+            //Check if the token is in a the expected token array.
+            for (var i = 0; i < this.expectedTokens.length; i++) {
+                if (this.expectedTokens[i].getTokenValue() == token) {
+                    this.isMatch == true;
+                }
+            }
+            if (this.isMatch) {
+                _Functions.log("PARSER - Token Matched!" + token);
+            }
+            else {
+                _Functions.log("PARSER ERROR - Expected tokens (" + this.expectedTokens.toString() + ") but got "
+                    + token + " instead.");
+            }
         };
         //Methods for recursive descent parser - Start symbol: program.
+        //Expected tokens - block, $
         parse.prototype.parseProgram = function () {
+            //Add the program node to the tree. This should be the root node.
+            this.CST.addNode("Program", "branch");
+            //Begin parse block.
+            this.parseBlock();
+            //Check for EOP at the end of program.
+            if (this.parseTokens[this.tokenPointer].getTokenValue() == "$") {
+                _Functions.log("PARSER - Program successfully parsed.");
+            }
         };
         //Expected tokens: { statementList }
         parse.prototype.parseBlock = function () {

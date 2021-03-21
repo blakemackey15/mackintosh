@@ -49,6 +49,7 @@ module mackintosh {
                 if(tokenFlag) {
                     //Add current token to the token stream.
                     _Functions.log('LEXER - ' + curToken.getTokenCode() + ' Found on line: ' + lineNum);
+                    tokens.push(curToken);
                 }
 
                 else {

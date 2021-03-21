@@ -50,11 +50,11 @@ var mackintosh;
         token.prototype.getIsComment = function () {
             return this.isComment;
         };
-        token.prototype.setIsWhitespace = function (isWhitespace) {
-            this.isWhitespace = isWhitespace;
+        token.prototype.setTokenType = function (tokenType) {
+            this.tokenType = tokenType;
         };
-        token.prototype.getIsWhitespace = function () {
-            return this.isWhitespace;
+        token.prototype.getTokenType = function () {
+            return this.tokenType;
         };
         /**
          * Generates token by checking against the regular expressions generated.
@@ -77,7 +77,6 @@ var mackintosh;
                     this.setTokenCode("");
                     this.setTokenValue("");
                     this.isToken == false;
-                    this.isWhitespace == true;
                     break;
             }
             switch (digits.test(input)) {
@@ -122,7 +121,7 @@ var mackintosh;
                             case true:
                                 this.setTokenValue(input);
                                 this.setTokenCode("BOOLEAN CHECK NOT EQUAL" + input);
-                                this.isToken;
+                                this.isToken = true;
                                 this.index = counter;
                                 this.setBoolOp(true);
                                 break;
