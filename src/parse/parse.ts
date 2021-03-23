@@ -5,7 +5,7 @@ module mackintosh {
     export class parse {
 
         //Recursive descent parser implimentation.
-        public static parse(parseTokens : Array<token>) {
+        public static parse(parseTokens : Array<String>) {
             _Functions.log("PARSER - Parsing Program " + programCount);
 
             //Check if there are tokens in the token stream.
@@ -55,7 +55,7 @@ module mackintosh {
 
         //Methods for recursive descent parser - Start symbol: program.
         //Expected tokens - block, $
-        public static parseProgram(parseTokens : Array<token>) {
+        public static parseProgram(parseTokens : Array<String>) {
             //Add the program node to the tree. This should be the root node.
             CSTTree.addNode("Program", "branch");
 
@@ -63,7 +63,7 @@ module mackintosh {
             this.parseBlock();
 
             //Check for EOP at the end of program.
-            if(parseTokens[tokenPointer].getTokenValue() == "$") {
+            if(parseTokens[tokenPointer] == "$") {
                 _Functions.log("PARSER - Program successfully parsed.");
 
             }

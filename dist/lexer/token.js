@@ -60,6 +60,7 @@ var mackintosh;
          * Generates token by checking against the regular expressions generated.
          */
         token.prototype.GenerateToken = function (input, program, counter) {
+            debugger;
             /**
              * Use switch statements to check against each RegEx.
              */

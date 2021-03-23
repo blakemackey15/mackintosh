@@ -5,7 +5,7 @@
     <link rel="stylesheet" type="text/css" href="mackintosh.css"></link>
 </head>
 
-<body onload="clear()">
+<body>
     <h1>Mackintosh Compiler</h1>
     <div>
         <input type="button" id="compile" value="Compile" onclick="compile();"></input>
@@ -36,15 +36,14 @@
     <script type="text/javascript" src="dist/compilerFunctions.js"></script>
 
     <script type="text/javascript">
-
         //Compile 
         function compile() {
-            clear();
+            debugger;
             tokens = "";
             tokenIndex = 0;
             curToken = "";
             errCount = 0;
-            lineNum = 0;
+            lineNum = 1;
             document.getElementById("output").innerHTML = " ";
 
             //Get src code and begin lex.

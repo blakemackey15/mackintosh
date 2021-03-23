@@ -17,6 +17,7 @@ var mackintosh;
             //Loop through the length of the inputted string, and check each character.
             var curToken = new mackintosh.token();
             for (var i = 0; i < program.length; i++) {
+                debugger;
                 tokenFlag = curToken.GenerateToken(program[i], program, i);
                 //Update the pointer and remove commented code.
                 if (curToken.getIsComment()) {
@@ -43,8 +44,9 @@ var mackintosh;
                 if (tokenFlag) {
                     if (curToken.getTokenCode() != "") {
                         //Add current token to the token stream.
+                        tokenIndex++;
                         _Functions.log('LEXER - ' + curToken.getTokenCode() + ' Found on line: ' + lineNum);
-                        tokens[i] = curToken;
+                        tokens[tokenIndex] = curToken;
                     }
                 }
                 else {

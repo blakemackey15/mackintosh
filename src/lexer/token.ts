@@ -87,6 +87,7 @@ module mackintosh {
          * Generates token by checking against the regular expressions generated.
          */
         public GenerateToken(input : string, program : string[], counter : number) : boolean {
+            debugger;
             /**
              * Use switch statements to check against each RegEx.
              */

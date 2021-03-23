@@ -27,7 +27,7 @@ var _Parser = mackintosh.parse;
 var _Token = mackintosh.token;
 var _Functions = mackintosh.compilerFunctions;
 //Initialize token stream, error counter, and the token index.
-var tokens;
+var tokens = new Array();
 //Lex errors.
 var errCount = 0;
 //Parse errors.
@@ -83,6 +83,7 @@ var mackintosh;
         }
         //Begins the compilation of the inputted code.
         index.startCompile = function () {
+            debugger;
             //Set compilation flag to true.
             isCompiling = true;
             _Functions.log('INFO: Beginning Compilation...');
@@ -126,6 +127,7 @@ var mackintosh;
             //Loop through the length of the inputted string, and check each character.
             var curToken = new mackintosh.token();
             for (var i = 0; i < program.length; i++) {
+                debugger;
                 tokenFlag = curToken.GenerateToken(program[i], program, i);
                 //Update the pointer and remove commented code.
                 if (curToken.getIsComment()) {
@@ -152,8 +154,9 @@ var mackintosh;
                 if (tokenFlag) {
                     if (curToken.getTokenCode() != "") {
                         //Add current token to the token stream.
+                        tokenIndex++;
                         _Functions.log('LEXER - ' + curToken.getTokenCode() + ' Found on line: ' + lineNum);
-                        tokens[i] = curToken;
+                        tokens[tokenIndex] = curToken;
                     }
                 }
                 else {
@@ -243,6 +246,7 @@ var mackintosh;
          * Generates token by checking against the regular expressions generated.
          */
         token.prototype.GenerateToken = function (input, program, counter) {
+            debugger;
             /**
              * Use switch statements to check against each RegEx.
              */

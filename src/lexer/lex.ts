@@ -19,6 +19,7 @@ module mackintosh {
             //Loop through the length of the inputted string, and check each character.
             let curToken = new token();
             for(let i = 0; i < program.length; i++) {
+                debugger;
                 tokenFlag = curToken.GenerateToken(program[i], program, i);
 
                 //Update the pointer and remove commented code.
@@ -48,9 +49,11 @@ module mackintosh {
 
                 if(tokenFlag) {
                     if(curToken.getTokenCode() != "") {
-                    //Add current token to the token stream.
-                    _Functions.log('LEXER - ' + curToken.getTokenCode() + ' Found on line: ' + lineNum);
-                    tokens[i] = curToken;
+                        //Add current token to the token stream.
+                        tokens.pop();
+                        tokenIndex++;
+                        _Functions.log('LEXER - ' + curToken.getTokenCode() + ' Found on line: ' + lineNum);
+                        tokens.push(curToken.getTokenValue()) ;
                     }
                 }
 
