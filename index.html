@@ -36,11 +36,6 @@
     <script type="text/javascript" src="dist/compilerFunctions.js"></script>
 
     <script type="text/javascript">
-        //Clear output text area.
-        function clear() {
-            document.getElementById("output").value = " ";
-
-        }
 
         //Compile 
         function compile() {
@@ -49,6 +44,8 @@
             tokenIndex = 0;
             curToken = "";
             errCount = 0;
+            lineNum = 0;
+            document.getElementById("output").innerHTML = " ";
 
             //Get src code and begin lex.
             let code = document.getElementById("inputCode").value;
