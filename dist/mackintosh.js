@@ -150,9 +150,11 @@ var mackintosh;
                     }
                 }
                 if (tokenFlag) {
-                    //Add current token to the token stream.
-                    _Functions.log('LEXER - ' + curToken.getTokenCode() + ' Found on line: ' + lineNum);
-                    tokens[i] = curToken;
+                    if (curToken.getTokenCode() != "") {
+                        //Add current token to the token stream.
+                        _Functions.log('LEXER - ' + curToken.getTokenCode() + ' Found on line: ' + lineNum);
+                        tokens[i] = curToken;
+                    }
                 }
                 else {
                     _Functions.log('LEXER ERROR - Invalid Token ' + curToken.getTokenCode() + ' Found on line: ' + lineNum);
@@ -164,8 +166,6 @@ var mackintosh;
                         _Functions.log('LEXER - Lex Completed With ' + errCount + ' Errors and ' + warnCount + ' Warnings');
                         //Check if this is the end of the program. If not, begin lexing the next program.
                         if (typeof program[i] != undefined) {
-                            _Functions.log('\n');
-                            _Functions.log('\n');
                             _Functions.log('\n');
                             _Functions.log('\n');
                             _Functions.log('LEXER - Lexing Program ' + programCount);
