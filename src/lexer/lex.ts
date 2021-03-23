@@ -18,6 +18,7 @@ module mackintosh {
 
             //Loop through the length of the inputted string, and check each character.
             let curToken = new token();
+            let tokenStream = new Array<String>('');
             for(let i = 0; i < program.length; i++) {
                 debugger;
                 tokenFlag = curToken.GenerateToken(program[i], program, i);
@@ -50,10 +51,10 @@ module mackintosh {
                 if(tokenFlag) {
                     if(curToken.getTokenCode() != "") {
                         //Add current token to the token stream.
-                        tokens.pop();
+                        tokenStream.pop()
                         tokenIndex++;
                         _Functions.log('LEXER - ' + curToken.getTokenCode() + ' Found on line: ' + lineNum);
-                        tokens.push(curToken.getTokenValue()) ;
+                        tokenStream.push(curToken.getTokenValue());
                     }
                 }
 
@@ -66,6 +67,7 @@ module mackintosh {
                 if(program[i] == '$') {
                     if(errCount == 0) {
                         _Functions.log('LEXER - Lex Completed With ' +  errCount + ' Errors and ' + warnCount + ' Warnings');
+                        _Parser.parse(tokenStream);
 
                         //Check if this is the end of the program. If not, begin lexing the next program.
                         if(typeof program[i] != undefined) {

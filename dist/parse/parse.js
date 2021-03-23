@@ -52,7 +52,7 @@ var mackintosh;
             //Begin parse block.
             this.parseBlock();
             //Check for EOP at the end of program.
-            if (parseTokens[tokenPointer].getTokenValue() == "$") {
+            if (parseTokens[tokenPointer] == "$") {
                 _Functions.log("PARSER - Program successfully parsed.");
             }
             else {

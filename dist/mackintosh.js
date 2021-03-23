@@ -47,7 +47,7 @@ var tokenBuffer = 0;
 var keywords = new Array("int", "print", "while", "string", "boolean", "while", "true", "false", "if");
 //Regular Expressions to check token type.
 var digits = new RegExp('(?:0|[1-9]\d*)');
-var characters = new RegExp('^[a-zA-Z]*$');
+var characters = new RegExp('^[a-z]*$');
 var leftBlock = new RegExp('[{]');
 var rightBlock = new RegExp('[}]');
 var operator = new RegExp('[+]');
@@ -92,7 +92,6 @@ var mackintosh;
             //code = mackintosh.compilerFunctions.trim(code);
             _Lexer.populateProgram(code);
             _Lexer.lex();
-            _Parser.parse(tokens);
             //Check if there is a $ at the end of the program, if not display warning.
             if (program[program.length - 1] != '$') {
                 _Functions.log('LEXER WARNING: End of Program $ Not Found.');
@@ -126,6 +125,7 @@ var mackintosh;
         lex.lex = function () {
             //Loop through the length of the inputted string, and check each character.
             var curToken = new mackintosh.token();
+            var tokenStream = new Array('');
             for (var i = 0; i < program.length; i++) {
                 debugger;
                 tokenFlag = curToken.GenerateToken(program[i], program, i);
@@ -154,9 +154,10 @@ var mackintosh;
                 if (tokenFlag) {
                     if (curToken.getTokenCode() != "") {
                         //Add current token to the token stream.
+                        tokenStream.pop();
                         tokenIndex++;
                         _Functions.log('LEXER - ' + curToken.getTokenCode() + ' Found on line: ' + lineNum);
-                        tokens[tokenIndex] = curToken;
+                        tokenStream.push(curToken.getTokenValue());
                     }
                 }
                 else {
@@ -167,6 +168,7 @@ var mackintosh;
                 if (program[i] == '$') {
                     if (errCount == 0) {
                         _Functions.log('LEXER - Lex Completed With ' + errCount + ' Errors and ' + warnCount + ' Warnings');
+                        _Parser.parse(tokenStream);
                         //Check if this is the end of the program. If not, begin lexing the next program.
                         if (typeof program[i] != undefined) {
                             _Functions.log('\n');
@@ -666,7 +668,7 @@ var mackintosh;
             //Begin parse block.
             this.parseBlock();
             //Check for EOP at the end of program.
-            if (parseTokens[tokenPointer].getTokenValue() == "$") {
+            if (parseTokens[tokenPointer] == "$") {
                 _Functions.log("PARSER - Program successfully parsed.");
             }
             else {

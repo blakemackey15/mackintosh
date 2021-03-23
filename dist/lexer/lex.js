@@ -16,6 +16,7 @@ var mackintosh;
         lex.lex = function () {
             //Loop through the length of the inputted string, and check each character.
             var curToken = new mackintosh.token();
+            var tokenStream = new Array('');
             for (var i = 0; i < program.length; i++) {
                 debugger;
                 tokenFlag = curToken.GenerateToken(program[i], program, i);
@@ -44,9 +45,10 @@ var mackintosh;
                 if (tokenFlag) {
                     if (curToken.getTokenCode() != "") {
                         //Add current token to the token stream.
+                        tokenStream.pop();
                         tokenIndex++;
                         _Functions.log('LEXER - ' + curToken.getTokenCode() + ' Found on line: ' + lineNum);
-                        tokens[tokenIndex] = curToken;
+                        tokenStream.push(curToken.getTokenValue());
                     }
                 }
                 else {
@@ -57,6 +59,7 @@ var mackintosh;
                 if (program[i] == '$') {
                     if (errCount == 0) {
                         _Functions.log('LEXER - Lex Completed With ' + errCount + ' Errors and ' + warnCount + ' Warnings');
+                        _Parser.parse(tokenStream);
                         //Check if this is the end of the program. If not, begin lexing the next program.
                         if (typeof program[i] != undefined) {
                             _Functions.log('\n');

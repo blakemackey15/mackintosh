@@ -20,9 +20,7 @@ module mackintosh {
             //code = mackintosh.compilerFunctions.trim(code);
 
             _Lexer.populateProgram(code);
-            _Lexer.lex();
-            _Parser.parse(tokens);
-            
+            _Lexer.lex();            
 
             //Check if there is a $ at the end of the program, if not display warning.
             if(program[program.length - 1] != '$') {                
