@@ -2,25 +2,22 @@ var mackintosh;
 (function (mackintosh) {
     //Class that represents parse/
     var parse = /** @class */ (function () {
-        //Get token stream from completed lex.
-        function parse(tokenStream) {
-            this.parseTokens = tokenStream;
-            this.CST = new mackintosh.CST();
+        function parse() {
         }
         //Recursive descent parser implimentation.
-        parse.prototype.parse = function () {
+        parse.parse = function (parseTokens) {
             _Functions.log("PARSER - Parsing Program " + programCount);
             //Check if there are tokens in the token stream.
-            if (this.parseTokens.length <= 0) {
+            if (parseTokens.length <= 0) {
                 _Functions.log("PARSER ERROR - There are no tokens to be parsed.");
             }
             //Begin parse.
             else {
                 //Use try catch to check for parse failures and output them.
                 try {
-                    this.parseProgram();
+                    this.parseProgram(parseTokens);
                     _Functions.log("PARSER - Parse completed.");
-                    return this.CST.getRoot();
+                    return CSTTree.getRoot();
                 }
                 catch (error) {
                     _Functions.log("PARSER - Error caused parse to end.");
@@ -28,104 +25,141 @@ var mackintosh;
             }
         };
         //Match function.
-        parse.prototype.match = function (token) {
+        parse.match = function (tokens) {
             //Check if the token is in a the expected token array.
-            for (var i = 0; i < this.expectedTokens.length; i++) {
-                if (this.expectedTokens[i].getTokenValue() == token) {
-                    this.isMatch == true;
+            for (var i = 0; i < expectedTokens.length; i++) {
+                if (expectedTokens[i].getTokenValue() == tokens[i]) {
+                    isMatch == true;
                 }
             }
-            if (this.isMatch) {
-                _Functions.log("PARSER - Token Matched!" + token);
+            if (isMatch) {
+                _Functions.log("PARSER - Token Matched!" + mackintosh.token);
+                //TODO: Check if this is a leaf or branch node.
+                CSTTree.addNode(curToken.getTokenValue(), "");
+                CSTTree.climbTree();
             }
             else {
-                _Functions.log("PARSER ERROR - Expected tokens (" + this.expectedTokens.toString() + ") but got "
-                    + token + " instead.");
+                _Functions.log("PARSER ERROR - Expected tokens (" + expectedTokens.toString() + ") but got "
+                    + mackintosh.token + " instead.");
+                parseErrCount++;
             }
         };
         //Methods for recursive descent parser - Start symbol: program.
         //Expected tokens - block, $
-        parse.prototype.parseProgram = function () {
+        parse.parseProgram = function (parseTokens) {
             //Add the program node to the tree. This should be the root node.
-            this.CST.addNode("Program", "branch");
+            CSTTree.addNode("Program", "branch");
             //Begin parse block.
             this.parseBlock();
             //Check for EOP at the end of program.
-            if (this.parseTokens[this.tokenPointer].getTokenValue() == "$") {
+            if (parseTokens[tokenPointer].getTokenValue() == "$") {
                 _Functions.log("PARSER - Program successfully parsed.");
+            }
+            else {
+                _Functions.log("PARSER ERROR - EOP $ not found at end of program.");
+                parseErrCount++;
             }
         };
         //Expected tokens: { statementList }
-        parse.prototype.parseBlock = function () {
+        parse.parseBlock = function () {
+            CSTTree.addNode("Block", "branch");
+            this.parseStatementList();
         };
         //Expected tokens: statement statementList
         //OR - empty
-        parse.prototype.parseStatementList = function () {
-            // else {
-            //     //Not an empty else, represents do nothing.
-            // }
+        parse.parseStatementList = function () {
+            // CSTTree.addNode("StatementList", "branch");
+            // this.parseStatement(parseTokens);
+            // this.parseStatementList(parseTokens);
+            //if(){
+            //}
+            //else {
+            //Not an empty else, represents do nothing.
+            //}
         };
         //Expected tokens: print, assignment, var declaration, while, if, block
-        parse.prototype.parseStatement = function () {
+        parse.parseStatement = function () {
         };
         //Expected tokens: print( expr )
-        parse.prototype.parsePrintStatement = function () {
+        parse.parsePrintStatement = function () {
         };
         //Expected tokens: id = expr
-        parse.prototype.parseAssignmentStatement = function () {
+        parse.parseAssignmentStatement = function () {
         };
         //Expected tokens: type id
-        parse.prototype.parseVarDecl = function () {
+        parse.parseVarDecl = function () {
         };
         //Expected tokens: while boolexpr block
-        parse.prototype.parseWhileStatement = function () {
+        parse.parseWhileStatement = function () {
         };
         //Expected tokens: if boolexpr block
-        parse.prototype.parseIfStatement = function () {
+        parse.parseIfStatement = function () {
         };
         //Expected tokens: intexpr, stringexpr, boolexpr, id
-        parse.prototype.parseExpr = function () {
+        parse.parseExpr = function () {
         };
         //Expected tokens: digit intop expr
         //OR: digit
-        parse.prototype.parseIntExpr = function () {
+        parse.parseIntExpr = function () {
         };
         //Expected tokens: "charlist"
-        parse.prototype.parseStringExpr = function () {
+        parse.parseStringExpr = function () {
         };
         //Expected tokens: ( expr boolop expr)
         //OR: boolval
-        parse.prototype.parseBoolExpr = function () {
+        parse.parseBoolExpr = function () {
         };
         //Expected tokens: char
-        parse.prototype.parseId = function () {
+        parse.parseId = function () {
         };
         //Expected tokens: char charlist, space charlist, empty
-        parse.prototype.parseCharList = function () {
+        parse.parseCharList = function () {
             // else {
             //     //Not an empty else, represents do nothing.
             // }
         };
         //Expected tokens: int, string, boolean
-        parse.prototype.parseType = function () {
+        parse.parseType = function () {
+            CSTTree.addNode("Type", "leaf");
+            this.match(["int", "string", "boolean"]);
+            CSTTree.climbTree();
         };
         //Expected tokens: a-z, A-Z
-        parse.prototype.parseChar = function () {
+        parse.parseChar = function () {
+            CSTTree.addNode("Char", "leaf");
+            this.match(["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k",
+                "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]);
+            CSTTree.climbTree();
         };
         //Expected tokens: space
-        parse.prototype.parseSpace = function () {
+        parse.parseSpace = function () {
+            CSTTree.addNode("Space", "leaf");
+            this.match([" "]);
+            CSTTree.climbTree();
         };
         //Expected tokens: 0-9
-        parse.prototype.parseDigit = function () {
+        parse.parseDigit = function () {
+            CSTTree.addNode("Digit", "leaf");
+            this.match(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]);
+            CSTTree.climbTree();
         };
         //Expected tokens: ==, !=
-        parse.prototype.parseBoolOp = function () {
+        parse.parseBoolOp = function () {
+            CSTTree.addNode("BoolOp", "leaf");
+            this.match(["==", "!="]);
+            CSTTree.climbTree();
         };
         //Expected tokens: false, true
-        parse.prototype.parseBoolVal = function () {
+        parse.parseBoolVal = function () {
+            CSTTree.addNode("BoolVal", "leaf");
+            this.match(["false", "true"]);
+            CSTTree.climbTree();
         };
         //Expected tokens: +
-        parse.prototype.parseIntOp = function () {
+        parse.parseIntOp = function () {
+            CSTTree.addNode("IntOp", "leaf");
+            this.match(["+"]);
+            CSTTree.climbTree();
         };
         return parse;
     }());

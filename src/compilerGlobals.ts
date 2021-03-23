@@ -9,7 +9,7 @@ var _Token = mackintosh.token;
 var _Functions = mackintosh.compilerFunctions;
 
 //Initialize token stream, error counter, and the token index.
-var tokens = new Array<mackintosh.token>();
+var tokens : Array<mackintosh.token>;
 //Lex errors.
 var errCount : number = 0;
 //Parse errors.

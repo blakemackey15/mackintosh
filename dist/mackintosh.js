@@ -24,13 +24,18 @@ var mackintosh;
 var _Compiler = mackintosh.index;
 var _Lexer = mackintosh.lex;
 var _Parser = mackintosh.parse;
-var _CST = mackintosh.CST;
 var _Token = mackintosh.token;
 var _Functions = mackintosh.compilerFunctions;
 //Initialize token stream, error counter, and the token index.
-var tokens = new Array();
+var tokens;
+//Lex errors.
 var errCount = 0;
+//Parse errors.
+var parseErrCount = 0;
+//Lex warnings.
 var warnCount = 0;
+//Parse warnings.
+var parseWarnCount = 0;
 var tokenIndex = 0;
 var curToken;
 var isCompiling;
@@ -62,6 +67,11 @@ var closeComments = new RegExp('[\*\/]');
 var assignment = new RegExp('[=]');
 var newLine = new RegExp('\n');
 var whitespace = new RegExp('[ \t]');
+//Parser globals.
+var CSTTree = new mackintosh.CST;
+var expectedTokens;
+var isMatch;
+var tokenPointer;
 /*
 References: Here is a list of the resources I referenced while developing this project.
 https://regex101.com/ - Useful tool I used to test my regular expressions for my tokens.
@@ -73,7 +83,6 @@ var mackintosh;
         }
         //Begins the compilation of the inputted code.
         index.startCompile = function () {
-            debugger;
             //Set compilation flag to true.
             isCompiling = true;
             _Functions.log('INFO: Beginning Compilation...');
@@ -82,6 +91,7 @@ var mackintosh;
             //code = mackintosh.compilerFunctions.trim(code);
             _Lexer.populateProgram(code);
             _Lexer.lex();
+            _Parser.parse(tokens);
             //Check if there is a $ at the end of the program, if not display warning.
             if (program[program.length - 1] != '$') {
                 _Functions.log('LEXER WARNING: End of Program $ Not Found.');
@@ -141,12 +151,8 @@ var mackintosh;
                 }
                 if (tokenFlag) {
                     //Add current token to the token stream.
-                    if (curToken.getIsWhitespace() == false) {
-                        _Functions.log('LEXER - ' + curToken.getTokenCode() + ' Found on line: ' + lineNum);
-                    }
-                    else {
-                        curToken.setIsWhitespace(false);
-                    }
+                    _Functions.log('LEXER - ' + curToken.getTokenCode() + ' Found on line: ' + lineNum);
+                    tokens[i] = curToken;
                 }
                 else {
                     _Functions.log('LEXER ERROR - Invalid Token ' + curToken.getTokenCode() + ' Found on line: ' + lineNum);
@@ -158,6 +164,10 @@ var mackintosh;
                         _Functions.log('LEXER - Lex Completed With ' + errCount + ' Errors and ' + warnCount + ' Warnings');
                         //Check if this is the end of the program. If not, begin lexing the next program.
                         if (typeof program[i] != undefined) {
+                            _Functions.log('\n');
+                            _Functions.log('\n');
+                            _Functions.log('\n');
+                            _Functions.log('\n');
                             _Functions.log('LEXER - Lexing Program ' + programCount);
                         }
                     }
@@ -223,17 +233,16 @@ var mackintosh;
         token.prototype.getIsComment = function () {
             return this.isComment;
         };
-        token.prototype.setIsWhitespace = function (isWhitespace) {
-            this.isWhitespace = isWhitespace;
+        token.prototype.setTokenType = function (tokenType) {
+            this.tokenType = tokenType;
         };
-        token.prototype.getIsWhitespace = function () {
-            return this.isWhitespace;
+        token.prototype.getTokenType = function () {
+            return this.tokenType;
         };
         /**
          * Generates token by checking against the regular expressions generated.
          */
         token.prototype.GenerateToken = function (input, program, counter) {
-            debugger;
             /**
              * Use switch statements to check against each RegEx.
              */
@@ -250,7 +259,6 @@ var mackintosh;
                     this.setTokenCode("");
                     this.setTokenValue("");
                     this.isToken == false;
-                    this.isWhitespace == true;
                     break;
             }
             switch (digits.test(input)) {
@@ -295,7 +303,7 @@ var mackintosh;
                             case true:
                                 this.setTokenValue(input);
                                 this.setTokenCode("BOOLEAN CHECK NOT EQUAL" + input);
-                                this.isToken;
+                                this.isToken = true;
                                 this.index = counter;
                                 this.setBoolOp(true);
                                 break;
@@ -505,6 +513,35 @@ var mackintosh;
 })(mackintosh || (mackintosh = {}));
 var mackintosh;
 (function (mackintosh) {
+    //Code reference: JavaScript tree demo: https://www.labouseur.com/projects/jsTreeDemo/treeDemo.js
+    //Class to represent a node in the tree.
+    var CSTNode = /** @class */ (function () {
+        function CSTNode(nodeName) {
+            this.nodeName = nodeName;
+            this.children = [];
+        }
+        CSTNode.prototype.setNodeName = function (nodeName) {
+            this.nodeName = nodeName;
+        };
+        CSTNode.prototype.getNodeName = function () {
+            return this.nodeName;
+        };
+        CSTNode.prototype.getChildren = function () {
+            return this.children;
+        };
+        CSTNode.prototype.addChildren = function (child) {
+            this.children.push(child);
+        };
+        CSTNode.prototype.getParent = function () {
+            return this.parent;
+        };
+        CSTNode.prototype.setParent = function (parNode) {
+            this.parent = parNode;
+        };
+        return CSTNode;
+    }());
+    mackintosh.CSTNode = CSTNode;
+    //Class to represent CST.
     var CST = /** @class */ (function () {
         function CST() {
             this.rootNode = null;
@@ -512,38 +549,60 @@ var mackintosh;
         CST.prototype.getRoot = function () {
             return this.rootNode;
         };
-        CST.prototype.setRoot = function (node) {
-            this.rootNode = node;
+        CST.prototype.getCurNode = function () {
+            return this.curNode;
         };
-        //Add nodes to the tree
-        CST.prototype.addNode = function (nodeVal) {
-            var newNode = new mackintosh.treeNode(nodeVal);
-            //Check if the node is empty. If it is, make the new node the root node.
+        //Kind represents if the node is a leaf or a branch node.
+        CST.prototype.addNode = function (nodeName, kind) {
+            //Create a node object. Has a name, child nodes, parent nodes, and if its a leaf or branch node.
+            var node = new CSTNode(nodeName);
+            //Check if theres a root node. If not, make the current node the root node.
             if (this.rootNode == null) {
-                this.setRoot(newNode);
-                return true;
+                this.rootNode = node;
             }
-            //If the root node is not empty, add it to the correct spot in the tree.
+            //The current node is a child node.
             else {
+                node.setParent(this.curNode);
+                this.curNode.addChildren(node);
+            }
+            //Check what kind of node this node is. Branch nodes are the grammar names (block, statement, etc.) and leaf nodes
+            //are the tokens.
+            if (kind == "branch") {
+                this.curNode = node;
             }
         };
-        //Recursive definition of depth first traversal - needed to get the valid tokens produced by the CST.
-        CST.prototype.depthFirst = function () {
-            var visit = new Array();
-            var curNode = this.getRoot();
-            function traverse(node) {
-                //Array of visited node values.
-                visit.push(node.getValue());
-                //Check to see if node is right or left and then traverse the corresponding one.
-                if (node.LeftNode) {
-                    traverse(node.LeftNode);
+        CST.prototype.climbTree = function () {
+            //Move up the tree to the parent node if it exists.
+            if (this.curNode.getParent() !== null && this.curNode.getParent().getNodeName() !== undefined) {
+                this.curNode = this.curNode.getParent();
+            }
+            else {
+                _Functions.log("CST ERROR - Parent node does not exist.");
+            }
+        };
+        CST.prototype.toString = function () {
+            var treeString = "";
+            //Handles the expansion of nodes using recursion.
+            function expand(node, depth) {
+                //Format to show the depth of the tree when displaying.
+                for (var i = 0; i < depth; i++) {
+                    treeString += "-";
                 }
-                if (node.RightNode) {
-                    traverse(node.RightNode);
+                //Check if the node is a leaf node. Then add the node and skip to new line.
+                if (node.getChildren().length === 0) {
+                    treeString += "[" + node.getNodeName() + "] \n";
+                }
+                //Get and display the children.
+                else {
+                    treeString += "<" + node.getNodeName() + "> \n";
+                    for (var i = 0; i < node.getChildren().length; i++) {
+                        expand(node.getChildren()[i], depth + 1);
+                    }
                 }
             }
-            traverse(curNode);
-            return visit;
+            //Call and expand from the root node.
+            expand(this.rootNode, 0);
+            return treeString;
         };
         return CST;
     }());
@@ -553,140 +612,167 @@ var mackintosh;
 (function (mackintosh) {
     //Class that represents parse/
     var parse = /** @class */ (function () {
-        //Get token stream from completed lex.
-        function parse(tokenStream) {
-            this.parseTokens = tokenStream;
+        function parse() {
         }
         //Recursive descent parser implimentation.
-        parse.prototype.parse = function () {
-            //i represents the token pointer.
-            for (var i = 0; i < this.parseTokens.length; i++) {
-                var tokenName = this.parseTokens[i].getTokenValue();
-                this.curToken = tokenName;
+        parse.parse = function (parseTokens) {
+            _Functions.log("PARSER - Parsing Program " + programCount);
+            //Check if there are tokens in the token stream.
+            if (parseTokens.length <= 0) {
+                _Functions.log("PARSER ERROR - There are no tokens to be parsed.");
+            }
+            //Begin parse.
+            else {
+                //Use try catch to check for parse failures and output them.
+                try {
+                    this.parseProgram(parseTokens);
+                    _Functions.log("PARSER - Parse completed.");
+                    return CSTTree.getRoot();
+                }
+                catch (error) {
+                    _Functions.log("PARSER - Error caused parse to end.");
+                }
             }
         };
         //Match function.
-        parse.prototype.match = function (token) {
-            return this.isMatch;
+        parse.match = function (tokens) {
+            //Check if the token is in a the expected token array.
+            for (var i = 0; i < expectedTokens.length; i++) {
+                if (expectedTokens[i].getTokenValue() == tokens[i]) {
+                    isMatch == true;
+                }
+            }
+            if (isMatch) {
+                _Functions.log("PARSER - Token Matched!" + mackintosh.token);
+                //TODO: Check if this is a leaf or branch node.
+                CSTTree.addNode(curToken.getTokenValue(), "");
+                CSTTree.climbTree();
+            }
+            else {
+                _Functions.log("PARSER ERROR - Expected tokens (" + expectedTokens.toString() + ") but got "
+                    + mackintosh.token + " instead.");
+                parseErrCount++;
+            }
         };
         //Methods for recursive descent parser - Start symbol: program.
-        parse.prototype.parseProgram = function () {
+        //Expected tokens - block, $
+        parse.parseProgram = function (parseTokens) {
+            //Add the program node to the tree. This should be the root node.
+            CSTTree.addNode("Program", "branch");
+            //Begin parse block.
+            this.parseBlock();
+            //Check for EOP at the end of program.
+            if (parseTokens[tokenPointer].getTokenValue() == "$") {
+                _Functions.log("PARSER - Program successfully parsed.");
+            }
+            else {
+                _Functions.log("PARSER ERROR - EOP $ not found at end of program.");
+                parseErrCount++;
+            }
         };
         //Expected tokens: { statementList }
-        parse.prototype.parseBlock = function () {
+        parse.parseBlock = function () {
+            CSTTree.addNode("Block", "branch");
+            this.parseStatementList();
         };
         //Expected tokens: statement statementList
         //OR - empty
-        parse.prototype.parseStatementList = function () {
-            // else {
-            //     //Not an empty else, represents do nothing.
-            // }
+        parse.parseStatementList = function () {
+            // CSTTree.addNode("StatementList", "branch");
+            // this.parseStatement(parseTokens);
+            // this.parseStatementList(parseTokens);
+            //if(){
+            //}
+            //else {
+            //Not an empty else, represents do nothing.
+            //}
         };
         //Expected tokens: print, assignment, var declaration, while, if, block
-        parse.prototype.parseStatement = function () {
+        parse.parseStatement = function () {
         };
         //Expected tokens: print( expr )
-        parse.prototype.parsePrintStatement = function () {
+        parse.parsePrintStatement = function () {
         };
         //Expected tokens: id = expr
-        parse.prototype.parseAssignmentStatement = function () {
+        parse.parseAssignmentStatement = function () {
         };
         //Expected tokens: type id
-        parse.prototype.parseVarDecl = function () {
+        parse.parseVarDecl = function () {
         };
         //Expected tokens: while boolexpr block
-        parse.prototype.parseWhileStatement = function () {
+        parse.parseWhileStatement = function () {
         };
         //Expected tokens: if boolexpr block
-        parse.prototype.parseIfStatement = function () {
+        parse.parseIfStatement = function () {
         };
         //Expected tokens: intexpr, stringexpr, boolexpr, id
-        parse.prototype.parseExpr = function () {
+        parse.parseExpr = function () {
         };
         //Expected tokens: digit intop expr
         //OR: digit
-        parse.prototype.parseIntExpr = function () {
+        parse.parseIntExpr = function () {
         };
         //Expected tokens: "charlist"
-        parse.prototype.parseStringExpr = function () {
+        parse.parseStringExpr = function () {
         };
         //Expected tokens: ( expr boolop expr)
         //OR: boolval
-        parse.prototype.parseBoolExpr = function () {
+        parse.parseBoolExpr = function () {
         };
         //Expected tokens: char
-        parse.prototype.parseId = function () {
+        parse.parseId = function () {
         };
         //Expected tokens: char charlist, space charlist, empty
-        parse.prototype.parseCharList = function () {
+        parse.parseCharList = function () {
             // else {
             //     //Not an empty else, represents do nothing.
             // }
         };
         //Expected tokens: int, string, boolean
-        parse.prototype.parseType = function () {
+        parse.parseType = function () {
+            CSTTree.addNode("Type", "leaf");
+            this.match(["int", "string", "boolean"]);
+            CSTTree.climbTree();
         };
         //Expected tokens: a-z, A-Z
-        parse.prototype.parseChar = function () {
+        parse.parseChar = function () {
+            CSTTree.addNode("Char", "leaf");
+            this.match(["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k",
+                "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]);
+            CSTTree.climbTree();
         };
         //Expected tokens: space
-        parse.prototype.parseSpace = function () {
+        parse.parseSpace = function () {
+            CSTTree.addNode("Space", "leaf");
+            this.match([" "]);
+            CSTTree.climbTree();
         };
         //Expected tokens: 0-9
-        parse.prototype.parseDigit = function () {
+        parse.parseDigit = function () {
+            CSTTree.addNode("Digit", "leaf");
+            this.match(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]);
+            CSTTree.climbTree();
         };
         //Expected tokens: ==, !=
-        parse.prototype.parseBoolOp = function () {
+        parse.parseBoolOp = function () {
+            CSTTree.addNode("BoolOp", "leaf");
+            this.match(["==", "!="]);
+            CSTTree.climbTree();
         };
         //Expected tokens: false, true
-        parse.prototype.parseBoolVal = function () {
+        parse.parseBoolVal = function () {
+            CSTTree.addNode("BoolVal", "leaf");
+            this.match(["false", "true"]);
+            CSTTree.climbTree();
         };
         //Expected tokens: +
-        parse.prototype.parseIntOp = function () {
+        parse.parseIntOp = function () {
+            CSTTree.addNode("IntOp", "leaf");
+            this.match(["+"]);
+            CSTTree.climbTree();
         };
         return parse;
     }());
     mackintosh.parse = parse;
-})(mackintosh || (mackintosh = {}));
-//Class that represents a singular node in a tree.
-var mackintosh;
-(function (mackintosh) {
-    var treeNode = /** @class */ (function () {
-        //Initialize a tree node.
-        function treeNode(nodeVal) {
-            this.value = nodeVal;
-            this.leftNode = null;
-            this.rightNode = null;
-        }
-        //Get and set methods for node attributes.
-        treeNode.prototype.getValue = function () {
-            return this.value;
-        };
-        treeNode.prototype.setValue = function (num) {
-            this.value = num;
-        };
-        Object.defineProperty(treeNode.prototype, "RightNode", {
-            get: function () {
-                return this.rightNode;
-            },
-            set: function (node) {
-                this.rightNode = node;
-            },
-            enumerable: false,
-            configurable: true
-        });
-        Object.defineProperty(treeNode.prototype, "LeftNode", {
-            get: function () {
-                return this.leftNode;
-            },
-            set: function (node) {
-                this.leftNode = node;
-            },
-            enumerable: false,
-            configurable: true
-        });
-        return treeNode;
-    }());
-    mackintosh.treeNode = treeNode;
 })(mackintosh || (mackintosh = {}));
 //# sourceMappingURL=mackintosh.js.map

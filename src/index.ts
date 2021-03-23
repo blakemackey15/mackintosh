@@ -9,7 +9,6 @@ module mackintosh {
 
         //Begins the compilation of the inputted code.
         public static startCompile() {
-            debugger;
             //Set compilation flag to true.
             isCompiling = true;
             

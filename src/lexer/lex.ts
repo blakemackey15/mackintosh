@@ -49,7 +49,7 @@ module mackintosh {
                 if(tokenFlag) {
                     //Add current token to the token stream.
                     _Functions.log('LEXER - ' + curToken.getTokenCode() + ' Found on line: ' + lineNum);
-                    tokens.push(curToken);
+                    tokens[i] = curToken;
                 }
 
                 else {
@@ -64,6 +64,8 @@ module mackintosh {
 
                         //Check if this is the end of the program. If not, begin lexing the next program.
                         if(typeof program[i] != undefined) {
+                            _Functions.log('\n');
+                            _Functions.log('\n');
                             _Functions.log('LEXER - Lexing Program ' + programCount);
                         }
                     }

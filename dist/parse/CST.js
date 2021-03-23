@@ -52,7 +52,8 @@ var mackintosh;
                 node.setParent(this.curNode);
                 this.curNode.addChildren(node);
             }
-            //Check what kind of node this node is.
+            //Check what kind of node this node is. Branch nodes are the grammar names (block, statement, etc.) and leaf nodes
+            //are the tokens.
             if (kind == "branch") {
                 this.curNode = node;
             }

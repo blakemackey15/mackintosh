@@ -5,13 +5,18 @@
 var _Compiler = mackintosh.index;
 var _Lexer = mackintosh.lex;
 var _Parser = mackintosh.parse;
-var _CST = mackintosh.CST;
 var _Token = mackintosh.token;
 var _Functions = mackintosh.compilerFunctions;
 //Initialize token stream, error counter, and the token index.
-var tokens = new Array();
+var tokens;
+//Lex errors.
 var errCount = 0;
+//Parse errors.
+var parseErrCount = 0;
+//Lex warnings.
 var warnCount = 0;
+//Parse warnings.
+var parseWarnCount = 0;
 var tokenIndex = 0;
 var curToken;
 var isCompiling;
@@ -43,4 +48,9 @@ var closeComments = new RegExp('[\*\/]');
 var assignment = new RegExp('[=]');
 var newLine = new RegExp('\n');
 var whitespace = new RegExp('[ \t]');
+//Parser globals.
+var CSTTree = new mackintosh.CST;
+var expectedTokens;
+var isMatch;
+var tokenPointer;
 //# sourceMappingURL=compilerGlobals.js.map
