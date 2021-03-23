@@ -31,7 +31,7 @@ var keywords = new Array<string>("int", "print", "while", "string",
 
 //Regular Expressions to check token type.
 var digits = new RegExp('(?:0|[1-9]\d*)');
-var characters = new RegExp('^[a-zA-Z]*$');
+var characters = new RegExp('^[a-z]*$');
 var leftBlock = new RegExp('[{]');
 var rightBlock = new RegExp('[}]');
 var operator = new RegExp('[+]');
