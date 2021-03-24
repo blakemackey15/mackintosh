@@ -43,12 +43,12 @@ module mackintosh {
                 _Functions.log("PARSER - Token Matched!" + token);
                 CSTTree.addNode(parseToken, "leaf");
                 tokenPointer++;
-                //CSTTree.climbTree();
+                CSTTree.climbTree();
             }
 
             else {
                 _Functions.log("PARSER ERROR - Expected tokens (" + expectedTokens.toString() + ") but got " 
-                + token + " instead.");
+                + parseToken + " instead.");
                 parseErrCount++;
             }
         }
@@ -77,55 +77,98 @@ module mackintosh {
         public static parseBlock(parseTokens : Array<string>) {
             CSTTree.addNode("Block", "branch");
             this.parseStatementList(parseTokens);
+            CSTTree.climbTree();
         }
 
         //Expected tokens: statement statementList
         //OR - empty
         public static parseStatementList(parseTokens : Array<string>) {
-            // CSTTree.addNode("StatementList", "branch");
-            // this.parseStatement(parseTokens);
-            // this.parseStatementList(parseTokens);
-            //if(){
+            //Check if the 
+            if(parseTokens[tokenPointer].length != 0) {
+                CSTTree.addNode("StatementList", "branch");
+                this.parseStatement(parseTokens);
+            }
 
-            //}
-            //else {
+            //Empty string - do nothing.
+            else {
                  //Not an empty else, represents do nothing.
-            //}
+            }
+
+            CSTTree.climbTree();
         }
 
         //Expected tokens: print, assignment, var declaration, while, if, block
         public static parseStatement(parseTokens : Array<string>) {
+            CSTTree.addNode("Statement", "branch");
+
+            //Use regular expressions from lex to check what type of statement is to be parsed.
+            if(printRegEx.test(parseTokens[tokenPointer])){
+                this.parsePrintStatement(parseTokens);
+            }
+
+            //Check for assignment op.
+            if(assignment.test(parseTokens[tokenPointer])) {
+                this.parseAssignmentStatement(parseTokens);
+            }
+
+            //Check for var declaration types - boolean, int, string.
+            if(boolRegEx.test(parseTokens[tokenPointer]) || stringRegEx.test(parseTokens[tokenPointer]) 
+              || intRegEx.test(parseTokens[tokenPointer])) {
+                this.parseVarDecl(parseTokens);
+            }
+
+            //Check for while statement.
+            if(whileRegEx.test(parseTokens[tokenPointer])) {
+                this.parseWhileStatement(parseTokens);
+            }
+
+            //Check for if statement.
+            if(ifRegEx.test(parseTokens[tokenPointer])) {
+                this.parseIfStatement(parseTokens);
+            }
+
+            //Check for opening or closing block.
+            if(leftBlock.test(parseTokens[tokenPointer]) || rightBlock.test(parseTokens[tokenPointer])) {
+                this.parseBlock(parseTokens);
+            }
+            CSTTree.climbTree();
 
         }
 
         //Expected tokens: print( expr )
         public static parsePrintStatement(parseTokens : Array<string>) {
-
+            CSTTree.addNode("PrintStatement", "branch");
+            CSTTree.climbTree();
         }
 
         //Expected tokens: id = expr
         public static parseAssignmentStatement(parseTokens : Array<string>) {
-
+            CSTTree.addNode("AssignmentStatement", "branch");
+            CSTTree.climbTree();
         }
 
         //Expected tokens: type id
         public static parseVarDecl(parseTokens : Array<string>) {
-
+            CSTTree.addNode("VarDecl", "branch");
+            CSTTree.climbTree();
         }
 
         //Expected tokens: while boolexpr block
         public static parseWhileStatement(parseTokens : Array<string>) {
+            CSTTree.addNode("WhileStatement", "branch");
+            CSTTree.climbTree();
 
         }
 
         //Expected tokens: if boolexpr block
         public static parseIfStatement(parseTokens : Array<string>) {
-
+            CSTTree.addNode("IfStatement", "branch");
+            CSTTree.climbTree();
         }
 
         //Expected tokens: intexpr, stringexpr, boolexpr, id
         public static parseExpr(parseTokens : Array<string>) {
-
+            
         }
 
         //Expected tokens: digit intop expr
