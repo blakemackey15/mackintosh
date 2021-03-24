@@ -8,8 +8,6 @@ var _Parser = mackintosh.parse;
 var _Token = mackintosh.token;
 var _Functions = mackintosh.compilerFunctions;
 
-//Initialize token stream, error counter, and the token index.
-var tokens = new Array<string>();
 //Lex errors.
 var errCount : number = 0;
 //Parse errors.
@@ -54,7 +52,6 @@ var whitespace = new RegExp('[ \t]');
 
 //Parser globals.
 var CSTTree = new mackintosh.CST;
-var expectedTokens : Array<mackintosh.token>;
 var isMatch : boolean;
 var tokenPointer : number;
 
