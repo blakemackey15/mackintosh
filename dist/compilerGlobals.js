@@ -7,8 +7,6 @@ var _Lexer = mackintosh.lex;
 var _Parser = mackintosh.parse;
 var _Token = mackintosh.token;
 var _Functions = mackintosh.compilerFunctions;
-//Initialize token stream, error counter, and the token index.
-var tokens = new Array();
 //Lex errors.
 var errCount = 0;
 //Parse errors.
@@ -50,7 +48,6 @@ var newLine = new RegExp('\n');
 var whitespace = new RegExp('[ \t]');
 //Parser globals.
 var CSTTree = new mackintosh.CST;
-var expectedTokens;
 var isMatch;
 var tokenPointer;
 //# sourceMappingURL=compilerGlobals.js.map

@@ -138,6 +138,7 @@ module mackintosh {
         //Expected tokens: print( expr )
         public static parsePrintStatement(parseTokens : Array<string>) {
             CSTTree.addNode("PrintStatement", "branch");
+            this.parseExpr(parseTokens);
             CSTTree.climbTree();
         }
 
@@ -168,7 +169,32 @@ module mackintosh {
 
         //Expected tokens: intexpr, stringexpr, boolexpr, id
         public static parseExpr(parseTokens : Array<string>) {
-            
+            CSTTree.addNode("Expr", "branch");
+
+            //Check what type of expr this token is.
+            if(digits.test(parseTokens[tokenPointer])) {
+                this.parseIntExpr(parseTokens);
+            }
+
+            //Check if there are more than 1 character - that means its a string and not an id. 
+            if(characters.test(parseTokens[tokenPointer]) && parseTokens[tokenPointer].length != 0) {
+                //Checks if the input value is true or false.
+                if(trueRegEx.test(parseTokens[tokenPointer]) || falseRegEx.test(parseTokens[tokenPointer])) {
+                    this.parseBoolExpr(parseTokens);
+                }
+
+                //If not, then its a string.
+                else {
+                    this.parseStringExpr(parseTokens);
+                }
+            }
+
+            //This handles if its an id.
+            if(characters.test(parseTokens[tokenPointer]) && parseTokens[tokenPointer].length == 0) {
+                this.parseId(parseTokens);
+            }
+
+            CSTTree.climbTree();
         }
 
         //Expected tokens: digit intop expr
@@ -179,6 +205,9 @@ module mackintosh {
 
         //Expected tokens: "charlist"
         public static parseStringExpr(parseTokens : Array<string>) {
+            CSTTree.addNode("StringExpr", "branch");
+            this.parseCharList(parseTokens);
+            CSTTree.climbTree();
 
         }
 
@@ -190,26 +219,40 @@ module mackintosh {
 
         //Expected tokens: char
         public static parseId(parseTokens : Array<string>) {
-
+            CSTTree.addNode("Id", "branch");
+            this.parseChar(parseTokens);
+            CSTTree.climbTree();
         }
 
         //Expected tokens: char charlist, space charlist, empty
         public static parseCharList(parseTokens : Array<string>) {
+            CSTTree.addNode("CharList", "branch");
+
+            if(parseTokens[tokenPointer] === " ") {
+                this.parseSpace(parseTokens);
+            }
+
+            else if(parseTokens[tokenPointer].length > 1) {
+                
+
+            }
             // else {
             //     //Not an empty else, represents do nothing.
             // }
+            CSTTree.climbTree();
+
         }
 
         //Expected tokens: int, string, boolean
         public static parseType(parseTokens : Array<string>) {
-            CSTTree.addNode("Type", "branch");
+            CSTTree.addNode("Type", "leaf");
             this.match(["int", "string", "boolean"], parseTokens[tokenPointer]);
             CSTTree.climbTree();
         }
 
-        //Expected tokens: a-z, A-Z
+        //Expected tokens: a-z
         public static parseChar(parseTokens : Array<string>) {
-            CSTTree.addNode("Char", "branch");
+            CSTTree.addNode("Char", "leaf");
             this.match(["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k",
             "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", 
             "y", "z"], parseTokens[tokenPointer]);
@@ -218,35 +261,35 @@ module mackintosh {
 
         //Expected tokens: space
         public static parseSpace(parseTokens : Array<string>) {
-            CSTTree.addNode("Space", "branch");
+            CSTTree.addNode("Space", "leaf");
             this.match([" "], parseTokens[tokenPointer]);
             CSTTree.climbTree();
         }
 
         //Expected tokens: 0-9
         public static parseDigit(parseTokens : Array<string>) {
-            CSTTree.addNode("Digit", "branch");
+            CSTTree.addNode("Digit", "leaf");
             this.match(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"], parseTokens[tokenPointer]);
             CSTTree.climbTree();
         }
 
         //Expected tokens: ==, !=
         public static parseBoolOp(parseTokens : Array<string>) {
-            CSTTree.addNode("BoolOp", "branch");
+            CSTTree.addNode("BoolOp", "leaf");
             this.match(["==", "!="], parseTokens[tokenPointer]);
             CSTTree.climbTree();
         }
 
         //Expected tokens: false, true
         public static parseBoolVal(parseTokens : Array<string>) {
-            CSTTree.addNode("BoolVal", "branch");
+            CSTTree.addNode("BoolVal", "leaf");
             this.match(["false", "true"], parseTokens[tokenPointer]);
             CSTTree.climbTree();
         }
 
         //Expected tokens: +
         public static parseIntOp(parseTokens : Array<string>) {
-            CSTTree.addNode("IntOp", "branch");
+            CSTTree.addNode("IntOp", "leaf");
             this.match(["+"], parseTokens[tokenPointer]);
             CSTTree.climbTree();
         }
