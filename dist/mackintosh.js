@@ -111,8 +111,9 @@ var mackintosh;
         }
         //Populate program array.
         lex.populateProgram = function (input) {
+            //Clear program if it is already populated.
+            program = [];
             _Functions.log('LEXER - Lexing Program ' + programCount);
-            //Remove white spaces.
             //Push characters in string to the program array.
             for (var i = 0; i < input.length; i++) {
                 program.push(input.charAt(i));

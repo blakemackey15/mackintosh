@@ -4,9 +4,10 @@ module mackintosh {
 
         //Populate program array.
         public static populateProgram(input : string) {
-            _Functions.log('LEXER - Lexing Program ' + programCount);
-            //Remove white spaces.
+            //Clear program if it is already populated.
+            program = [];
 
+            _Functions.log('LEXER - Lexing Program ' + programCount);
             //Push characters in string to the program array.
             for(let i = 0; i < input.length; i++) {
                 program.push(input.charAt(i));
