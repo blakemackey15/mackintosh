@@ -49,5 +49,5 @@ var whitespace = new RegExp('[ \t]');
 //Parser globals.
 var CSTTree = new mackintosh.CST;
 var isMatch;
-var tokenPointer;
+var tokenPointer = 0;
 //# sourceMappingURL=compilerGlobals.js.map

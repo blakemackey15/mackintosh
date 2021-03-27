@@ -68,7 +68,7 @@ var whitespace = new RegExp('[ \t]');
 //Parser globals.
 var CSTTree = new mackintosh.CST;
 var isMatch;
-var tokenPointer;
+var tokenPointer = 0;
 /*
 References: Here is a list of the resources I referenced while developing this project.
 https://regex101.com/ - Useful tool I used to test my regular expressions for my tokens.
