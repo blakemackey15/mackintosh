@@ -6,6 +6,7 @@ module mackintosh {
 
         //Recursive descent parser implimentation.
         public static parse(parseTokens : Array<string>) {
+            debugger;
             _Functions.log("PARSER - Parsing Program " + programCount);
 
             //Check if there are tokens in the token stream.

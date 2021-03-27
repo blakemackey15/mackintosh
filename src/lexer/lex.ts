@@ -20,6 +20,7 @@ module mackintosh {
             //Loop through the length of the inputted string, and check each character.
             let curToken = new token();
             let tokenStream = new Array<string>('');
+            tokenStream.pop();
             for(let i = 0; i < program.length; i++) {
                 debugger;
                 tokenFlag = curToken.GenerateToken(program[i], program, i);
@@ -52,7 +53,6 @@ module mackintosh {
                 if(tokenFlag) {
                     if(curToken.getTokenCode() != "") {
                         //Add current token to the token stream.
-                        tokenStream.pop()
                         tokenIndex++;
                         _Functions.log('LEXER - ' + curToken.getTokenCode() + ' Found on line: ' + lineNum);
                         tokenStream.push(curToken.getTokenValue());

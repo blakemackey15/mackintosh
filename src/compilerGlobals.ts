@@ -53,7 +53,7 @@ var whitespace = new RegExp('[ \t]');
 //Parser globals.
 var CSTTree = new mackintosh.CST;
 var isMatch : boolean;
-var tokenPointer : number;
+var tokenPointer : number = 0;
 
 
 
