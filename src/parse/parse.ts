@@ -68,7 +68,7 @@ module mackintosh {
                 _Functions.log("PARSER - Program successfully parsed.");
             }
 
-            else {
+            else if (parseTokens[tokenPointer + 1] == undefined){
                 _Functions.log("PARSER ERROR - EOP $ not found at end of program.");
                 parseErrCount++;
             }
@@ -201,7 +201,20 @@ module mackintosh {
         //Expected tokens: digit intop expr
         //OR: digit
         public static parseIntExpr(parseTokens : Array<string>) {
+            CSTTree.addNode("IntExpr", "branch");
 
+            //Check if this is to be an expression or a single digit.
+            if(parseTokens[tokenPointer + 1] == "+") {
+                this.parseDigit(parseTokens);
+                this.parseIntOp(parseTokens);
+                this.parseExpr(parseTokens);
+            }
+
+            else {
+                this.parseDigit(parseTokens);
+            }
+
+            CSTTree.climbTree();
         }
 
         //Expected tokens: "charlist"
@@ -215,7 +228,21 @@ module mackintosh {
         //Expected tokens: ( expr boolop expr)
         //OR: boolval
         public static parseBoolExpr(parseTokens : Array<string>) {
+            CSTTree.addNode("BooleanExpr", "branch");
+            //If match parenthesis = true: (expr boolop expr)
+            if(parseTokens[tokenPointer] == "(" || parseTokens[tokenPointer] == ")") {
+                this.parseParen(parseTokens);
+                this.parseExpr(parseTokens);
+                this.parseBoolOp(parseTokens);
+                this.parseExpr(parseTokens);
+                this.parseParen(parseTokens);
+            }
 
+            //Boolean value.
+            else {
+                this.parseBoolVal(parseTokens);
+            }
+            CSTTree.climbTree();
         }
 
         //Expected tokens: char
@@ -237,9 +264,9 @@ module mackintosh {
                 
 
             }
-            // else {
-            //     //Not an empty else, represents do nothing.
-            // }
+            else {
+                 //Not an empty else, represents do nothing.
+            }
             CSTTree.climbTree();
 
         }
@@ -293,6 +320,23 @@ module mackintosh {
             CSTTree.addNode("IntOp", "leaf");
             this.match(["+"], parseTokens[tokenPointer]);
             CSTTree.climbTree();
+        }
+
+        public static parseParen(parseTokens : Array<string>) {
+            CSTTree.addNode("Parenthesis", "leaf");
+            this.match(["(", ")"], parseTokens[tokenPointer]);
+            CSTTree.climbTree();
+        }
+
+        public static parseAssignmentOp(parseTokens : Array<string>) {
+            CSTTree.addNode("AssignmentOp", "leaf");
+            this.match(["="], parseTokens[tokenPointer]);
+            CSTTree.climbTree();
+        }
+
+        public static parseQuotes(parseTokens : Array<string>) {
+            CSTTree.addNode("Quotes", "leaf");
+            this.match(['"', '"'], parseTokens[tokenPointer]);
         }
 
     }
