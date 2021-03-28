@@ -44,7 +44,7 @@ module mackintosh {
                 _Functions.log("PARSER - Token Matched!" + parseToken);
                 CSTTree.addNode(parseToken, "leaf");
                 tokenPointer++;
-                CSTTree.climbTree();
+                isMatch = false;
             }
 
             else {
@@ -57,6 +57,7 @@ module mackintosh {
         //Methods for recursive descent parser - Start symbol: program.
         //Expected tokens - block, $
         public static parseProgram(parseTokens : Array<string>) {
+            _Functions.log("PARSER - parseProgram()");
             //Add the program node to the tree. This should be the root node.
             CSTTree.addNode("Program", "branch");
 
@@ -76,6 +77,7 @@ module mackintosh {
 
         //Expected tokens: { statementList }
         public static parseBlock(parseTokens : Array<string>) {
+            _Functions.log("PARSER - parseBlock()");
             CSTTree.addNode("Block", "branch");
             this.parseStatementList(parseTokens);
             CSTTree.climbTree();
@@ -84,7 +86,8 @@ module mackintosh {
         //Expected tokens: statement statementList
         //OR - empty
         public static parseStatementList(parseTokens : Array<string>) {
-            //Check if the 
+            //Check if the token is empty or not.
+            _Functions.log("PARSER - parseStatementList()");
             if(parseTokens[tokenPointer].length != 0) {
                 CSTTree.addNode("StatementList", "branch");
                 this.parseStatement(parseTokens);
@@ -100,6 +103,7 @@ module mackintosh {
 
         //Expected tokens: print, assignment, var declaration, while, if, block
         public static parseStatement(parseTokens : Array<string>) {
+            _Functions.log("PARSER - parseStatement()");
             CSTTree.addNode("Statement", "branch");
 
             //Use regular expressions from lex to check what type of statement is to be parsed.
@@ -138,6 +142,7 @@ module mackintosh {
 
         //Expected tokens: print( expr )
         public static parsePrintStatement(parseTokens : Array<string>) {
+            _Functions.log("PARSER - parsePrintStatement()");
             CSTTree.addNode("PrintStatement", "branch");
             this.parsePrint(parseTokens);
             this.parseParen(parseTokens);
@@ -148,6 +153,7 @@ module mackintosh {
 
         //Expected tokens: id = expr
         public static parseAssignmentStatement(parseTokens : Array<string>) {
+            _Functions.log("PARSER - parseAssignmentStatement()");
             CSTTree.addNode("AssignmentStatement", "branch");
             this.parseId(parseTokens);
             this.parseAssignmentOp(parseTokens);
@@ -157,6 +163,7 @@ module mackintosh {
 
         //Expected tokens: type id
         public static parseVarDecl(parseTokens : Array<string>) {
+            _Functions.log("PARSER - parseVarDecl()");
             CSTTree.addNode("VarDecl", "branch");
             this.parseType(parseTokens);
             this.parseId(parseTokens);
@@ -165,6 +172,7 @@ module mackintosh {
 
         //Expected tokens: while boolexpr block
         public static parseWhileStatement(parseTokens : Array<string>) {
+            _Functions.log("PARSER - parseWhileStatement()");
             CSTTree.addNode("WhileStatement", "branch");
             this.parseWhile(parseTokens);
             this.parseBoolExpr(parseTokens);
@@ -175,6 +183,7 @@ module mackintosh {
 
         //Expected tokens: if boolexpr block
         public static parseIfStatement(parseTokens : Array<string>) {
+            _Functions.log("PARSER - parseIfStatement()");
             CSTTree.addNode("IfStatement", "branch");
             this.parseIf(parseTokens);
             this.parseBoolExpr(parseTokens);
@@ -184,6 +193,7 @@ module mackintosh {
 
         //Expected tokens: intexpr, stringexpr, boolexpr, id
         public static parseExpr(parseTokens : Array<string>) {
+            _Functions.log("PARSER - parseExpr()");
             CSTTree.addNode("Expr", "branch");
 
             //Check what type of expr this token is.
@@ -215,6 +225,7 @@ module mackintosh {
         //Expected tokens: digit intop expr
         //OR: digit
         public static parseIntExpr(parseTokens : Array<string>) {
+            _Functions.log("PARSER - parseIntExpr()");
             CSTTree.addNode("IntExpr", "branch");
 
             //Check if this is to be an expression or a single digit.
@@ -233,6 +244,7 @@ module mackintosh {
 
         //Expected tokens: "charlist"
         public static parseStringExpr(parseTokens : Array<string>) {
+            _Functions.log("PARSER - parseStringExpr()");
             CSTTree.addNode("StringExpr", "branch");
             this.parseCharList(parseTokens);
             CSTTree.climbTree();
@@ -242,6 +254,7 @@ module mackintosh {
         //Expected tokens: ( expr boolop expr)
         //OR: boolval
         public static parseBoolExpr(parseTokens : Array<string>) {
+            _Functions.log("PARSER - parseBoolExpr()");
             CSTTree.addNode("BooleanExpr", "branch");
             //If match parenthesis = true: (expr boolop expr)
             if(parseTokens[tokenPointer] == "(" || parseTokens[tokenPointer] == ")") {
@@ -261,6 +274,7 @@ module mackintosh {
 
         //Expected tokens: char
         public static parseId(parseTokens : Array<string>) {
+            _Functions.log("PARSER - parseId()");
             CSTTree.addNode("Id", "branch");
             this.parseChar(parseTokens);
             CSTTree.climbTree();
@@ -268,6 +282,7 @@ module mackintosh {
 
         //Expected tokens: char charlist, space charlist, empty
         public static parseCharList(parseTokens : Array<string>) {
+            _Functions.log("PARSER - parseCharList()");
             CSTTree.addNode("CharList", "branch");
 
             if(parseTokens[tokenPointer] === " ") {
@@ -289,6 +304,7 @@ module mackintosh {
 
         //Expected tokens: int, string, boolean
         public static parseType(parseTokens : Array<string>) {
+            _Functions.log("PARSER - parseType()");
             CSTTree.addNode("type", "branch");
             this.match(["int", "string", "boolean"], parseTokens[tokenPointer]);
             CSTTree.climbTree();
@@ -296,6 +312,7 @@ module mackintosh {
 
         //Expected tokens: a-z
         public static parseChar(parseTokens : Array<string>) {
+            _Functions.log("PARSER - parseChar()");
             CSTTree.addNode("char", "branch");
             this.match(["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k",
             "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", 
@@ -305,6 +322,7 @@ module mackintosh {
 
         //Expected tokens: space
         public static parseSpace(parseTokens : Array<string>) {
+            _Functions.log("PARSER - parseSpace()");
             CSTTree.addNode("space", "branch");
             this.match([" "], parseTokens[tokenPointer]);
             CSTTree.climbTree();
@@ -312,6 +330,7 @@ module mackintosh {
 
         //Expected tokens: 0-9
         public static parseDigit(parseTokens : Array<string>) {
+            _Functions.log("PARSER - parseDigit()");
             CSTTree.addNode("digit", "branch");
             this.match(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"], parseTokens[tokenPointer]);
             CSTTree.climbTree();
@@ -319,6 +338,7 @@ module mackintosh {
 
         //Expected tokens: ==, !=
         public static parseBoolOp(parseTokens : Array<string>) {
+            _Functions.log("PARSER - parseBoolOp()");
             CSTTree.addNode("boolop", "branch");
             this.match(["==", "!="], parseTokens[tokenPointer]);
             CSTTree.climbTree();
@@ -326,6 +346,7 @@ module mackintosh {
 
         //Expected tokens: false, true
         public static parseBoolVal(parseTokens : Array<string>) {
+            _Functions.log("PARSER - parseBoolVal()");
             CSTTree.addNode("boolval", "branch");
             this.match(["false", "true"], parseTokens[tokenPointer]);
             CSTTree.climbTree();
@@ -333,42 +354,49 @@ module mackintosh {
 
         //Expected tokens: +
         public static parseIntOp(parseTokens : Array<string>) {
+            _Functions.log("PARSER - parseIntOp()");
             CSTTree.addNode("intop", "branch");
             this.match(["+"], parseTokens[tokenPointer]);
             CSTTree.climbTree();
         }
 
         public static parseParen(parseTokens : Array<string>) {
+            _Functions.log("PARSER - parseParen()");
             CSTTree.addNode("parenthesis", "branch");
             this.match(["(", ")"], parseTokens[tokenPointer]);
             CSTTree.climbTree();
         }
 
         public static parseAssignmentOp(parseTokens : Array<string>) {
+            _Functions.log("PARSER - parseAssignmentOp()");
             CSTTree.addNode("assignmentOp", "branch");
             this.match(["="], parseTokens[tokenPointer]);
             CSTTree.climbTree();
         }
 
         public static parseQuotes(parseTokens : Array<string>) {
+            _Functions.log("PARSER - parseQuotes()");
             CSTTree.addNode("quotes", "branch");
             this.match(['"', '"'], parseTokens[tokenPointer]);
             CSTTree.climbTree();
         }
 
         public static parseIf(parseTokens : Array<string>) {
+            _Functions.log("PARSER - parseIf()");
             CSTTree.addNode("if", "branch");
             this.match(["if"], parseTokens[tokenPointer]);
             CSTTree.climbTree();
         }
 
         public static parseWhile(parseTokens : Array<string>) {
+            _Functions.log("PARSER - parseWhile()");
             CSTTree.addNode("while", "branch");
             this.match(["while"], parseTokens[tokenPointer]);
             CSTTree.climbTree();
         }
 
         public static parsePrint(parseTokens : Array<string>) {
+            _Functions.log("PARSER - parsePrint()");
             CSTTree.addNode("print", "branch");
             this.match(["print"], parseTokens[tokenPointer]);
             CSTTree.climbTree();
