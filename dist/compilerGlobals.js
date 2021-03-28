@@ -48,6 +48,6 @@ var newLine = new RegExp('\n');
 var whitespace = new RegExp('[ \t]');
 //Parser globals.
 var CSTTree = new mackintosh.CST;
-var isMatch;
+var isMatch = false;
 var tokenPointer = 0;
 //# sourceMappingURL=compilerGlobals.js.map

@@ -67,7 +67,7 @@ var newLine = new RegExp('\n');
 var whitespace = new RegExp('[ \t]');
 //Parser globals.
 var CSTTree = new mackintosh.CST;
-var isMatch;
+var isMatch = false;
 var tokenPointer = 0;
 /*
 References: Here is a list of the resources I referenced while developing this project.
@@ -643,12 +643,12 @@ var mackintosh;
         parse.match = function (expectedTokens, parseToken) {
             //Check if the token is in a the expected token array.
             for (var i = 0; i < expectedTokens.length; i++) {
-                if (expectedTokens[i] === parseToken) {
-                    isMatch == true;
+                if (expectedTokens[i] == parseToken) {
+                    isMatch = true;
                 }
             }
             if (isMatch) {
-                _Functions.log("PARSER - Token Matched!" + mackintosh.token);
+                _Functions.log("PARSER - Token Matched!" + parseToken);
                 CSTTree.addNode(parseToken, "leaf");
                 tokenPointer++;
                 CSTTree.climbTree();

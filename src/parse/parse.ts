@@ -34,14 +34,14 @@ module mackintosh {
         public static match(expectedTokens : Array<string>, parseToken : string) {
             //Check if the token is in a the expected token array.
             for(let i = 0; i < expectedTokens.length; i++) {
-                if(expectedTokens[i] === parseToken) {
-                    isMatch == true;
+                if(expectedTokens[i] == parseToken) {
+                    isMatch = true;
                 }
 
             }
 
             if(isMatch) {
-                _Functions.log("PARSER - Token Matched!" + token);
+                _Functions.log("PARSER - Token Matched!" + parseToken);
                 CSTTree.addNode(parseToken, "leaf");
                 tokenPointer++;
                 CSTTree.climbTree();
