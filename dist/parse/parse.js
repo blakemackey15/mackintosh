@@ -114,27 +114,41 @@ var mackintosh;
         //Expected tokens: print( expr )
         parse.parsePrintStatement = function (parseTokens) {
             CSTTree.addNode("PrintStatement", "branch");
+            this.parsePrint(parseTokens);
+            this.parseParen(parseTokens);
             this.parseExpr(parseTokens);
+            this.parseParen(parseTokens);
             CSTTree.climbTree();
         };
         //Expected tokens: id = expr
         parse.parseAssignmentStatement = function (parseTokens) {
             CSTTree.addNode("AssignmentStatement", "branch");
+            this.parseId(parseTokens);
+            this.parseAssignmentOp(parseTokens);
+            this.parseExpr(parseTokens);
             CSTTree.climbTree();
         };
         //Expected tokens: type id
         parse.parseVarDecl = function (parseTokens) {
             CSTTree.addNode("VarDecl", "branch");
+            this.parseType(parseTokens);
+            this.parseId(parseTokens);
             CSTTree.climbTree();
         };
         //Expected tokens: while boolexpr block
         parse.parseWhileStatement = function (parseTokens) {
             CSTTree.addNode("WhileStatement", "branch");
+            this.parseWhile(parseTokens);
+            this.parseBoolExpr(parseTokens);
+            this.parseBlock(parseTokens);
             CSTTree.climbTree();
         };
         //Expected tokens: if boolexpr block
         parse.parseIfStatement = function (parseTokens) {
             CSTTree.addNode("IfStatement", "branch");
+            this.parseIf(parseTokens);
+            this.parseBoolExpr(parseTokens);
+            this.parseBlock(parseTokens);
             CSTTree.climbTree();
         };
         //Expected tokens: intexpr, stringexpr, boolexpr, id
@@ -211,8 +225,11 @@ var mackintosh;
             CSTTree.addNode("CharList", "branch");
             if (parseTokens[tokenPointer] === " ") {
                 this.parseSpace(parseTokens);
+                this.parseCharList(parseTokens);
             }
-            else if (parseTokens[tokenPointer].length > 1) {
+            else if (characters.test(parseTokens[tokenPointer])) {
+                this.parseChar(parseTokens);
+                this.parseCharList(parseTokens);
             }
             else {
                 //Not an empty else, represents do nothing.
@@ -221,13 +238,13 @@ var mackintosh;
         };
         //Expected tokens: int, string, boolean
         parse.parseType = function (parseTokens) {
-            CSTTree.addNode("Type", "leaf");
+            CSTTree.addNode("type", "branch");
             this.match(["int", "string", "boolean"], parseTokens[tokenPointer]);
             CSTTree.climbTree();
         };
         //Expected tokens: a-z
         parse.parseChar = function (parseTokens) {
-            CSTTree.addNode("Char", "leaf");
+            CSTTree.addNode("char", "branch");
             this.match(["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k",
                 "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x",
                 "y", "z"], parseTokens[tokenPointer]);
@@ -235,47 +252,63 @@ var mackintosh;
         };
         //Expected tokens: space
         parse.parseSpace = function (parseTokens) {
-            CSTTree.addNode("Space", "leaf");
+            CSTTree.addNode("space", "branch");
             this.match([" "], parseTokens[tokenPointer]);
             CSTTree.climbTree();
         };
         //Expected tokens: 0-9
         parse.parseDigit = function (parseTokens) {
-            CSTTree.addNode("Digit", "leaf");
+            CSTTree.addNode("digit", "branch");
             this.match(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"], parseTokens[tokenPointer]);
             CSTTree.climbTree();
         };
         //Expected tokens: ==, !=
         parse.parseBoolOp = function (parseTokens) {
-            CSTTree.addNode("BoolOp", "leaf");
+            CSTTree.addNode("boolop", "branch");
             this.match(["==", "!="], parseTokens[tokenPointer]);
             CSTTree.climbTree();
         };
         //Expected tokens: false, true
         parse.parseBoolVal = function (parseTokens) {
-            CSTTree.addNode("BoolVal", "leaf");
+            CSTTree.addNode("boolval", "branch");
             this.match(["false", "true"], parseTokens[tokenPointer]);
             CSTTree.climbTree();
         };
         //Expected tokens: +
         parse.parseIntOp = function (parseTokens) {
-            CSTTree.addNode("IntOp", "leaf");
+            CSTTree.addNode("intop", "branch");
             this.match(["+"], parseTokens[tokenPointer]);
             CSTTree.climbTree();
         };
         parse.parseParen = function (parseTokens) {
-            CSTTree.addNode("Parenthesis", "leaf");
+            CSTTree.addNode("parenthesis", "branch");
             this.match(["(", ")"], parseTokens[tokenPointer]);
             CSTTree.climbTree();
         };
         parse.parseAssignmentOp = function (parseTokens) {
-            CSTTree.addNode("AssignmentOp", "leaf");
+            CSTTree.addNode("assignmentOp", "branch");
             this.match(["="], parseTokens[tokenPointer]);
             CSTTree.climbTree();
         };
         parse.parseQuotes = function (parseTokens) {
-            CSTTree.addNode("Quotes", "leaf");
+            CSTTree.addNode("quotes", "branch");
             this.match(['"', '"'], parseTokens[tokenPointer]);
+            CSTTree.climbTree();
+        };
+        parse.parseIf = function (parseTokens) {
+            CSTTree.addNode("if", "branch");
+            this.match(["if"], parseTokens[tokenPointer]);
+            CSTTree.climbTree();
+        };
+        parse.parseWhile = function (parseTokens) {
+            CSTTree.addNode("while", "branch");
+            this.match(["while"], parseTokens[tokenPointer]);
+            CSTTree.climbTree();
+        };
+        parse.parsePrint = function (parseTokens) {
+            CSTTree.addNode("print", "branch");
+            this.match(["print"], parseTokens[tokenPointer]);
+            CSTTree.climbTree();
         };
         return parse;
     }());
