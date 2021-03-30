@@ -621,7 +621,7 @@ var mackintosh;
         //Recursive descent parser implimentation.
         parse.parse = function (parseTokens) {
             debugger;
-            _Functions.log("PARSER - Parsing Program " + programCount);
+            _Functions.log("PARSER - Parsing Program " + (programCount - 1));
             //Check if there are tokens in the token stream.
             if (parseTokens.length <= 0) {
                 _Functions.log("PARSER ERROR - There are no tokens to be parsed.");
