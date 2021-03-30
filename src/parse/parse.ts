@@ -7,6 +7,8 @@ module mackintosh {
         //Recursive descent parser implimentation.
         public static parse(parseTokens : Array<string>) {
             debugger;
+            _Functions.log("\n");
+            _Functions.log("\n");
             _Functions.log("PARSER - Parsing Program " + (programCount - 1));
 
             //Check if there are tokens in the token stream.
@@ -41,7 +43,7 @@ module mackintosh {
             }
 
             if(isMatch) {
-                _Functions.log("PARSER - Token Matched!" + parseToken);
+                _Functions.log("PARSER - Token Matched! " + parseToken);
                 CSTTree.addNode(parseToken, "leaf");
                 tokenPointer++;
                 isMatch = false;
@@ -79,6 +81,7 @@ module mackintosh {
         public static parseBlock(parseTokens : Array<string>) {
             _Functions.log("PARSER - parseBlock()");
             CSTTree.addNode("Block", "branch");
+            this.parseOpenBrace(parseTokens);
             this.parseStatementList(parseTokens);
             CSTTree.climbTree();
         }
@@ -97,7 +100,7 @@ module mackintosh {
             else {
                  //Not an empty else, represents do nothing.
             }
-
+            this.parseCloseBrace(parseTokens);
             CSTTree.climbTree();
         }
 
@@ -133,9 +136,14 @@ module mackintosh {
             }
 
             //Check for opening or closing block.
-            if(leftBlock.test(parseTokens[tokenPointer]) || rightBlock.test(parseTokens[tokenPointer])) {
-                this.parseBlock(parseTokens);
+            if(leftBlock.test(parseTokens[tokenPointer])) {
+                this.parseOpenBrace(parseTokens);
             }
+
+            if(rightBlock.test(parseTokens[tokenPointer])) {
+                this.parseCloseBrace(parseTokens);
+            }
+
             CSTTree.climbTree();
 
         }
@@ -304,102 +312,71 @@ module mackintosh {
 
         //Expected tokens: int, string, boolean
         public static parseType(parseTokens : Array<string>) {
-            _Functions.log("PARSER - parseType()");
-            CSTTree.addNode("type", "branch");
             this.match(["int", "string", "boolean"], parseTokens[tokenPointer]);
-            CSTTree.climbTree();
         }
 
         //Expected tokens: a-z
         public static parseChar(parseTokens : Array<string>) {
-            _Functions.log("PARSER - parseChar()");
-            CSTTree.addNode("char", "branch");
             this.match(["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k",
             "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", 
             "y", "z"], parseTokens[tokenPointer]);
-            CSTTree.climbTree();
         }
 
         //Expected tokens: space
         public static parseSpace(parseTokens : Array<string>) {
-            _Functions.log("PARSER - parseSpace()");
-            CSTTree.addNode("space", "branch");
             this.match([" "], parseTokens[tokenPointer]);
-            CSTTree.climbTree();
         }
 
         //Expected tokens: 0-9
         public static parseDigit(parseTokens : Array<string>) {
-            _Functions.log("PARSER - parseDigit()");
-            CSTTree.addNode("digit", "branch");
             this.match(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"], parseTokens[tokenPointer]);
-            CSTTree.climbTree();
         }
 
         //Expected tokens: ==, !=
         public static parseBoolOp(parseTokens : Array<string>) {
-            _Functions.log("PARSER - parseBoolOp()");
-            CSTTree.addNode("boolop", "branch");
             this.match(["==", "!="], parseTokens[tokenPointer]);
-            CSTTree.climbTree();
         }
 
         //Expected tokens: false, true
         public static parseBoolVal(parseTokens : Array<string>) {
-            _Functions.log("PARSER - parseBoolVal()");
-            CSTTree.addNode("boolval", "branch");
             this.match(["false", "true"], parseTokens[tokenPointer]);
-            CSTTree.climbTree();
         }
 
         //Expected tokens: +
         public static parseIntOp(parseTokens : Array<string>) {
-            _Functions.log("PARSER - parseIntOp()");
-            CSTTree.addNode("intop", "branch");
             this.match(["+"], parseTokens[tokenPointer]);
-            CSTTree.climbTree();
         }
 
         public static parseParen(parseTokens : Array<string>) {
-            _Functions.log("PARSER - parseParen()");
-            CSTTree.addNode("parenthesis", "branch");
             this.match(["(", ")"], parseTokens[tokenPointer]);
-            CSTTree.climbTree();
         }
 
         public static parseAssignmentOp(parseTokens : Array<string>) {
-            _Functions.log("PARSER - parseAssignmentOp()");
-            CSTTree.addNode("assignmentOp", "branch");
             this.match(["="], parseTokens[tokenPointer]);
-            CSTTree.climbTree();
         }
 
         public static parseQuotes(parseTokens : Array<string>) {
-            _Functions.log("PARSER - parseQuotes()");
-            CSTTree.addNode("quotes", "branch");
             this.match(['"', '"'], parseTokens[tokenPointer]);
-            CSTTree.climbTree();
         }
 
         public static parseIf(parseTokens : Array<string>) {
-            _Functions.log("PARSER - parseIf()");
-            CSTTree.addNode("if", "branch");
             this.match(["if"], parseTokens[tokenPointer]);
-            CSTTree.climbTree();
         }
 
         public static parseWhile(parseTokens : Array<string>) {
-            _Functions.log("PARSER - parseWhile()");
-            CSTTree.addNode("while", "branch");
             this.match(["while"], parseTokens[tokenPointer]);
-            CSTTree.climbTree();
         }
 
         public static parsePrint(parseTokens : Array<string>) {
-            _Functions.log("PARSER - parsePrint()");
-            CSTTree.addNode("print", "branch");
             this.match(["print"], parseTokens[tokenPointer]);
-            CSTTree.climbTree();
+        }
+
+        public static parseOpenBrace(parseTokens : Array<string>) {
+            this.match(["{"], parseTokens[tokenPointer]);
+        }
+
+        public static parseCloseBrace(parseTokens : Array<string>) {
+            this.match(["}"], parseTokens[tokenPointer]);
         }
 
     }

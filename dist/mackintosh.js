@@ -621,6 +621,8 @@ var mackintosh;
         //Recursive descent parser implimentation.
         parse.parse = function (parseTokens) {
             debugger;
+            _Functions.log("\n");
+            _Functions.log("\n");
             _Functions.log("PARSER - Parsing Program " + (programCount - 1));
             //Check if there are tokens in the token stream.
             if (parseTokens.length <= 0) {
@@ -648,7 +650,7 @@ var mackintosh;
                 }
             }
             if (isMatch) {
-                _Functions.log("PARSER - Token Matched!" + parseToken);
+                _Functions.log("PARSER - Token Matched! " + parseToken);
                 CSTTree.addNode(parseToken, "leaf");
                 tokenPointer++;
                 isMatch = false;
@@ -680,6 +682,7 @@ var mackintosh;
         parse.parseBlock = function (parseTokens) {
             _Functions.log("PARSER - parseBlock()");
             CSTTree.addNode("Block", "branch");
+            this.parseOpenBrace(parseTokens);
             this.parseStatementList(parseTokens);
             CSTTree.climbTree();
         };
@@ -696,6 +699,7 @@ var mackintosh;
             else {
                 //Not an empty else, represents do nothing.
             }
+            this.parseCloseBrace(parseTokens);
             CSTTree.climbTree();
         };
         //Expected tokens: print, assignment, var declaration, while, if, block
@@ -724,8 +728,11 @@ var mackintosh;
                 this.parseIfStatement(parseTokens);
             }
             //Check for opening or closing block.
-            if (leftBlock.test(parseTokens[tokenPointer]) || rightBlock.test(parseTokens[tokenPointer])) {
-                this.parseBlock(parseTokens);
+            if (leftBlock.test(parseTokens[tokenPointer])) {
+                this.parseOpenBrace(parseTokens);
+            }
+            if (rightBlock.test(parseTokens[tokenPointer])) {
+                this.parseCloseBrace(parseTokens);
             }
             CSTTree.climbTree();
         };
@@ -867,90 +874,57 @@ var mackintosh;
         };
         //Expected tokens: int, string, boolean
         parse.parseType = function (parseTokens) {
-            _Functions.log("PARSER - parseType()");
-            CSTTree.addNode("type", "branch");
             this.match(["int", "string", "boolean"], parseTokens[tokenPointer]);
-            CSTTree.climbTree();
         };
         //Expected tokens: a-z
         parse.parseChar = function (parseTokens) {
-            _Functions.log("PARSER - parseChar()");
-            CSTTree.addNode("char", "branch");
             this.match(["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k",
                 "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x",
                 "y", "z"], parseTokens[tokenPointer]);
-            CSTTree.climbTree();
         };
         //Expected tokens: space
         parse.parseSpace = function (parseTokens) {
-            _Functions.log("PARSER - parseSpace()");
-            CSTTree.addNode("space", "branch");
             this.match([" "], parseTokens[tokenPointer]);
-            CSTTree.climbTree();
         };
         //Expected tokens: 0-9
         parse.parseDigit = function (parseTokens) {
-            _Functions.log("PARSER - parseDigit()");
-            CSTTree.addNode("digit", "branch");
             this.match(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"], parseTokens[tokenPointer]);
-            CSTTree.climbTree();
         };
         //Expected tokens: ==, !=
         parse.parseBoolOp = function (parseTokens) {
-            _Functions.log("PARSER - parseBoolOp()");
-            CSTTree.addNode("boolop", "branch");
             this.match(["==", "!="], parseTokens[tokenPointer]);
-            CSTTree.climbTree();
         };
         //Expected tokens: false, true
         parse.parseBoolVal = function (parseTokens) {
-            _Functions.log("PARSER - parseBoolVal()");
-            CSTTree.addNode("boolval", "branch");
             this.match(["false", "true"], parseTokens[tokenPointer]);
-            CSTTree.climbTree();
         };
         //Expected tokens: +
         parse.parseIntOp = function (parseTokens) {
-            _Functions.log("PARSER - parseIntOp()");
-            CSTTree.addNode("intop", "branch");
             this.match(["+"], parseTokens[tokenPointer]);
-            CSTTree.climbTree();
         };
         parse.parseParen = function (parseTokens) {
-            _Functions.log("PARSER - parseParen()");
-            CSTTree.addNode("parenthesis", "branch");
             this.match(["(", ")"], parseTokens[tokenPointer]);
-            CSTTree.climbTree();
         };
         parse.parseAssignmentOp = function (parseTokens) {
-            _Functions.log("PARSER - parseAssignmentOp()");
-            CSTTree.addNode("assignmentOp", "branch");
             this.match(["="], parseTokens[tokenPointer]);
-            CSTTree.climbTree();
         };
         parse.parseQuotes = function (parseTokens) {
-            _Functions.log("PARSER - parseQuotes()");
-            CSTTree.addNode("quotes", "branch");
             this.match(['"', '"'], parseTokens[tokenPointer]);
-            CSTTree.climbTree();
         };
         parse.parseIf = function (parseTokens) {
-            _Functions.log("PARSER - parseIf()");
-            CSTTree.addNode("if", "branch");
             this.match(["if"], parseTokens[tokenPointer]);
-            CSTTree.climbTree();
         };
         parse.parseWhile = function (parseTokens) {
-            _Functions.log("PARSER - parseWhile()");
-            CSTTree.addNode("while", "branch");
             this.match(["while"], parseTokens[tokenPointer]);
-            CSTTree.climbTree();
         };
         parse.parsePrint = function (parseTokens) {
-            _Functions.log("PARSER - parsePrint()");
-            CSTTree.addNode("print", "branch");
             this.match(["print"], parseTokens[tokenPointer]);
-            CSTTree.climbTree();
+        };
+        parse.parseOpenBrace = function (parseTokens) {
+            this.match(["{"], parseTokens[tokenPointer]);
+        };
+        parse.parseCloseBrace = function (parseTokens) {
+            this.match(["}"], parseTokens[tokenPointer]);
         };
         return parse;
     }());
