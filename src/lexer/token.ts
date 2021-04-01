@@ -113,6 +113,14 @@ module mackintosh {
                     this.setTokenValue(input);
                     this.setTokenCode("DIGIT - " + input);
                     this.isToken = true;
+
+                    //Handles digits not being allowed in strings.
+                    if(this.quoteCount >= 1) {
+                        _Functions.log("LEXER ERROR at " + lineNum + " - Digits cannot be in a string.");
+                        this.setTokenValue("");
+                        this.setTokenCode("");
+                        this.isToken = false;
+                    }
                     break;
             }
 
@@ -351,9 +359,16 @@ module mackintosh {
                     }
 
                     if(this.quoteCount > 0) {
-                        this.setTokenCode("CHARACTER " + saveChar[0]);
-                        this.setTokenValue(saveChar[0].toString());
-                        this.isToken = true;
+                        //New line causes lex error in string.
+                        if(input == "\n") {
+                            _Functions.log("LEXER ERROR at " + lineNum + ": new line not allowed in string." );
+                        }
+
+                        else {
+                            this.setTokenCode("CHARACTER " + saveChar[0]);
+                            this.setTokenValue(saveChar[0].toString());
+                            this.isToken = true;
+                        }
                     }
 
                     else if(this.quoteCount == 0 && this.isKeyword == false) {
@@ -364,6 +379,10 @@ module mackintosh {
                     this.isKeyword = false;
                     isntKey = false;
                     break;
+                case false:
+                    if(digits.test(input.toLowerCase())) {
+                        _Functions.log("LEXER ERROR at " + lineNum + " - characters and ids cannot be capital.");
+                    }
             }
 
             switch(operator.test(input)) {
