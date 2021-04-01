@@ -81,8 +81,9 @@ module mackintosh {
         public static parseBlock(parseTokens : Array<string>) {
             _Functions.log("PARSER - parseBlock()");
             CSTTree.addNode("Block", "branch");
-            this.parseOpenBrace(parseTokens);
+            //this.parseOpenBrace(parseTokens);
             this.parseStatementList(parseTokens);
+            //this.parseCloseBrace(parseTokens);
             CSTTree.climbTree();
         }
 
@@ -100,7 +101,6 @@ module mackintosh {
             else {
                  //Not an empty else, represents do nothing.
             }
-            this.parseCloseBrace(parseTokens);
             CSTTree.climbTree();
         }
 
@@ -138,6 +138,7 @@ module mackintosh {
             //Check for opening or closing block.
             if(leftBlock.test(parseTokens[tokenPointer])) {
                 this.parseOpenBrace(parseTokens);
+                this.parseBlock(parseTokens);
             }
 
             if(rightBlock.test(parseTokens[tokenPointer])) {
