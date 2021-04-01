@@ -246,20 +246,30 @@ var mackintosh;
                             }
                             switch (whileRegEx.test(input)) {
                                 case true:
-                                    this.setTokenValue(input);
-                                    this.setTokenCode("WHILE KEYWORD " + input);
-                                    this.isKeyword = true;
-                                    this.isToken = true;
-                                    this.index = counter;
+                                    if (input == "while") {
+                                        this.setTokenValue(input);
+                                        this.setTokenCode("WHILE KEYWORD " + input);
+                                        this.isKeyword = true;
+                                        this.isToken = true;
+                                        this.index = counter;
+                                    }
+                                    else {
+                                        isntKey = true;
+                                    }
                                     break;
                             }
                             switch (boolRegEx.test(input)) {
                                 case true:
-                                    this.setTokenValue(input);
-                                    this.setTokenCode("BOOLEAN KEYWORD " + input);
-                                    this.isKeyword = true;
-                                    this.isToken = true;
-                                    this.index = counter;
+                                    if (input == "boolean") {
+                                        this.setTokenValue(input);
+                                        this.setTokenCode("BOOLEAN KEYWORD " + input);
+                                        this.isKeyword = true;
+                                        this.isToken = true;
+                                        this.index = counter;
+                                    }
+                                    else {
+                                        isntKey = true;
+                                    }
                                     break;
                             }
                             //Break out of the loop if the token is a keyword it has become too long to be a token.

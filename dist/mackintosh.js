@@ -432,20 +432,30 @@ var mackintosh;
                             }
                             switch (whileRegEx.test(input)) {
                                 case true:
-                                    this.setTokenValue(input);
-                                    this.setTokenCode("WHILE KEYWORD " + input);
-                                    this.isKeyword = true;
-                                    this.isToken = true;
-                                    this.index = counter;
+                                    if (input == "while") {
+                                        this.setTokenValue(input);
+                                        this.setTokenCode("WHILE KEYWORD " + input);
+                                        this.isKeyword = true;
+                                        this.isToken = true;
+                                        this.index = counter;
+                                    }
+                                    else {
+                                        isntKey = true;
+                                    }
                                     break;
                             }
                             switch (boolRegEx.test(input)) {
                                 case true:
-                                    this.setTokenValue(input);
-                                    this.setTokenCode("BOOLEAN KEYWORD " + input);
-                                    this.isKeyword = true;
-                                    this.isToken = true;
-                                    this.index = counter;
+                                    if (input == "boolean") {
+                                        this.setTokenValue(input);
+                                        this.setTokenCode("BOOLEAN KEYWORD " + input);
+                                        this.isKeyword = true;
+                                        this.isToken = true;
+                                        this.index = counter;
+                                    }
+                                    else {
+                                        isntKey = true;
+                                    }
                                     break;
                             }
                             //Break out of the loop if the token is a keyword it has become too long to be a token.
@@ -659,17 +669,30 @@ var mackintosh;
             //Check if there are tokens in the token stream.
             if (parseTokens.length <= 0) {
                 _Functions.log("PARSER ERROR - There are no tokens to be parsed.");
+                parseErrCount++;
             }
             //Begin parse.
             else {
                 //Use try catch to check for parse failures and output them.
                 try {
                     this.parseProgram(parseTokens);
-                    _Functions.log("PARSER - Parse completed.");
-                    _Functions.log(CSTTree.toString());
+                    //Display CST if there are no more non-terminals to be consumed.
+                    if (tokenPointer == parseTokens.length) {
+                        _Functions.log("PARSER - Parse completed with " + parseErrCount + " errors and " +
+                            parseWarnCount + " warnings");
+                        //Prints the CST if there are no more errors.
+                        if (parseErrCount <= 0) {
+                            _Functions.log(CSTTree.toString());
+                        }
+                    }
+                    else {
+                        _Functions.log("PARSER ERROR - Ran out of non-terminals to turn into terminals.");
+                        parseErrCount++;
+                    }
                 }
                 catch (error) {
                     _Functions.log("PARSER - Error caused parse to end.");
+                    parseErrCount++;
                 }
             }
         };
