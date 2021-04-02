@@ -684,7 +684,7 @@ var mackintosh;
             _Functions.log("\n");
             _Functions.log("PARSER - Parsing Program " + (programCount - 1));
             //Check if there are tokens in the token stream.
-            if (parseTokens.length <= 0) {
+            if (parseTokens.length == 0) {
                 _Functions.log("PARSER ERROR - There are no tokens to be parsed.");
                 parseErrCount++;
             }
@@ -693,18 +693,11 @@ var mackintosh;
                 //Use try catch to check for parse failures and output them.
                 try {
                     this.parseProgram(parseTokens);
-                    //Display CST if there are no more non-terminals to be consumed.
-                    if (tokenPointer == parseTokens.length) {
-                        _Functions.log("PARSER - Parse completed with " + parseErrCount + " errors and " +
-                            parseWarnCount + " warnings");
-                        //Prints the CST if there are no more errors.
-                        if (parseErrCount <= 0) {
-                            _Functions.log(CSTTree.toString());
-                        }
-                    }
-                    else {
-                        _Functions.log("PARSER ERROR - Ran out of non-terminals to turn into terminals.");
-                        parseErrCount++;
+                    _Functions.log("PARSER - Parse completed with " + parseErrCount + " errors and " +
+                        parseWarnCount + " warnings");
+                    //Prints the CST if there are no more errors.
+                    if (parseErrCount <= 0) {
+                        _Functions.log(CSTTree.toString());
                     }
                 }
                 catch (error) {
@@ -754,9 +747,9 @@ var mackintosh;
         parse.parseBlock = function (parseTokens) {
             _Functions.log("PARSER - parseBlock()");
             CSTTree.addNode("Block", "branch");
-            //this.parseOpenBrace(parseTokens);
+            this.parseOpenBrace(parseTokens);
             this.parseStatementList(parseTokens);
-            //this.parseCloseBrace(parseTokens);
+            this.parseCloseBrace(parseTokens);
             CSTTree.climbTree();
         };
         //Expected tokens: statement statementList
@@ -801,11 +794,7 @@ var mackintosh;
             }
             //Check for opening or closing block.
             if (leftBlock.test(parseTokens[tokenPointer])) {
-                this.parseOpenBrace(parseTokens);
                 this.parseBlock(parseTokens);
-            }
-            if (rightBlock.test(parseTokens[tokenPointer])) {
-                this.parseCloseBrace(parseTokens);
             }
             CSTTree.climbTree();
         };
