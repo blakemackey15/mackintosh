@@ -768,7 +768,7 @@ var mackintosh;
                     this.parsePrintStatement(parseTokens);
                 }
                 //Check for assignment op.
-                else if (assignment.test(parseTokens[tokenPointer])) {
+                else if (assignment.test(parseTokens[tokenPointer + 1])) {
                     this.parseAssignmentStatement(parseTokens);
                 }
                 //Check for var declaration types - boolean, int, string.
@@ -793,7 +793,7 @@ var mackintosh;
                     parseErrCount++;
                     break;
                 }
-                //CSTTree.climbTree();
+                CSTTree.climbTree();
             }
             // if(parseTokens[tokenPointer].length != 0) {
             //     CSTTree.addNode("StatementList", "branch");

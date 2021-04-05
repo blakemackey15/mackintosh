@@ -111,7 +111,7 @@ module mackintosh {
                 }
 
                 //Check for assignment op.
-                else if(assignment.test(parseTokens[tokenPointer])) {
+                else if(assignment.test(parseTokens[tokenPointer + 1])) {
                     this.parseAssignmentStatement(parseTokens);
                 }
 
@@ -142,7 +142,7 @@ module mackintosh {
                     break;
                 }
 
-                //CSTTree.climbTree();
+                CSTTree.climbTree();
             }
             // if(parseTokens[tokenPointer].length != 0) {
             //     CSTTree.addNode("StatementList", "branch");
