@@ -178,20 +178,17 @@ var mackintosh;
             if (digits.test(parseTokens[tokenPointer])) {
                 this.parseIntExpr(parseTokens);
             }
-            //Check if there are more than 1 character - that means its a string and not an id. 
-            if (characters.test(parseTokens[tokenPointer]) && parseTokens[tokenPointer].length != 0) {
-                //Checks if the input value is true or false.
-                if (trueRegEx.test(parseTokens[tokenPointer]) || falseRegEx.test(parseTokens[tokenPointer])) {
-                    this.parseBoolExpr(parseTokens);
-                }
-                //If not, then its a string.
-                else {
-                    this.parseStringExpr(parseTokens);
-                }
+            //String check.
+            if (quotes.test(parseTokens[tokenPointer])) {
+                this.parseStringExpr(parseTokens);
             }
             //This handles if its an id.
             if (characters.test(parseTokens[tokenPointer]) && parseTokens[tokenPointer].length == 0) {
                 this.parseId(parseTokens);
+            }
+            //Bool expr.
+            if (trueRegEx.test(parseTokens[tokenPointer]) || falseRegEx.test(parseTokens[tokenPointer])) {
+                this.parseBoolExpr(parseTokens);
             }
             CSTTree.climbTree();
         };
@@ -215,7 +212,9 @@ var mackintosh;
         parse.parseStringExpr = function (parseTokens) {
             _Functions.log("PARSER - parseStringExpr()");
             CSTTree.addNode("StringExpr", "branch");
+            this.parseQuotes(parseTokens);
             this.parseCharList(parseTokens);
+            this.parseQuotes(parseTokens);
             CSTTree.climbTree();
         };
         //Expected tokens: ( expr boolop expr)
@@ -250,11 +249,15 @@ var mackintosh;
             CSTTree.addNode("CharList", "branch");
             if (parseTokens[tokenPointer] === " ") {
                 this.parseSpace(parseTokens);
-                this.parseCharList(parseTokens);
             }
             else if (characters.test(parseTokens[tokenPointer])) {
-                this.parseChar(parseTokens);
-                this.parseCharList(parseTokens);
+                var string = void 0;
+                //Builds string until there is a quote.
+                while (!quotes.test(parseTokens[tokenPointer])) {
+                    this.parseChar(parseTokens);
+                    string += parseTokens[tokenPointer];
+                }
+                _Functions.log("PARSER - String: " + string);
             }
             else {
                 //Not an empty else, represents do nothing.

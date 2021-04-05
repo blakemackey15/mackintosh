@@ -211,22 +211,19 @@ module mackintosh {
                 this.parseIntExpr(parseTokens);
             }
 
-            //Check if there are more than 1 character - that means its a string and not an id. 
-            if(characters.test(parseTokens[tokenPointer]) && parseTokens[tokenPointer].length != 0) {
-                //Checks if the input value is true or false.
-                if(trueRegEx.test(parseTokens[tokenPointer]) || falseRegEx.test(parseTokens[tokenPointer])) {
-                    this.parseBoolExpr(parseTokens);
-                }
-
-                //If not, then its a string.
-                else {
-                    this.parseStringExpr(parseTokens);
-                }
+            //String check.
+            if(quotes.test(parseTokens[tokenPointer])) {
+                this.parseStringExpr(parseTokens);
             }
 
             //This handles if its an id.
             if(characters.test(parseTokens[tokenPointer]) && parseTokens[tokenPointer].length == 0) {
                 this.parseId(parseTokens);
+            }
+
+            //Bool expr.
+            if(trueRegEx.test(parseTokens[tokenPointer]) || falseRegEx.test(parseTokens[tokenPointer])) {
+                this.parseBoolExpr(parseTokens);
             }
 
             CSTTree.climbTree();
@@ -256,7 +253,9 @@ module mackintosh {
         public static parseStringExpr(parseTokens : Array<string>) {
             _Functions.log("PARSER - parseStringExpr()");
             CSTTree.addNode("StringExpr", "branch");
+            this.parseQuotes(parseTokens);
             this.parseCharList(parseTokens);
+            this.parseQuotes(parseTokens);
             CSTTree.climbTree();
 
         }
@@ -297,12 +296,18 @@ module mackintosh {
 
             if(parseTokens[tokenPointer] === " ") {
                 this.parseSpace(parseTokens);
-                this.parseCharList(parseTokens);
             }
 
             else if(characters.test(parseTokens[tokenPointer])) {
-                this.parseChar(parseTokens);
-                this.parseCharList(parseTokens);
+                let string : string;
+
+                //Builds string until there is a quote.
+                while(!quotes.test(parseTokens[tokenPointer])){
+                    this.parseChar(parseTokens);
+                    string += parseTokens[tokenPointer];
+                }
+
+                _Functions.log("PARSER - String: " + string);
             }
 
             else {
