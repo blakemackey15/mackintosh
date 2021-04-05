@@ -74,6 +74,7 @@ module mackintosh {
 
             //Check for EOP at the end of program.
             if(parseTokens[tokenPointer] == "$") {
+                this.match(["$"], parseTokens[tokenPointer]);
                 _Functions.log("PARSER - Program successfully parsed.");
             }
 
