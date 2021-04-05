@@ -246,7 +246,6 @@ var mackintosh;
          * Generates token by checking against the regular expressions generated.
          */
         token.prototype.GenerateToken = function (input, program, counter) {
-            debugger;
             /**
              * Use switch statements to check against each RegEx.
              */
@@ -680,6 +679,7 @@ var mackintosh;
         //Recursive descent parser implimentation.
         parse.parse = function (parseTokens) {
             debugger;
+            CSTTree = new mackintosh.CST();
             _Functions.log("\n");
             _Functions.log("\n");
             _Functions.log("PARSER - Parsing Program " + (programCount - 1));
@@ -758,47 +758,84 @@ var mackintosh;
         parse.parseStatementList = function (parseTokens) {
             //Check if the token is empty or not.
             _Functions.log("PARSER - parseStatementList()");
-            if (parseTokens[tokenPointer].length != 0) {
-                CSTTree.addNode("StatementList", "branch");
-                this.parseStatement(parseTokens);
+            CSTTree.addNode("StatementList", "branch");
+            while (parseTokens[tokenPointer] != "}") {
+                _Functions.log("PARSER - parseStatement()");
+                CSTTree.addNode("Statement", "branch");
+                //this.parseStatement(parseTokens);
+                //Use regular expressions from lex to check what type of statement is to be parsed.
+                if (printRegEx.test(parseTokens[tokenPointer])) {
+                    this.parsePrintStatement(parseTokens);
+                }
+                //Check for assignment op.
+                else if (assignment.test(parseTokens[tokenPointer])) {
+                    this.parseAssignmentStatement(parseTokens);
+                }
+                //Check for var declaration types - boolean, int, string.
+                else if (boolRegEx.test(parseTokens[tokenPointer]) || stringRegEx.test(parseTokens[tokenPointer])
+                    || intRegEx.test(parseTokens[tokenPointer])) {
+                    this.parseVarDecl(parseTokens);
+                }
+                //Check for while statement.
+                else if (whileRegEx.test(parseTokens[tokenPointer])) {
+                    this.parseWhileStatement(parseTokens);
+                }
+                //Check for if statement.
+                else if (ifRegEx.test(parseTokens[tokenPointer])) {
+                    this.parseIfStatement(parseTokens);
+                }
+                //Check for opening or closing block.
+                else if (leftBlock.test(parseTokens[tokenPointer])) {
+                    this.parseBlock(parseTokens);
+                }
+                else {
+                    _Functions.log("PARSER ERROR - Failed to parse statement list.");
+                    parseErrCount++;
+                    break;
+                }
+                //CSTTree.climbTree();
             }
-            //Empty string - do nothing.
-            else {
-                //Not an empty else, represents do nothing.
-            }
+            // if(parseTokens[tokenPointer].length != 0) {
+            //     CSTTree.addNode("StatementList", "branch");
+            //     this.parseStatement(parseTokens);
+            // }
+            // //Empty string - do nothing.
+            // else {
+            //      //Not an empty else, represents do nothing.
+            // }
             CSTTree.climbTree();
         };
         //Expected tokens: print, assignment, var declaration, while, if, block
-        parse.parseStatement = function (parseTokens) {
-            _Functions.log("PARSER - parseStatement()");
-            CSTTree.addNode("Statement", "branch");
-            //Use regular expressions from lex to check what type of statement is to be parsed.
-            if (printRegEx.test(parseTokens[tokenPointer])) {
-                this.parsePrintStatement(parseTokens);
-            }
-            //Check for assignment op.
-            if (assignment.test(parseTokens[tokenPointer])) {
-                this.parseAssignmentStatement(parseTokens);
-            }
-            //Check for var declaration types - boolean, int, string.
-            if (boolRegEx.test(parseTokens[tokenPointer]) || stringRegEx.test(parseTokens[tokenPointer])
-                || intRegEx.test(parseTokens[tokenPointer])) {
-                this.parseVarDecl(parseTokens);
-            }
-            //Check for while statement.
-            if (whileRegEx.test(parseTokens[tokenPointer])) {
-                this.parseWhileStatement(parseTokens);
-            }
-            //Check for if statement.
-            if (ifRegEx.test(parseTokens[tokenPointer])) {
-                this.parseIfStatement(parseTokens);
-            }
-            //Check for opening or closing block.
-            if (leftBlock.test(parseTokens[tokenPointer])) {
-                this.parseBlock(parseTokens);
-            }
-            CSTTree.climbTree();
-        };
+        // public static parseStatement(parseTokens : Array<string>) {
+        //     _Functions.log("PARSER - parseStatement()");
+        //     CSTTree.addNode("Statement", "branch");
+        //     //Use regular expressions from lex to check what type of statement is to be parsed.
+        //     if(printRegEx.test(parseTokens[tokenPointer])){
+        //         this.parsePrintStatement(parseTokens);
+        //     }
+        //     //Check for assignment op.
+        //     if(assignment.test(parseTokens[tokenPointer])) {
+        //         this.parseAssignmentStatement(parseTokens);
+        //     }
+        //     //Check for var declaration types - boolean, int, string.
+        //     if(boolRegEx.test(parseTokens[tokenPointer]) || stringRegEx.test(parseTokens[tokenPointer]) 
+        //       || intRegEx.test(parseTokens[tokenPointer])) {
+        //         this.parseVarDecl(parseTokens);
+        //     }
+        //     //Check for while statement.
+        //     if(whileRegEx.test(parseTokens[tokenPointer])) {
+        //         this.parseWhileStatement(parseTokens);
+        //     }
+        //     //Check for if statement.
+        //     if(ifRegEx.test(parseTokens[tokenPointer])) {
+        //         this.parseIfStatement(parseTokens);
+        //     }
+        //     //Check for opening or closing block.
+        //     if(leftBlock.test(parseTokens[tokenPointer])) {
+        //         this.parseBlock(parseTokens);
+        //     }
+        //     CSTTree.climbTree();
+        // }
         //Expected tokens: print( expr )
         parse.parsePrintStatement = function (parseTokens) {
             _Functions.log("PARSER - parsePrintStatement()");
