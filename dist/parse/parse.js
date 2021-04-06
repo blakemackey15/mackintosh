@@ -8,6 +8,7 @@ var mackintosh;
         parse.parse = function (parseTokens) {
             debugger;
             CSTTree = new mackintosh.CST();
+            tokenPointer = 0;
             _Functions.log("\n");
             _Functions.log("\n");
             _Functions.log("PARSER - Parsing Program " + (programCount - 1));

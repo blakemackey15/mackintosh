@@ -8,6 +8,7 @@ module mackintosh {
         public static parse(parseTokens : Array<string>) {
             debugger;
             CSTTree = new CST();
+            tokenPointer = 0;
             _Functions.log("\n");
             _Functions.log("\n");
             _Functions.log("PARSER - Parsing Program " + (programCount - 1));
