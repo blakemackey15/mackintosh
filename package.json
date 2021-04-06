@@ -30,7 +30,6 @@
   },
   "dependencies": {
     "express": "^4.16.4",
-    "gulp-webserver": "^0.9.1",
     "prompt": "^1.1.0",
     "requirejs": "^2.3.6"
   }

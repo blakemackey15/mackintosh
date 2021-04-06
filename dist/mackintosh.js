@@ -24,13 +24,16 @@ var mackintosh;
 var _Compiler = mackintosh.index;
 var _Lexer = mackintosh.lex;
 var _Parser = mackintosh.parse;
-var _CST = mackintosh.CST;
 var _Token = mackintosh.token;
 var _Functions = mackintosh.compilerFunctions;
-//Initialize token stream, error counter, and the token index.
-var tokens = new Array();
+//Lex errors.
 var errCount = 0;
+//Parse errors.
+var parseErrCount = 0;
+//Lex warnings.
 var warnCount = 0;
+//Parse warnings.
+var parseWarnCount = 0;
 var tokenIndex = 0;
 var curToken;
 var isCompiling;
@@ -42,7 +45,7 @@ var tokenBuffer = 0;
 var keywords = new Array("int", "print", "while", "string", "boolean", "while", "true", "false", "if");
 //Regular Expressions to check token type.
 var digits = new RegExp('(?:0|[1-9]\d*)');
-var characters = new RegExp('^[a-zA-Z]*$');
+var characters = new RegExp('^[a-z]*$');
 var leftBlock = new RegExp('[{]');
 var rightBlock = new RegExp('[}]');
 var operator = new RegExp('[+]');
@@ -62,6 +65,10 @@ var closeComments = new RegExp('[\*\/]');
 var assignment = new RegExp('[=]');
 var newLine = new RegExp('\n');
 var whitespace = new RegExp('[ \t]');
+//Parser globals.
+var CSTTree = new mackintosh.CST;
+var isMatch = false;
+var tokenPointer = 0;
 /*
 References: Here is a list of the resources I referenced while developing this project.
 https://regex101.com/ - Useful tool I used to test my regular expressions for my tokens.
@@ -104,8 +111,9 @@ var mackintosh;
         }
         //Populate program array.
         lex.populateProgram = function (input) {
+            //Clear program if it is already populated.
+            program = [];
             _Functions.log('LEXER - Lexing Program ' + programCount);
-            //Remove white spaces.
             //Push characters in string to the program array.
             for (var i = 0; i < input.length; i++) {
                 program.push(input.charAt(i));
@@ -115,7 +123,10 @@ var mackintosh;
         lex.lex = function () {
             //Loop through the length of the inputted string, and check each character.
             var curToken = new mackintosh.token();
+            var tokenStream = new Array('');
+            tokenStream.pop();
             for (var i = 0; i < program.length; i++) {
+                debugger;
                 tokenFlag = curToken.GenerateToken(program[i], program, i);
                 //Update the pointer and remove commented code.
                 if (curToken.getIsComment()) {
@@ -140,12 +151,11 @@ var mackintosh;
                     }
                 }
                 if (tokenFlag) {
-                    //Add current token to the token stream.
-                    if (curToken.getIsWhitespace() == false) {
+                    if (curToken.getTokenCode() != "") {
+                        //Add current token to the token stream.
+                        tokenIndex++;
                         _Functions.log('LEXER - ' + curToken.getTokenCode() + ' Found on line: ' + lineNum);
-                    }
-                    else {
-                        curToken.setIsWhitespace(false);
+                        tokenStream.push(curToken.getTokenValue());
                     }
                 }
                 else {
@@ -156,8 +166,11 @@ var mackintosh;
                 if (program[i] == '$') {
                     if (errCount == 0) {
                         _Functions.log('LEXER - Lex Completed With ' + errCount + ' Errors and ' + warnCount + ' Warnings');
+                        _Parser.parse(tokenStream);
                         //Check if this is the end of the program. If not, begin lexing the next program.
                         if (typeof program[i] != undefined) {
+                            _Functions.log('\n');
+                            _Functions.log('\n');
                             _Functions.log('LEXER - Lexing Program ' + programCount);
                         }
                     }
@@ -223,17 +236,16 @@ var mackintosh;
         token.prototype.getIsComment = function () {
             return this.isComment;
         };
-        token.prototype.setIsWhitespace = function (isWhitespace) {
-            this.isWhitespace = isWhitespace;
+        token.prototype.setTokenType = function (tokenType) {
+            this.tokenType = tokenType;
         };
-        token.prototype.getIsWhitespace = function () {
-            return this.isWhitespace;
+        token.prototype.getTokenType = function () {
+            return this.tokenType;
         };
         /**
          * Generates token by checking against the regular expressions generated.
          */
         token.prototype.GenerateToken = function (input, program, counter) {
-            debugger;
             /**
              * Use switch statements to check against each RegEx.
              */
@@ -250,7 +262,6 @@ var mackintosh;
                     this.setTokenCode("");
                     this.setTokenValue("");
                     this.isToken == false;
-                    this.isWhitespace == true;
                     break;
             }
             switch (digits.test(input)) {
@@ -258,6 +269,13 @@ var mackintosh;
                     this.setTokenValue(input);
                     this.setTokenCode("DIGIT - " + input);
                     this.isToken = true;
+                    //Handles digits not being allowed in strings.
+                    if (this.quoteCount >= 1) {
+                        _Functions.log("LEXER ERROR at " + lineNum + " - Digits cannot be in a string.");
+                        this.setTokenValue("");
+                        this.setTokenCode("");
+                        this.isToken = false;
+                    }
                     break;
             }
             switch (assignment.test(input)) {
@@ -295,7 +313,7 @@ var mackintosh;
                             case true:
                                 this.setTokenValue(input);
                                 this.setTokenCode("BOOLEAN CHECK NOT EQUAL" + input);
-                                this.isToken;
+                                this.isToken = true;
                                 this.index = counter;
                                 this.setBoolOp(true);
                                 break;
@@ -325,6 +343,7 @@ var mackintosh;
                 case true:
                     var saveChar = new Array('');
                     var loops = 0;
+                    var isntKey = false;
                     saveChar.pop();
                     saveChar.push(input);
                     //Checks if the next element in the array is undefined. If this isn't here the program gets stuck in an
@@ -335,79 +354,119 @@ var mackintosh;
                             input += program[counter];
                             switch (intRegEx.test(input)) {
                                 case true:
-                                    this.setTokenValue(input);
-                                    this.setTokenCode("KEYWORD VAR DECLARATION " + input);
-                                    this.isKeyword = true;
-                                    this.isToken = true;
-                                    this.index = counter;
+                                    if (input == "int") {
+                                        this.setTokenValue(input);
+                                        this.setTokenCode("KEYWORD VAR DECLARATION " + input);
+                                        this.isKeyword = true;
+                                        this.isToken = true;
+                                        this.index = counter;
+                                    }
+                                    else {
+                                        isntKey = true;
+                                    }
                                     break;
                             }
                             switch (stringRegEx.test(input)) {
                                 case true:
-                                    this.setTokenValue(input);
-                                    this.setTokenCode("KEYWORD VAR DECLARATION " + input);
-                                    this.isKeyword = true;
-                                    this.isToken = true;
-                                    this.index = counter;
+                                    if (input == "string") {
+                                        this.setTokenValue(input);
+                                        this.setTokenCode("KEYWORD VAR DECLARATION " + input);
+                                        this.isKeyword = true;
+                                        this.isToken = true;
+                                        this.index = counter;
+                                    }
+                                    else {
+                                        isntKey = true;
+                                    }
                                     break;
                             }
                             switch (printRegEx.test(input)) {
                                 case true:
-                                    this.setTokenValue(input);
-                                    this.setTokenCode("KEYWORD PRINT STATEMENT " + input);
-                                    this.isKeyword = true;
-                                    this.isToken = true;
-                                    this.index = counter;
+                                    if (input == "print") {
+                                        this.setTokenValue(input);
+                                        this.setTokenCode("KEYWORD PRINT STATEMENT " + input);
+                                        this.isKeyword = true;
+                                        this.isToken = true;
+                                        this.index = counter;
+                                    }
+                                    else {
+                                        isntKey = true;
+                                    }
                                     break;
                             }
                             switch (trueRegEx.test(input)) {
                                 case true:
-                                    this.setTokenValue(input);
-                                    this.setTokenCode("BOOLEAN " + input);
-                                    this.isKeyword = true;
-                                    this.isToken = true;
-                                    this.index = counter;
+                                    if (input == "true") {
+                                        this.setTokenValue(input);
+                                        this.setTokenCode("BOOLEAN " + input);
+                                        this.isKeyword = true;
+                                        this.isToken = true;
+                                        this.index = counter;
+                                    }
+                                    else {
+                                        isntKey = true;
+                                    }
                                     break;
                             }
                             switch (falseRegEx.test(input)) {
                                 case true:
-                                    this.setTokenValue(input);
-                                    this.setTokenCode("BOOLEAN " + input);
-                                    this.isKeyword = true;
-                                    this.isToken = true;
-                                    this.index = counter;
+                                    if (input == "false") {
+                                        this.setTokenValue(input);
+                                        this.setTokenCode("BOOLEAN " + input);
+                                        this.isKeyword = true;
+                                        this.isToken = true;
+                                        this.index = counter;
+                                    }
+                                    else {
+                                        isntKey = true;
+                                    }
                                     break;
                             }
                             switch (ifRegEx.test(input)) {
                                 case true:
-                                    this.setTokenValue(input);
-                                    this.setTokenCode("BRANCHING STATEMENT " + input);
-                                    this.isKeyword = true;
-                                    this.isToken = true;
-                                    this.index = counter;
+                                    if (input == "if") {
+                                        this.setTokenValue(input);
+                                        this.setTokenCode("BRANCHING STATEMENT " + input);
+                                        this.isKeyword = true;
+                                        this.isToken = true;
+                                        this.index = counter;
+                                    }
+                                    else {
+                                        isntKey = true;
+                                    }
                                     break;
                             }
                             switch (whileRegEx.test(input)) {
                                 case true:
-                                    this.setTokenValue(input);
-                                    this.setTokenCode("WHILE KEYWORD " + input);
-                                    this.isKeyword = true;
-                                    this.isToken = true;
-                                    this.index = counter;
+                                    if (input == "while") {
+                                        this.setTokenValue(input);
+                                        this.setTokenCode("WHILE KEYWORD " + input);
+                                        this.isKeyword = true;
+                                        this.isToken = true;
+                                        this.index = counter;
+                                    }
+                                    else {
+                                        isntKey = true;
+                                    }
                                     break;
                             }
                             switch (boolRegEx.test(input)) {
                                 case true:
-                                    this.setTokenValue(input);
-                                    this.setTokenCode("BOOLEAN KEYWORD " + input);
-                                    this.isKeyword = true;
-                                    this.isToken = true;
-                                    this.index = counter;
+                                    if (input == "boolean") {
+                                        this.setTokenValue(input);
+                                        this.setTokenCode("BOOLEAN KEYWORD " + input);
+                                        this.isKeyword = true;
+                                        this.isToken = true;
+                                        this.index = counter;
+                                    }
+                                    else {
+                                        isntKey = true;
+                                    }
                                     break;
                             }
                             //Break out of the loop if the token is a keyword it has become too long to be a token.
                             //Or, break out of the loop if the next element in the array is undefined.
-                            if (typeof program[counter + 1] === 'undefined' || this.isKeyword == true) {
+                            if (typeof program[counter + 1] === 'undefined' || this.isKeyword == true || isntKey == true) {
                                 break;
                             }
                             loops++;
@@ -421,9 +480,15 @@ var mackintosh;
                         input = saveChar[0].toString();
                     }
                     if (this.quoteCount > 0) {
-                        this.setTokenCode("CHARACTER " + saveChar[0]);
-                        this.setTokenValue(saveChar[0].toString());
-                        this.isToken = true;
+                        //New line causes lex error in string.
+                        if (input == "\n") {
+                            _Functions.log("LEXER ERROR at " + lineNum + ": new line not allowed in string.");
+                        }
+                        else {
+                            this.setTokenCode("CHARACTER " + saveChar[0]);
+                            this.setTokenValue(saveChar[0].toString());
+                            this.isToken = true;
+                        }
                     }
                     else if (this.quoteCount == 0 && this.isKeyword == false) {
                         this.setTokenCode("IDENTIFIER " + saveChar[0].toString());
@@ -431,7 +496,12 @@ var mackintosh;
                         this.isToken = true;
                     }
                     this.isKeyword = false;
+                    isntKey = false;
                     break;
+                case false:
+                    if (digits.test(input.toLowerCase())) {
+                        _Functions.log("LEXER ERROR at " + lineNum + " - characters and ids cannot be capital.");
+                    }
             }
             switch (operator.test(input)) {
                 case true:
@@ -505,6 +575,35 @@ var mackintosh;
 })(mackintosh || (mackintosh = {}));
 var mackintosh;
 (function (mackintosh) {
+    //Code reference: JavaScript tree demo: https://www.labouseur.com/projects/jsTreeDemo/treeDemo.js
+    //Class to represent a node in the tree.
+    var CSTNode = /** @class */ (function () {
+        function CSTNode(nodeName) {
+            this.nodeName = nodeName;
+            this.children = [];
+        }
+        CSTNode.prototype.setNodeName = function (nodeName) {
+            this.nodeName = nodeName;
+        };
+        CSTNode.prototype.getNodeName = function () {
+            return this.nodeName;
+        };
+        CSTNode.prototype.getChildren = function () {
+            return this.children;
+        };
+        CSTNode.prototype.addChildren = function (child) {
+            this.children.push(child);
+        };
+        CSTNode.prototype.getParent = function () {
+            return this.parent;
+        };
+        CSTNode.prototype.setParent = function (parNode) {
+            this.parent = parNode;
+        };
+        return CSTNode;
+    }());
+    mackintosh.CSTNode = CSTNode;
+    //Class to represent CST.
     var CST = /** @class */ (function () {
         function CST() {
             this.rootNode = null;
@@ -512,38 +611,60 @@ var mackintosh;
         CST.prototype.getRoot = function () {
             return this.rootNode;
         };
-        CST.prototype.setRoot = function (node) {
-            this.rootNode = node;
+        CST.prototype.getCurNode = function () {
+            return this.curNode;
         };
-        //Add nodes to the tree
-        CST.prototype.addNode = function (nodeVal) {
-            var newNode = new mackintosh.treeNode(nodeVal);
-            //Check if the node is empty. If it is, make the new node the root node.
+        //Kind represents if the node is a leaf or a branch node.
+        CST.prototype.addNode = function (nodeName, kind) {
+            //Create a node object. Has a name, child nodes, parent nodes, and if its a leaf or branch node.
+            var node = new CSTNode(nodeName);
+            //Check if theres a root node. If not, make the current node the root node.
             if (this.rootNode == null) {
-                this.setRoot(newNode);
-                return true;
+                this.rootNode = node;
             }
-            //If the root node is not empty, add it to the correct spot in the tree.
+            //The current node is a child node.
             else {
+                node.setParent(this.curNode);
+                this.curNode.addChildren(node);
+            }
+            //Check what kind of node this node is. Branch nodes are the grammar names (block, statement, etc.) and leaf nodes
+            //are the tokens.
+            if (kind == "branch") {
+                this.curNode = node;
             }
         };
-        //Recursive definition of depth first traversal - needed to get the valid tokens produced by the CST.
-        CST.prototype.depthFirst = function () {
-            var visit = new Array();
-            var curNode = this.getRoot();
-            function traverse(node) {
-                //Array of visited node values.
-                visit.push(node.getValue());
-                //Check to see if node is right or left and then traverse the corresponding one.
-                if (node.LeftNode) {
-                    traverse(node.LeftNode);
+        CST.prototype.climbTree = function () {
+            //Move up the tree to the parent node if it exists.
+            if (this.curNode.getParent() !== null && this.curNode.getParent().getNodeName() !== undefined) {
+                this.curNode = this.curNode.getParent();
+            }
+            else {
+                _Functions.log("CST ERROR - Parent node does not exist.");
+            }
+        };
+        CST.prototype.toString = function () {
+            var treeString = "";
+            //Handles the expansion of nodes using recursion.
+            function expand(node, depth) {
+                //Format to show the depth of the tree when displaying.
+                for (var i = 0; i < depth; i++) {
+                    treeString += "-";
                 }
-                if (node.RightNode) {
-                    traverse(node.RightNode);
+                //Check if the node is a leaf node. Then add the node and skip to new line.
+                if (node.getChildren().length === 0) {
+                    treeString += "[" + node.getNodeName() + "] \n";
+                }
+                //Get and display the children.
+                else {
+                    treeString += "<" + node.getNodeName() + "> \n";
+                    for (var i = 0; i < node.getChildren().length; i++) {
+                        expand(node.getChildren()[i], depth + 1);
+                    }
                 }
             }
-            traverse(curNode);
-            return visit;
+            //Call and expand from the root node.
+            expand(this.rootNode, 0);
+            return treeString;
         };
         return CST;
     }());
@@ -553,140 +674,325 @@ var mackintosh;
 (function (mackintosh) {
     //Class that represents parse/
     var parse = /** @class */ (function () {
-        //Get token stream from completed lex.
-        function parse(tokenStream) {
-            this.parseTokens = tokenStream;
+        function parse() {
         }
         //Recursive descent parser implimentation.
-        parse.prototype.parse = function () {
-            //i represents the token pointer.
-            for (var i = 0; i < this.parseTokens.length; i++) {
-                var tokenName = this.parseTokens[i].getTokenValue();
-                this.curToken = tokenName;
+        parse.parse = function (parseTokens) {
+            debugger;
+            CSTTree = new mackintosh.CST();
+            tokenPointer = 0;
+            _Functions.log("\n");
+            _Functions.log("\n");
+            _Functions.log("PARSER - Parsing Program " + (programCount - 1));
+            //Check if there are tokens in the token stream.
+            if (parseTokens.length == 0) {
+                _Functions.log("PARSER ERROR - There are no tokens to be parsed.");
+                parseErrCount++;
+            }
+            //Begin parse.
+            else {
+                //Use try catch to check for parse failures and output them.
+                try {
+                    this.parseProgram(parseTokens);
+                    _Functions.log("PARSER - Parse completed with " + parseErrCount + " errors and " +
+                        parseWarnCount + " warnings");
+                    //Prints the CST if there are no more errors.
+                    if (parseErrCount <= 0) {
+                        _Functions.log(CSTTree.toString());
+                    }
+                }
+                catch (error) {
+                    _Functions.log("PARSER - Error caused parse to end.");
+                    parseErrCount++;
+                }
             }
         };
         //Match function.
-        parse.prototype.match = function (token) {
-            return this.isMatch;
+        parse.match = function (expectedTokens, parseToken) {
+            //Check if the token is in a the expected token array.
+            for (var i = 0; i < expectedTokens.length; i++) {
+                if (expectedTokens[i] == parseToken) {
+                    isMatch = true;
+                }
+            }
+            if (isMatch) {
+                _Functions.log("PARSER - Token Matched! " + parseToken);
+                CSTTree.addNode(parseToken, "leaf");
+                tokenPointer++;
+                isMatch = false;
+            }
+            else {
+                _Functions.log("PARSER ERROR - Expected tokens (" + expectedTokens.toString() + ") but got "
+                    + parseToken + " instead.");
+                parseErrCount++;
+            }
         };
         //Methods for recursive descent parser - Start symbol: program.
-        parse.prototype.parseProgram = function () {
+        //Expected tokens - block, $
+        parse.parseProgram = function (parseTokens) {
+            _Functions.log("PARSER - parseProgram()");
+            //Add the program node to the tree. This should be the root node.
+            CSTTree.addNode("Program", "branch");
+            //Begin parse block.
+            this.parseBlock(parseTokens);
+            //Check for EOP at the end of program.
+            if (parseTokens[tokenPointer] == "$") {
+                this.match(["$"], parseTokens[tokenPointer]);
+                _Functions.log("PARSER - Program successfully parsed.");
+            }
+            else if (parseTokens[tokenPointer + 1] == undefined) {
+                _Functions.log("PARSER ERROR - EOP $ not found at end of program.");
+                parseErrCount++;
+            }
         };
         //Expected tokens: { statementList }
-        parse.prototype.parseBlock = function () {
+        parse.parseBlock = function (parseTokens) {
+            _Functions.log("PARSER - parseBlock()");
+            CSTTree.addNode("Block", "branch");
+            this.parseOpenBrace(parseTokens);
+            this.parseStatementList(parseTokens);
+            this.parseCloseBrace(parseTokens);
+            CSTTree.climbTree();
         };
         //Expected tokens: statement statementList
         //OR - empty
-        parse.prototype.parseStatementList = function () {
-            // else {
-            //     //Not an empty else, represents do nothing.
-            // }
-        };
-        //Expected tokens: print, assignment, var declaration, while, if, block
-        parse.prototype.parseStatement = function () {
+        parse.parseStatementList = function (parseTokens) {
+            //Check if the token is empty or not.
+            _Functions.log("PARSER - parseStatementList()");
+            CSTTree.addNode("StatementList", "branch");
+            while (parseTokens[tokenPointer] != "}") {
+                _Functions.log("PARSER - parseStatement()");
+                CSTTree.addNode("Statement", "branch");
+                //this.parseStatement(parseTokens);
+                //Use regular expressions from lex to check what type of statement is to be parsed.
+                if (printRegEx.test(parseTokens[tokenPointer])) {
+                    this.parsePrintStatement(parseTokens);
+                }
+                //Check for assignment op.
+                else if (assignment.test(parseTokens[tokenPointer + 1])) {
+                    this.parseAssignmentStatement(parseTokens);
+                }
+                //Check for var declaration types - boolean, int, string.
+                else if (boolRegEx.test(parseTokens[tokenPointer]) || stringRegEx.test(parseTokens[tokenPointer])
+                    || intRegEx.test(parseTokens[tokenPointer])) {
+                    this.parseVarDecl(parseTokens);
+                }
+                //Check for while statement.
+                else if (whileRegEx.test(parseTokens[tokenPointer])) {
+                    this.parseWhileStatement(parseTokens);
+                }
+                //Check for if statement.
+                else if (ifRegEx.test(parseTokens[tokenPointer])) {
+                    this.parseIfStatement(parseTokens);
+                }
+                //Check for opening or closing block.
+                else if (leftBlock.test(parseTokens[tokenPointer])) {
+                    this.parseBlock(parseTokens);
+                }
+                else {
+                    _Functions.log("PARSER ERROR - Failed to parse statement list.");
+                    parseErrCount++;
+                    break;
+                }
+                CSTTree.climbTree();
+            }
+            CSTTree.climbTree();
         };
         //Expected tokens: print( expr )
-        parse.prototype.parsePrintStatement = function () {
+        parse.parsePrintStatement = function (parseTokens) {
+            _Functions.log("PARSER - parsePrintStatement()");
+            CSTTree.addNode("PrintStatement", "branch");
+            this.parsePrint(parseTokens);
+            this.parseParen(parseTokens);
+            this.parseExpr(parseTokens);
+            this.parseParen(parseTokens);
+            CSTTree.climbTree();
         };
         //Expected tokens: id = expr
-        parse.prototype.parseAssignmentStatement = function () {
+        parse.parseAssignmentStatement = function (parseTokens) {
+            _Functions.log("PARSER - parseAssignmentStatement()");
+            CSTTree.addNode("AssignmentStatement", "branch");
+            this.parseId(parseTokens);
+            this.parseAssignmentOp(parseTokens);
+            this.parseExpr(parseTokens);
+            CSTTree.climbTree();
         };
         //Expected tokens: type id
-        parse.prototype.parseVarDecl = function () {
+        parse.parseVarDecl = function (parseTokens) {
+            _Functions.log("PARSER - parseVarDecl()");
+            CSTTree.addNode("VarDecl", "branch");
+            this.parseType(parseTokens);
+            this.parseId(parseTokens);
+            CSTTree.climbTree();
         };
         //Expected tokens: while boolexpr block
-        parse.prototype.parseWhileStatement = function () {
+        parse.parseWhileStatement = function (parseTokens) {
+            _Functions.log("PARSER - parseWhileStatement()");
+            CSTTree.addNode("WhileStatement", "branch");
+            this.parseWhile(parseTokens);
+            this.parseBoolExpr(parseTokens);
+            this.parseBlock(parseTokens);
+            CSTTree.climbTree();
         };
         //Expected tokens: if boolexpr block
-        parse.prototype.parseIfStatement = function () {
+        parse.parseIfStatement = function (parseTokens) {
+            _Functions.log("PARSER - parseIfStatement()");
+            CSTTree.addNode("IfStatement", "branch");
+            this.parseIf(parseTokens);
+            this.parseBoolExpr(parseTokens);
+            this.parseBlock(parseTokens);
+            CSTTree.climbTree();
         };
         //Expected tokens: intexpr, stringexpr, boolexpr, id
-        parse.prototype.parseExpr = function () {
+        parse.parseExpr = function (parseTokens) {
+            _Functions.log("PARSER - parseExpr()");
+            CSTTree.addNode("Expr", "branch");
+            //Check what type of expr this token is.
+            if (digits.test(parseTokens[tokenPointer])) {
+                this.parseIntExpr(parseTokens);
+            }
+            //String check.
+            if (quotes.test(parseTokens[tokenPointer])) {
+                this.parseStringExpr(parseTokens);
+            }
+            //This handles if its an id.
+            if (characters.test(parseTokens[tokenPointer]) && parseTokens[tokenPointer].length == 0) {
+                this.parseId(parseTokens);
+            }
+            //Bool expr.
+            if (trueRegEx.test(parseTokens[tokenPointer]) || falseRegEx.test(parseTokens[tokenPointer])) {
+                this.parseBoolExpr(parseTokens);
+            }
+            CSTTree.climbTree();
         };
         //Expected tokens: digit intop expr
         //OR: digit
-        parse.prototype.parseIntExpr = function () {
+        parse.parseIntExpr = function (parseTokens) {
+            _Functions.log("PARSER - parseIntExpr()");
+            CSTTree.addNode("IntExpr", "branch");
+            //Check if this is to be an expression or a single digit.
+            if (parseTokens[tokenPointer + 1] == "+") {
+                this.parseDigit(parseTokens);
+                this.parseIntOp(parseTokens);
+                this.parseExpr(parseTokens);
+            }
+            else {
+                this.parseDigit(parseTokens);
+            }
+            CSTTree.climbTree();
         };
         //Expected tokens: "charlist"
-        parse.prototype.parseStringExpr = function () {
+        parse.parseStringExpr = function (parseTokens) {
+            _Functions.log("PARSER - parseStringExpr()");
+            CSTTree.addNode("StringExpr", "branch");
+            this.parseQuotes(parseTokens);
+            this.parseCharList(parseTokens);
+            this.parseQuotes(parseTokens);
+            CSTTree.climbTree();
         };
         //Expected tokens: ( expr boolop expr)
         //OR: boolval
-        parse.prototype.parseBoolExpr = function () {
+        parse.parseBoolExpr = function (parseTokens) {
+            _Functions.log("PARSER - parseBoolExpr()");
+            CSTTree.addNode("BooleanExpr", "branch");
+            //If match parenthesis = true: (expr boolop expr)
+            if (parseTokens[tokenPointer] == "(" || parseTokens[tokenPointer] == ")") {
+                this.parseParen(parseTokens);
+                this.parseExpr(parseTokens);
+                this.parseBoolOp(parseTokens);
+                this.parseExpr(parseTokens);
+                this.parseParen(parseTokens);
+            }
+            //Boolean value.
+            else {
+                this.parseBoolVal(parseTokens);
+            }
+            CSTTree.climbTree();
         };
         //Expected tokens: char
-        parse.prototype.parseId = function () {
+        parse.parseId = function (parseTokens) {
+            _Functions.log("PARSER - parseId()");
+            CSTTree.addNode("Id", "branch");
+            this.parseChar(parseTokens);
+            CSTTree.climbTree();
         };
         //Expected tokens: char charlist, space charlist, empty
-        parse.prototype.parseCharList = function () {
-            // else {
-            //     //Not an empty else, represents do nothing.
-            // }
+        parse.parseCharList = function (parseTokens) {
+            _Functions.log("PARSER - parseCharList()");
+            CSTTree.addNode("CharList", "branch");
+            if (parseTokens[tokenPointer] === " ") {
+                this.parseSpace(parseTokens);
+            }
+            else if (characters.test(parseTokens[tokenPointer])) {
+                var string = void 0;
+                //Builds string until there is a quote.
+                while (!quotes.test(parseTokens[tokenPointer])) {
+                    this.parseChar(parseTokens);
+                    string += parseTokens[tokenPointer];
+                }
+                _Functions.log("PARSER - String: " + string);
+            }
+            else {
+                //Not an empty else, represents do nothing.
+            }
+            CSTTree.climbTree();
         };
         //Expected tokens: int, string, boolean
-        parse.prototype.parseType = function () {
+        parse.parseType = function (parseTokens) {
+            this.match(["int", "string", "boolean"], parseTokens[tokenPointer]);
         };
-        //Expected tokens: a-z, A-Z
-        parse.prototype.parseChar = function () {
+        //Expected tokens: a-z
+        parse.parseChar = function (parseTokens) {
+            this.match(["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k",
+                "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x",
+                "y", "z"], parseTokens[tokenPointer]);
         };
         //Expected tokens: space
-        parse.prototype.parseSpace = function () {
+        parse.parseSpace = function (parseTokens) {
+            this.match([" "], parseTokens[tokenPointer]);
         };
         //Expected tokens: 0-9
-        parse.prototype.parseDigit = function () {
+        parse.parseDigit = function (parseTokens) {
+            this.match(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"], parseTokens[tokenPointer]);
         };
         //Expected tokens: ==, !=
-        parse.prototype.parseBoolOp = function () {
+        parse.parseBoolOp = function (parseTokens) {
+            this.match(["==", "!="], parseTokens[tokenPointer]);
         };
         //Expected tokens: false, true
-        parse.prototype.parseBoolVal = function () {
+        parse.parseBoolVal = function (parseTokens) {
+            this.match(["false", "true"], parseTokens[tokenPointer]);
         };
         //Expected tokens: +
-        parse.prototype.parseIntOp = function () {
+        parse.parseIntOp = function (parseTokens) {
+            this.match(["+"], parseTokens[tokenPointer]);
+        };
+        parse.parseParen = function (parseTokens) {
+            this.match(["(", ")"], parseTokens[tokenPointer]);
+        };
+        parse.parseAssignmentOp = function (parseTokens) {
+            this.match(["="], parseTokens[tokenPointer]);
+        };
+        parse.parseQuotes = function (parseTokens) {
+            this.match(['"', '"'], parseTokens[tokenPointer]);
+        };
+        parse.parseIf = function (parseTokens) {
+            this.match(["if"], parseTokens[tokenPointer]);
+        };
+        parse.parseWhile = function (parseTokens) {
+            this.match(["while"], parseTokens[tokenPointer]);
+        };
+        parse.parsePrint = function (parseTokens) {
+            this.match(["print"], parseTokens[tokenPointer]);
+        };
+        parse.parseOpenBrace = function (parseTokens) {
+            this.match(["{"], parseTokens[tokenPointer]);
+        };
+        parse.parseCloseBrace = function (parseTokens) {
+            this.match(["}"], parseTokens[tokenPointer]);
         };
         return parse;
     }());
     mackintosh.parse = parse;
-})(mackintosh || (mackintosh = {}));
-//Class that represents a singular node in a tree.
-var mackintosh;
-(function (mackintosh) {
-    var treeNode = /** @class */ (function () {
-        //Initialize a tree node.
-        function treeNode(nodeVal) {
-            this.value = nodeVal;
-            this.leftNode = null;
-            this.rightNode = null;
-        }
-        //Get and set methods for node attributes.
-        treeNode.prototype.getValue = function () {
-            return this.value;
-        };
-        treeNode.prototype.setValue = function (num) {
-            this.value = num;
-        };
-        Object.defineProperty(treeNode.prototype, "RightNode", {
-            get: function () {
-                return this.rightNode;
-            },
-            set: function (node) {
-                this.rightNode = node;
-            },
-            enumerable: false,
-            configurable: true
-        });
-        Object.defineProperty(treeNode.prototype, "LeftNode", {
-            get: function () {
-                return this.leftNode;
-            },
-            set: function (node) {
-                this.leftNode = node;
-            },
-            enumerable: false,
-            configurable: true
-        });
-        return treeNode;
-    }());
-    mackintosh.treeNode = treeNode;
 })(mackintosh || (mackintosh = {}));
 //# sourceMappingURL=mackintosh.js.map

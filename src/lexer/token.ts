@@ -24,6 +24,7 @@ module mackintosh {
         private quoteCount : number;
         private isBoolOp : boolean;
         private isComment : boolean;
+        private tokenType : string;
 
         constructor() {
             this.tokenCode = "";
@@ -73,12 +74,19 @@ module mackintosh {
         public getIsComment() {
             return this.isComment;
         }
+
+        public setTokenType(tokenType : string) {
+            this.tokenType = tokenType;
+        }
+
+        public getTokenType() {
+            return this.tokenType;
+        }
         
         /**
          * Generates token by checking against the regular expressions generated.
          */
         public GenerateToken(input : string, program : string[], counter : number) : boolean {
-            debugger;
             /**
              * Use switch statements to check against each RegEx.
              */
@@ -98,15 +106,22 @@ module mackintosh {
                     this.isToken == false;
                     break;
             }
+
             switch(digits.test(input)) {
                 case true:
                     this.setTokenValue(input);
                     this.setTokenCode("DIGIT - " + input);
                     this.isToken = true;
+
+                    //Handles digits not being allowed in strings.
+                    if(this.quoteCount >= 1) {
+                        _Functions.log("LEXER ERROR at " + lineNum + " - Digits cannot be in a string.");
+                        this.setTokenValue("");
+                        this.setTokenCode("");
+                        this.isToken = false;
+                    }
                     break;
             }
-
-
 
             switch(assignment.test(input)) {
                 case true:
@@ -148,8 +163,9 @@ module mackintosh {
                             case true:
                                 this.setTokenValue(input);
                                 this.setTokenCode("BOOLEAN CHECK NOT EQUAL" + input);
-                                this.isToken;
+                                this.isToken = true;
                                 this.index = counter;
+                                
                                 this.setBoolOp(true);
                                 break;
                         }
@@ -183,6 +199,7 @@ module mackintosh {
                 case true:
                     let saveChar = new Array<String>('');
                     let loops = 0
+                    let isntKey : boolean = false;
                     saveChar.pop();
                     saveChar.push(input);
 
@@ -195,87 +212,136 @@ module mackintosh {
 
                             switch(intRegEx.test(input)) {
                                 case true:
-                                    this.setTokenValue(input);
-                                    this.setTokenCode("KEYWORD VAR DECLARATION " + input);
-                                    this.isKeyword = true;
-                                    this.isToken = true;
-                                    this.index = counter;
+                                    if(input == "int") {
+                                        this.setTokenValue(input);
+                                        this.setTokenCode("KEYWORD VAR DECLARATION " + input);
+                                        this.isKeyword = true;
+                                        this.isToken = true;
+                                        this.index = counter;
+                                    }
+
+                                    else {
+                                        isntKey = true;
+                                    }
                                     break;
                             }
                     
                             switch(stringRegEx.test(input)) {
                                 case true:
-                                    this.setTokenValue(input);
-                                    this.setTokenCode("KEYWORD VAR DECLARATION " + input);
-                                    this.isKeyword = true;
-                                    this.isToken = true;
-                                    this.index = counter;
-                                    break;
+                                    if(input == "string") {
+                                        this.setTokenValue(input);
+                                        this.setTokenCode("KEYWORD VAR DECLARATION " + input);
+                                        this.isKeyword = true;
+                                        this.isToken = true;
+                                        this.index = counter;
+                                    }
+                                    
+                                    else {
+                                        isntKey = true;
+                                    }      
+                                    break;          
                             }
                     
                             switch(printRegEx.test(input)) {
                                 case true:
-                                    this.setTokenValue(input);
-                                    this.setTokenCode("KEYWORD PRINT STATEMENT " + input);
-                                    this.isKeyword = true;
-                                    this.isToken = true;
-                                    this.index = counter;
+                                    if(input == "print") {
+                                        this.setTokenValue(input);
+                                        this.setTokenCode("KEYWORD PRINT STATEMENT " + input);
+                                        this.isKeyword = true;
+                                        this.isToken = true;
+                                        this.index = counter;
+                                    }
+
+                                    else {
+                                        isntKey = true;
+                                    }
                                     break;
                             }
                     
                             switch(trueRegEx.test(input)) {
                                 case true:
-                                    this.setTokenValue(input);
-                                    this.setTokenCode("BOOLEAN " + input);
-                                    this.isKeyword = true;
-                                    this.isToken = true;
-                                    this.index = counter;
+                                    if(input == "true") {
+                                        this.setTokenValue(input);
+                                        this.setTokenCode("BOOLEAN " + input);
+                                        this.isKeyword = true;
+                                        this.isToken = true;
+                                        this.index = counter;
+                                    }
+
+                                    else {
+                                        isntKey = true;
+                                    }
                                     break;
                             }
                     
                             switch(falseRegEx.test(input)) {
                                 case true:
-                                    this.setTokenValue(input);
-                                    this.setTokenCode("BOOLEAN " + input);
-                                    this.isKeyword = true;
-                                    this.isToken = true;
-                                    this.index = counter;
+                                    if(input == "false") {
+                                        this.setTokenValue(input);
+                                        this.setTokenCode("BOOLEAN " + input);
+                                        this.isKeyword = true;
+                                        this.isToken = true;
+                                        this.index = counter;
+                                    }
+
+                                    else {
+                                        isntKey = true;
+                                    }
                                     break;
+
                             }
                     
                             switch(ifRegEx.test(input)) {
                                 case true:
-                                    this.setTokenValue(input);
-                                    this.setTokenCode("BRANCHING STATEMENT " + input);
-                                    this.isKeyword = true;
-                                    this.isToken = true;
-                                    this.index = counter;
+                                    if(input == "if") {
+                                        this.setTokenValue(input);
+                                        this.setTokenCode("BRANCHING STATEMENT " + input);
+                                        this.isKeyword = true;
+                                        this.isToken = true;
+                                        this.index = counter;
+                                    }
+
+                                    else {
+                                        isntKey = true;
+                                    }
                                     break;
                             }
                     
                             switch(whileRegEx.test(input)) {
                                 case true:
-                                    this.setTokenValue(input);
-                                    this.setTokenCode("WHILE KEYWORD " + input);
-                                    this.isKeyword = true;
-                                    this.isToken = true;
-                                    this.index = counter;
+                                    if(input == "while") {
+                                        this.setTokenValue(input);
+                                        this.setTokenCode("WHILE KEYWORD " + input);
+                                        this.isKeyword = true;
+                                        this.isToken = true;
+                                        this.index = counter;
+                                    }
+
+                                    else {
+                                        isntKey = true;
+                                    }
                                     break;
                             }
 
                             switch(boolRegEx.test(input)) {
                                 case true:
-                                    this.setTokenValue(input);
-                                    this.setTokenCode("BOOLEAN KEYWORD " + input);
-                                    this.isKeyword = true;
-                                    this.isToken = true;
-                                    this.index = counter;
+                                    if(input == "boolean") {
+                                        this.setTokenValue(input);
+                                        this.setTokenCode("BOOLEAN KEYWORD " + input);
+                                        this.isKeyword = true;
+                                        this.isToken = true;
+                                        this.index = counter;
+                                    }
+
+                                    else {
+                                        isntKey = true;
+                                    }
                                     break;
                             }
 
                             //Break out of the loop if the token is a keyword it has become too long to be a token.
                             //Or, break out of the loop if the next element in the array is undefined.
-                            if(typeof program[counter + 1] === 'undefined' || this.isKeyword == true) {
+                            if(typeof program[counter + 1] === 'undefined' || this.isKeyword == true || isntKey == true) {
                                 break;
                             }
                             loops++;
@@ -292,9 +358,16 @@ module mackintosh {
                     }
 
                     if(this.quoteCount > 0) {
-                        this.setTokenCode("CHARACTER " + saveChar[0]);
-                        this.setTokenValue(saveChar[0].toString());
-                        this.isToken = true;
+                        //New line causes lex error in string.
+                        if(input == "\n") {
+                            _Functions.log("LEXER ERROR at " + lineNum + ": new line not allowed in string." );
+                        }
+
+                        else {
+                            this.setTokenCode("CHARACTER " + saveChar[0]);
+                            this.setTokenValue(saveChar[0].toString());
+                            this.isToken = true;
+                        }
                     }
 
                     else if(this.quoteCount == 0 && this.isKeyword == false) {
@@ -303,7 +376,12 @@ module mackintosh {
                         this.isToken = true;
                     }
                     this.isKeyword = false;
+                    isntKey = false;
                     break;
+                case false:
+                    if(digits.test(input.toLowerCase())) {
+                        _Functions.log("LEXER ERROR at " + lineNum + " - characters and ids cannot be capital.");
+                    }
             }
 
             switch(operator.test(input)) {
