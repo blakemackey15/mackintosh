@@ -144,57 +144,9 @@ module mackintosh {
 
                 CSTTree.climbTree();
             }
-            // if(parseTokens[tokenPointer].length != 0) {
-            //     CSTTree.addNode("StatementList", "branch");
-            //     this.parseStatement(parseTokens);
-            // }
 
-            // //Empty string - do nothing.
-            // else {
-            //      //Not an empty else, represents do nothing.
-            // }
             CSTTree.climbTree();
         }
-
-        //Expected tokens: print, assignment, var declaration, while, if, block
-        // public static parseStatement(parseTokens : Array<string>) {
-        //     _Functions.log("PARSER - parseStatement()");
-        //     CSTTree.addNode("Statement", "branch");
-
-        //     //Use regular expressions from lex to check what type of statement is to be parsed.
-        //     if(printRegEx.test(parseTokens[tokenPointer])){
-        //         this.parsePrintStatement(parseTokens);
-        //     }
-
-        //     //Check for assignment op.
-        //     if(assignment.test(parseTokens[tokenPointer])) {
-        //         this.parseAssignmentStatement(parseTokens);
-        //     }
-
-        //     //Check for var declaration types - boolean, int, string.
-        //     if(boolRegEx.test(parseTokens[tokenPointer]) || stringRegEx.test(parseTokens[tokenPointer]) 
-        //       || intRegEx.test(parseTokens[tokenPointer])) {
-        //         this.parseVarDecl(parseTokens);
-        //     }
-
-        //     //Check for while statement.
-        //     if(whileRegEx.test(parseTokens[tokenPointer])) {
-        //         this.parseWhileStatement(parseTokens);
-        //     }
-
-        //     //Check for if statement.
-        //     if(ifRegEx.test(parseTokens[tokenPointer])) {
-        //         this.parseIfStatement(parseTokens);
-        //     }
-
-        //     //Check for opening or closing block.
-        //     if(leftBlock.test(parseTokens[tokenPointer])) {
-        //         this.parseBlock(parseTokens);
-        //     }
-
-        //     CSTTree.climbTree();
-
-        // }
 
         //Expected tokens: print( expr )
         public static parsePrintStatement(parseTokens : Array<string>) {
