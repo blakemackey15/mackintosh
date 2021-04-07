@@ -87,6 +87,7 @@ module mackintosh {
          * Generates token by checking against the regular expressions generated.
          */
         public GenerateToken(input : string, program : string[], counter : number) : boolean {
+            debugger;
             /**
              * Use switch statements to check against each RegEx.
              */
@@ -429,8 +430,8 @@ module mackintosh {
                     this.setIsComment(true);
 
                     while(closeComment == false || closeCommentAgain == false) {
+                        //Handles whitespace.
                         comment.push(program[counter]);
-                        counter++;
                         counter++;
                         closeComment = closeComments.test(program[counter])
                         closeCommentAgain = closeComments.test(input + programCount[counter]);

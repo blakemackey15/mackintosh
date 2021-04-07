@@ -246,6 +246,7 @@ var mackintosh;
          * Generates token by checking against the regular expressions generated.
          */
         token.prototype.GenerateToken = function (input, program, counter) {
+            debugger;
             /**
              * Use switch statements to check against each RegEx.
              */
@@ -542,8 +543,8 @@ var mackintosh;
                     var closeCommentAgain = false;
                     this.setIsComment(true);
                     while (closeComment == false || closeCommentAgain == false) {
+                        //Handles whitespace.
                         comment.push(program[counter]);
-                        counter++;
                         counter++;
                         closeComment = closeComments.test(program[counter]);
                         closeCommentAgain = closeComments.test(input + programCount[counter]);
@@ -698,6 +699,9 @@ var mackintosh;
                         parseWarnCount + " warnings");
                     //Prints the CST if there are no more errors.
                     if (parseErrCount <= 0) {
+                        _Functions.log("\n");
+                        _Functions.log("\n");
+                        _Functions.log("PARSER - Program " + (programCount - 1) + " CST:");
                         _Functions.log(CSTTree.toString());
                     }
                 }

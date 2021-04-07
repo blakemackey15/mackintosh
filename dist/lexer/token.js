@@ -60,6 +60,7 @@ var mackintosh;
          * Generates token by checking against the regular expressions generated.
          */
         token.prototype.GenerateToken = function (input, program, counter) {
+            debugger;
             /**
              * Use switch statements to check against each RegEx.
              */
@@ -356,8 +357,8 @@ var mackintosh;
                     var closeCommentAgain = false;
                     this.setIsComment(true);
                     while (closeComment == false || closeCommentAgain == false) {
+                        //Handles whitespace.
                         comment.push(program[counter]);
-                        counter++;
                         counter++;
                         closeComment = closeComments.test(program[counter]);
                         closeCommentAgain = closeComments.test(input + programCount[counter]);

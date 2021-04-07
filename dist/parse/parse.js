@@ -26,6 +26,9 @@ var mackintosh;
                         parseWarnCount + " warnings");
                     //Prints the CST if there are no more errors.
                     if (parseErrCount <= 0) {
+                        _Functions.log("\n");
+                        _Functions.log("\n");
+                        _Functions.log("PARSER - Program " + (programCount - 1) + " CST:");
                         _Functions.log(CSTTree.toString());
                     }
                 }
