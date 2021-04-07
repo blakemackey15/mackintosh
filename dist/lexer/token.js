@@ -349,15 +349,16 @@ var mackintosh;
             }
             switch (openComments.test(input)) {
                 case true:
+                    counter++;
                     this.isToken = true;
                     var comment = new Array("");
                     comment.pop();
+                    comment.push(program[counter]);
                     //This is kind of a dumb fix but it works.
                     var closeComment = false;
                     var closeCommentAgain = false;
                     this.setIsComment(true);
-                    while (closeComment == false || closeCommentAgain == false) {
-                        //Handles whitespace.
+                    while (closeComment == false && closeCommentAgain == false) {
                         comment.push(program[counter]);
                         counter++;
                         closeComment = closeComments.test(program[counter]);
