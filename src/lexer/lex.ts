@@ -74,6 +74,7 @@ module mackintosh {
                         if(typeof program[i] != undefined) {
                             _Functions.log('\n');
                             _Functions.log('\n');
+                            tokenStream = [];
                             _Functions.log('LEXER - Lexing Program ' + programCount);
                         }
                     }
