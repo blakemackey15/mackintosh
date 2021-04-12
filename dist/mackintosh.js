@@ -256,6 +256,11 @@ var mackintosh;
                     this.setTokenCode("");
                     this.setTokenValue("");
                     this.isToken == false;
+                    //New line causes lex error in string.
+                    if (this.quoteCount > 0) {
+                        _Functions.log("LEXER ERROR at " + lineNum + ": new line not allowed in string.");
+                        errCount++;
+                    }
                     lineNum++;
                     break;
             }
@@ -482,15 +487,9 @@ var mackintosh;
                         input = saveChar[0].toString();
                     }
                     if (this.quoteCount > 0) {
-                        //New line causes lex error in string.
-                        if (input == "\n") {
-                            _Functions.log("LEXER ERROR at " + lineNum + ": new line not allowed in string.");
-                        }
-                        else {
-                            this.setTokenCode("CHARACTER " + saveChar[0]);
-                            this.setTokenValue(saveChar[0].toString());
-                            this.isToken = true;
-                        }
+                        this.setTokenCode("CHARACTER " + saveChar[0]);
+                        this.setTokenValue(saveChar[0].toString());
+                        this.isToken = true;
                     }
                     else if (this.quoteCount == 0 && this.isKeyword == false) {
                         this.setTokenCode("IDENTIFIER " + saveChar[0].toString());
