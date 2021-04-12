@@ -159,7 +159,7 @@ var mackintosh;
                     }
                 }
                 else {
-                    _Functions.log('LEXER ERROR - Invalid Token ' + curToken.getTokenCode() + ' Found on line: ' + lineNum);
+                    _Functions.log('LEXER ERROR - Invalid Token ' + program[i] + ' Found on line: ' + lineNum);
                     errCount++;
                 }
                 //Check for EOP $ and start lexing next program.
