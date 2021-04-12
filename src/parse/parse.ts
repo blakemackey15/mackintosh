@@ -219,7 +219,7 @@ module mackintosh {
             }
 
             //This handles if its an id.
-            if(characters.test(parseTokens[tokenPointer]) && parseTokens[tokenPointer].length == 0) {
+            if(characters.test(parseTokens[tokenPointer])) {
                 this.parseId(parseTokens);
             }
 
