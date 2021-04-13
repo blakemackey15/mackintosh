@@ -499,10 +499,6 @@ var mackintosh;
                     this.isKeyword = false;
                     isntKey = false;
                     break;
-                case false:
-                    if (digits.test(input.toLowerCase())) {
-                        _Functions.log("LEXER ERROR at " + lineNum + " - characters and ids cannot be capital.");
-                    }
             }
             switch (operator.test(input)) {
                 case true:
@@ -795,7 +791,7 @@ var mackintosh;
                     this.parseBlock(parseTokens);
                 }
                 else {
-                    _Functions.log("PARSER ERROR - Failed to parse statement list.");
+                    _Functions.log("PARSER ERROR - Expected beginning of statement tokens (if, print, while, {}, assignment statement, boolean, int, string)");
                     parseErrCount++;
                     break;
                 }

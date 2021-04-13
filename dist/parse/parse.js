@@ -121,9 +121,8 @@ var mackintosh;
                     this.parseBlock(parseTokens);
                 }
                 else {
-                    _Functions.log("PARSER ERROR - Failed to parse statement list.");
+                    _Functions.log("PARSER ERROR - Expected beginning of statement tokens (if, print, while, {}, assignment statement, boolean, int, string)");
                     parseErrCount++;
-                    break;
                 }
                 CSTTree.climbTree();
             }

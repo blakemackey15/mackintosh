@@ -377,10 +377,6 @@ module mackintosh {
                     this.isKeyword = false;
                     isntKey = false;
                     break;
-                case false:
-                    if(digits.test(input.toLowerCase())) {
-                        _Functions.log("LEXER ERROR at " + lineNum + " - characters and ids cannot be capital.");
-                    }
             }
 
             switch(operator.test(input)) {
