@@ -346,6 +346,7 @@ var mackintosh;
                 case true:
                     this.isToken = true;
                     var comment = new Array("");
+                    this.setTokenCode("");
                     comment.pop();
                     comment.push(program[counter]);
                     counter++;
@@ -353,7 +354,6 @@ var mackintosh;
                     counter++;
                     //This is kind of a dumb fix but it works.
                     var closeComment = false;
-                    var closeCommentAgain = false;
                     this.setIsComment(true);
                     while (closeComment == false) {
                         comment.push(program[counter]);
@@ -361,6 +361,7 @@ var mackintosh;
                         closeComment = closeComments.test(program[counter]);
                         this.index = counter;
                     }
+                    comment.push(program[counter]);
                     counter++;
                     comment.push(program[counter]);
                     this.index = counter;

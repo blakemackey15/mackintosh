@@ -416,6 +416,7 @@ module mackintosh {
                 case true:
                     this.isToken = true;
                     let comment = new Array<string>("");
+                    this.setTokenCode("");
                     comment.pop();
                     comment.push(program[counter]);
                     counter++;
@@ -424,7 +425,6 @@ module mackintosh {
 
                     //This is kind of a dumb fix but it works.
                     let closeComment = false;
-                    let closeCommentAgain = false;
                     this.setIsComment(true);
 
                     while(closeComment == false) {
@@ -434,6 +434,7 @@ module mackintosh {
                         this.index = counter;
                     }
 
+                    comment.push(program[counter]);
                     counter++;
                     comment.push(program[counter]);
                     this.index = counter;
