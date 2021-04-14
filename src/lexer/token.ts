@@ -96,6 +96,11 @@ module mackintosh {
                     this.setTokenCode("");
                     this.setTokenValue("");
                     this.isToken == false;
+                    //New line causes lex error in string.
+                    if(this.quoteCount > 0) {
+                        _Functions.log("LEXER ERROR at " + lineNum + ": new line not allowed in string." );
+                        errCount++;
+                    }
                     lineNum++;
                     break;
             }
@@ -359,16 +364,9 @@ module mackintosh {
                     }
 
                     if(this.quoteCount > 0) {
-                        //New line causes lex error in string.
-                        if(input == "\n") {
-                            _Functions.log("LEXER ERROR at " + lineNum + ": new line not allowed in string." );
-                        }
-
-                        else {
-                            this.setTokenCode("CHARACTER " + saveChar[0]);
-                            this.setTokenValue(saveChar[0].toString());
-                            this.isToken = true;
-                        }
+                        this.setTokenCode("CHARACTER " + saveChar[0]);
+                        this.setTokenValue(saveChar[0].toString());
+                        this.isToken = true;
                     }
 
                     else if(this.quoteCount == 0 && this.isKeyword == false) {
@@ -379,10 +377,6 @@ module mackintosh {
                     this.isKeyword = false;
                     isntKey = false;
                     break;
-                case false:
-                    if(digits.test(input.toLowerCase())) {
-                        _Functions.log("LEXER ERROR at " + lineNum + " - characters and ids cannot be capital.");
-                    }
             }
 
             switch(operator.test(input)) {
@@ -420,24 +414,30 @@ module mackintosh {
 
             switch(openComments.test(input)) {
                 case true:
-                    counter++;
                     this.isToken = true;
                     let comment = new Array<string>("");
+                    this.setTokenCode("");
                     comment.pop();
                     comment.push(program[counter]);
+                    counter++;
+                    comment.push(program[counter]);
+                    counter++;
 
                     //This is kind of a dumb fix but it works.
                     let closeComment = false;
-                    let closeCommentAgain = false;
                     this.setIsComment(true);
 
-                    while(closeComment == false && closeCommentAgain == false) {
+                    while(closeComment == false) {
                         comment.push(program[counter]);
                         counter++;
                         closeComment = closeComments.test(program[counter])
-                        closeCommentAgain = closeComments.test(input + programCount[counter]);
                         this.index = counter;
                     }
+
+                    comment.push(program[counter]);
+                    counter++;
+                    comment.push(program[counter]);
+                    this.index = counter;
             }
 
             switch(input === '(') {
