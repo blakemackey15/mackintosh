@@ -862,12 +862,16 @@ var mackintosh;
             }
             //This handles if its an id.
             if (characters.test(parseTokens[tokenPointer])) {
-                this.parseId(parseTokens);
+                if (parseTokens[tokenPointer].length > 1) {
+                    if (trueRegEx.test(parseTokens[tokenPointer]) || falseRegEx.test(parseTokens[tokenPointer])) {
+                        this.parseBoolExpr(parseTokens);
+                    }
+                }
+                else {
+                    this.parseId(parseTokens);
+                }
             }
             //Bool expr.
-            if (trueRegEx.test(parseTokens[tokenPointer]) || falseRegEx.test(parseTokens[tokenPointer])) {
-                this.parseBoolExpr(parseTokens);
-            }
             CSTTree.climbTree();
         };
         //Expected tokens: digit intop expr
