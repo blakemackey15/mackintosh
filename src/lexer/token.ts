@@ -414,24 +414,29 @@ module mackintosh {
 
             switch(openComments.test(input)) {
                 case true:
-                    counter++;
                     this.isToken = true;
                     let comment = new Array<string>("");
                     comment.pop();
                     comment.push(program[counter]);
+                    counter++;
+                    comment.push(program[counter]);
+                    counter++;
 
                     //This is kind of a dumb fix but it works.
                     let closeComment = false;
                     let closeCommentAgain = false;
                     this.setIsComment(true);
 
-                    while(closeComment == false && closeCommentAgain == false) {
+                    while(closeComment == false) {
                         comment.push(program[counter]);
                         counter++;
                         closeComment = closeComments.test(program[counter])
-                        closeCommentAgain = closeComments.test(input + programCount[counter]);
                         this.index = counter;
                     }
+
+                    counter++;
+                    comment.push(program[counter]);
+                    this.index = counter;
             }
 
             switch(input === '(') {

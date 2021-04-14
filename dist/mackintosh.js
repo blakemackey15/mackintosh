@@ -531,22 +531,26 @@ var mackintosh;
             }
             switch (openComments.test(input)) {
                 case true:
-                    counter++;
                     this.isToken = true;
                     var comment = new Array("");
                     comment.pop();
                     comment.push(program[counter]);
+                    counter++;
+                    comment.push(program[counter]);
+                    counter++;
                     //This is kind of a dumb fix but it works.
                     var closeComment = false;
                     var closeCommentAgain = false;
                     this.setIsComment(true);
-                    while (closeComment == false && closeCommentAgain == false) {
+                    while (closeComment == false) {
                         comment.push(program[counter]);
                         counter++;
                         closeComment = closeComments.test(program[counter]);
-                        closeCommentAgain = closeComments.test(input + programCount[counter]);
                         this.index = counter;
                     }
+                    counter++;
+                    comment.push(program[counter]);
+                    this.index = counter;
             }
             switch (input === '(') {
                 case true:
