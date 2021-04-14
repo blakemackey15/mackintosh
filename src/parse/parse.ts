@@ -163,7 +163,7 @@ module mackintosh {
             CSTTree.climbTree();
         }
 
-        //Expected tokens: id = expr
+        //Expected tokens: id = exprx
         public static parseAssignmentStatement(parseTokens : Array<string>) {
             _Functions.log("PARSER - parseAssignmentStatement()");
             CSTTree.addNode("AssignmentStatement", "branch");
@@ -211,6 +211,10 @@ module mackintosh {
             //Check what type of expr this token is.
             if(digits.test(parseTokens[tokenPointer])) {
                 this.parseIntExpr(parseTokens);
+                //Handle multiple digits.
+                while(digits.test(parseTokens[tokenPointer])) {
+                    this.parseIntExpr(parseTokens);
+                }
             }
 
             //String check.

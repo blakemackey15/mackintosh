@@ -123,6 +123,7 @@ var mackintosh;
                 else {
                     _Functions.log("PARSER ERROR - Expected beginning of statement tokens (if, print, while, {}, assignment statement, boolean, int, string)");
                     parseErrCount++;
+                    break;
                 }
                 CSTTree.climbTree();
             }
@@ -138,7 +139,7 @@ var mackintosh;
             this.parseParen(parseTokens);
             CSTTree.climbTree();
         };
-        //Expected tokens: id = expr
+        //Expected tokens: id = exprx
         parse.parseAssignmentStatement = function (parseTokens) {
             _Functions.log("PARSER - parseAssignmentStatement()");
             CSTTree.addNode("AssignmentStatement", "branch");
@@ -180,6 +181,10 @@ var mackintosh;
             //Check what type of expr this token is.
             if (digits.test(parseTokens[tokenPointer])) {
                 this.parseIntExpr(parseTokens);
+                //Handle multiple digits.
+                while (digits.test(parseTokens[tokenPointer])) {
+                    this.parseIntExpr(parseTokens);
+                }
             }
             //String check.
             if (quotes.test(parseTokens[tokenPointer])) {
