@@ -141,7 +141,7 @@ module mackintosh {
                 }
 
                 else {
-                    _Functions.log("PARSER ERROR - Failed to parse statement list.");
+                    _Functions.log("PARSER ERROR - Expected beginning of statement tokens (if, print, while, {}, assignment statement, boolean, int, string)");
                     parseErrCount++;
                     break;
                 }
@@ -163,7 +163,7 @@ module mackintosh {
             CSTTree.climbTree();
         }
 
-        //Expected tokens: id = expr
+        //Expected tokens: id = exprx
         public static parseAssignmentStatement(parseTokens : Array<string>) {
             _Functions.log("PARSER - parseAssignmentStatement()");
             CSTTree.addNode("AssignmentStatement", "branch");
@@ -211,6 +211,10 @@ module mackintosh {
             //Check what type of expr this token is.
             if(digits.test(parseTokens[tokenPointer])) {
                 this.parseIntExpr(parseTokens);
+                //Handle multiple digits.
+                while(digits.test(parseTokens[tokenPointer])) {
+                    this.parseIntExpr(parseTokens);
+                }
             }
 
             //String check.
@@ -219,14 +223,19 @@ module mackintosh {
             }
 
             //This handles if its an id.
-            if(characters.test(parseTokens[tokenPointer]) && parseTokens[tokenPointer].length == 0) {
-                this.parseId(parseTokens);
+            if(characters.test(parseTokens[tokenPointer])) {
+                if(parseTokens[tokenPointer].length > 1) {
+                    if(trueRegEx.test(parseTokens[tokenPointer]) || falseRegEx.test(parseTokens[tokenPointer])) {
+                        this.parseBoolExpr(parseTokens);
+                    }
+                }
+                else {
+                    this.parseId(parseTokens);
+                }
             }
 
             //Bool expr.
-            if(trueRegEx.test(parseTokens[tokenPointer]) || falseRegEx.test(parseTokens[tokenPointer])) {
-                this.parseBoolExpr(parseTokens);
-            }
+
 
             CSTTree.climbTree();
         }

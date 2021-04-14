@@ -159,7 +159,7 @@ var mackintosh;
                     }
                 }
                 else {
-                    _Functions.log('LEXER ERROR - Invalid Token ' + curToken.getTokenCode() + ' Found on line: ' + lineNum);
+                    _Functions.log('LEXER ERROR - Invalid Token ' + program[i] + ' Found on line: ' + lineNum);
                     errCount++;
                 }
                 //Check for EOP $ and start lexing next program.
@@ -256,6 +256,11 @@ var mackintosh;
                     this.setTokenCode("");
                     this.setTokenValue("");
                     this.isToken == false;
+                    //New line causes lex error in string.
+                    if (this.quoteCount > 0) {
+                        _Functions.log("LEXER ERROR at " + lineNum + ": new line not allowed in string.");
+                        errCount++;
+                    }
                     lineNum++;
                     break;
             }
@@ -482,15 +487,9 @@ var mackintosh;
                         input = saveChar[0].toString();
                     }
                     if (this.quoteCount > 0) {
-                        //New line causes lex error in string.
-                        if (input == "\n") {
-                            _Functions.log("LEXER ERROR at " + lineNum + ": new line not allowed in string.");
-                        }
-                        else {
-                            this.setTokenCode("CHARACTER " + saveChar[0]);
-                            this.setTokenValue(saveChar[0].toString());
-                            this.isToken = true;
-                        }
+                        this.setTokenCode("CHARACTER " + saveChar[0]);
+                        this.setTokenValue(saveChar[0].toString());
+                        this.isToken = true;
                     }
                     else if (this.quoteCount == 0 && this.isKeyword == false) {
                         this.setTokenCode("IDENTIFIER " + saveChar[0].toString());
@@ -500,10 +499,6 @@ var mackintosh;
                     this.isKeyword = false;
                     isntKey = false;
                     break;
-                case false:
-                    if (digits.test(input.toLowerCase())) {
-                        _Functions.log("LEXER ERROR at " + lineNum + " - characters and ids cannot be capital.");
-                    }
             }
             switch (operator.test(input)) {
                 case true:
@@ -536,22 +531,27 @@ var mackintosh;
             }
             switch (openComments.test(input)) {
                 case true:
-                    counter++;
                     this.isToken = true;
                     var comment = new Array("");
+                    this.setTokenCode("");
                     comment.pop();
                     comment.push(program[counter]);
+                    counter++;
+                    comment.push(program[counter]);
+                    counter++;
                     //This is kind of a dumb fix but it works.
                     var closeComment = false;
-                    var closeCommentAgain = false;
                     this.setIsComment(true);
-                    while (closeComment == false && closeCommentAgain == false) {
+                    while (closeComment == false) {
                         comment.push(program[counter]);
                         counter++;
                         closeComment = closeComments.test(program[counter]);
-                        closeCommentAgain = closeComments.test(input + programCount[counter]);
                         this.index = counter;
                     }
+                    comment.push(program[counter]);
+                    counter++;
+                    comment.push(program[counter]);
+                    this.index = counter;
             }
             switch (input === '(') {
                 case true:
@@ -796,7 +796,7 @@ var mackintosh;
                     this.parseBlock(parseTokens);
                 }
                 else {
-                    _Functions.log("PARSER ERROR - Failed to parse statement list.");
+                    _Functions.log("PARSER ERROR - Expected beginning of statement tokens (if, print, while, {}, assignment statement, boolean, int, string)");
                     parseErrCount++;
                     break;
                 }
@@ -814,7 +814,7 @@ var mackintosh;
             this.parseParen(parseTokens);
             CSTTree.climbTree();
         };
-        //Expected tokens: id = expr
+        //Expected tokens: id = exprx
         parse.parseAssignmentStatement = function (parseTokens) {
             _Functions.log("PARSER - parseAssignmentStatement()");
             CSTTree.addNode("AssignmentStatement", "branch");
@@ -856,19 +856,27 @@ var mackintosh;
             //Check what type of expr this token is.
             if (digits.test(parseTokens[tokenPointer])) {
                 this.parseIntExpr(parseTokens);
+                //Handle multiple digits.
+                while (digits.test(parseTokens[tokenPointer])) {
+                    this.parseIntExpr(parseTokens);
+                }
             }
             //String check.
             if (quotes.test(parseTokens[tokenPointer])) {
                 this.parseStringExpr(parseTokens);
             }
             //This handles if its an id.
-            if (characters.test(parseTokens[tokenPointer]) && parseTokens[tokenPointer].length == 0) {
-                this.parseId(parseTokens);
+            if (characters.test(parseTokens[tokenPointer])) {
+                if (parseTokens[tokenPointer].length > 1) {
+                    if (trueRegEx.test(parseTokens[tokenPointer]) || falseRegEx.test(parseTokens[tokenPointer])) {
+                        this.parseBoolExpr(parseTokens);
+                    }
+                }
+                else {
+                    this.parseId(parseTokens);
+                }
             }
             //Bool expr.
-            if (trueRegEx.test(parseTokens[tokenPointer]) || falseRegEx.test(parseTokens[tokenPointer])) {
-                this.parseBoolExpr(parseTokens);
-            }
             CSTTree.climbTree();
         };
         //Expected tokens: digit intop expr
