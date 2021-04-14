@@ -68,7 +68,7 @@ var mackintosh;
                 case true:
                     this.setTokenCode("");
                     this.setTokenValue("");
-                    this.isToken == false;
+                    this.isToken = true;
                     //New line causes lex error in string.
                     if (this.quoteCount > 0) {
                         _Functions.log("LEXER ERROR at " + lineNum + ": new line not allowed in string.");
@@ -81,7 +81,7 @@ var mackintosh;
                 case true:
                     this.setTokenCode("");
                     this.setTokenValue("");
-                    this.isToken == false;
+                    this.isToken = true;
                     break;
             }
             switch (digits.test(input)) {

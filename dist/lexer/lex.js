@@ -56,6 +56,7 @@ var mackintosh;
                     _Functions.log('LEXER ERROR - Invalid Token ' + program[i] + ' Found on line: ' + lineNum);
                     errCount++;
                 }
+                curToken.setIsToken(false);
                 //Check for EOP $ and start lexing next program.
                 if (program[i] == '$') {
                     if (errCount == 0) {
