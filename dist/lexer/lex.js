@@ -62,6 +62,7 @@ var mackintosh;
                     if (errCount == 0) {
                         _Functions.log('LEXER - Lex Completed With ' + errCount + ' Errors and ' + warnCount + ' Warnings');
                         _Parser.parse(tokenStream);
+                        _SemanticAnalyzer.createAST(tokenStream);
                         //Check if this is the end of the program. If not, begin lexing the next program.
                         if (typeof program[i] != undefined) {
                             _Functions.log('\n');

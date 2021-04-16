@@ -26,6 +26,7 @@ var _Lexer = mackintosh.lex;
 var _Parser = mackintosh.parse;
 var _Token = mackintosh.token;
 var _Functions = mackintosh.compilerFunctions;
+var _SemanticAnalyzer = mackintosh.semanticAnalyser;
 //Lex errors.
 var errCount = 0;
 //Parse errors.
@@ -69,6 +70,7 @@ var whitespace = new RegExp('[ \t]');
 var CSTTree = new mackintosh.CST;
 var isMatch = false;
 var tokenPointer = 0;
+var ASTTree = new mackintosh.AST;
 /*
 References: Here is a list of the resources I referenced while developing this project.
 https://regex101.com/ - Useful tool I used to test my regular expressions for my tokens.
@@ -168,6 +170,7 @@ var mackintosh;
                     if (errCount == 0) {
                         _Functions.log('LEXER - Lex Completed With ' + errCount + ' Errors and ' + warnCount + ' Warnings');
                         _Parser.parse(tokenStream);
+                        _SemanticAnalyzer.createAST(tokenStream);
                         //Check if this is the end of the program. If not, begin lexing the next program.
                         if (typeof program[i] != undefined) {
                             _Functions.log('\n');
@@ -1054,6 +1057,10 @@ var mackintosh;
     var semanticAnalyser = /** @class */ (function () {
         function semanticAnalyser() {
         }
+        //AST and symbol table implementations.
+        semanticAnalyser.createAST = function (parseTokens) {
+            ASTTree = new mackintosh.AST();
+        };
         return semanticAnalyser;
     }());
     mackintosh.semanticAnalyser = semanticAnalyser;

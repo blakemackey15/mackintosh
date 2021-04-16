@@ -7,6 +7,7 @@ var _Lexer = mackintosh.lex;
 var _Parser = mackintosh.parse;
 var _Token = mackintosh.token;
 var _Functions = mackintosh.compilerFunctions;
+var _SemanticAnalyzer = mackintosh.semanticAnalyser;
 //Lex errors.
 var errCount = 0;
 //Parse errors.
@@ -50,4 +51,5 @@ var whitespace = new RegExp('[ \t]');
 var CSTTree = new mackintosh.CST;
 var isMatch = false;
 var tokenPointer = 0;
+var ASTTree = new mackintosh.AST;
 //# sourceMappingURL=compilerGlobals.js.map
