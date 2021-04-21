@@ -8,6 +8,7 @@ var mackintosh;
         parse.parse = function (parseTokens) {
             debugger;
             CSTTree = new mackintosh.CST();
+            ASTTree = new mackintosh.CST();
             tokenPointer = 0;
             _Functions.log("\n");
             _Functions.log("\n");
@@ -30,9 +31,14 @@ var mackintosh;
                         _Functions.log("\n");
                         _Functions.log("PARSER - Program " + (programCount - 1) + " CST:");
                         _Functions.log(CSTTree.toString());
+                        _Functions.log("\n");
+                        _Functions.log("\n");
+                        _Functions.log("PARSER - Program " + (programCount - 1) + " AST:");
+                        _Functions.log(ASTTree.toString());
                     }
                 }
                 catch (error) {
+                    _Functions.log(error);
                     _Functions.log("PARSER - Error caused parse to end.");
                     parseErrCount++;
                 }
@@ -49,6 +55,7 @@ var mackintosh;
             if (isMatch) {
                 _Functions.log("PARSER - Token Matched! " + parseToken);
                 CSTTree.addNode(parseToken, "leaf");
+                ASTTree.addNode(parseToken, "leaf");
                 tokenPointer++;
                 isMatch = false;
             }
@@ -80,6 +87,7 @@ var mackintosh;
         parse.parseBlock = function (parseTokens) {
             _Functions.log("PARSER - parseBlock()");
             CSTTree.addNode("Block", "branch");
+            ASTTree.addNode("Block", "branch");
             this.parseOpenBrace(parseTokens);
             this.parseStatementList(parseTokens);
             this.parseCloseBrace(parseTokens);
@@ -133,46 +141,56 @@ var mackintosh;
         parse.parsePrintStatement = function (parseTokens) {
             _Functions.log("PARSER - parsePrintStatement()");
             CSTTree.addNode("PrintStatement", "branch");
+            ASTTree.addNode("PrintStatement", "branch");
             this.parsePrint(parseTokens);
             this.parseParen(parseTokens);
             this.parseExpr(parseTokens);
             this.parseParen(parseTokens);
             CSTTree.climbTree();
+            ASTTree.climbTree();
         };
         //Expected tokens: id = exprx
         parse.parseAssignmentStatement = function (parseTokens) {
             _Functions.log("PARSER - parseAssignmentStatement()");
             CSTTree.addNode("AssignmentStatement", "branch");
+            ASTTree.addNode("AssignmentStatement", "branch");
             this.parseId(parseTokens);
             this.parseAssignmentOp(parseTokens);
             this.parseExpr(parseTokens);
             CSTTree.climbTree();
+            ASTTree.climbTree();
         };
         //Expected tokens: type id
         parse.parseVarDecl = function (parseTokens) {
             _Functions.log("PARSER - parseVarDecl()");
             CSTTree.addNode("VarDecl", "branch");
+            ASTTree.addNode("VarDecl", "branch");
             this.parseType(parseTokens);
             this.parseId(parseTokens);
             CSTTree.climbTree();
+            ASTTree.climbTree();
         };
         //Expected tokens: while boolexpr block
         parse.parseWhileStatement = function (parseTokens) {
             _Functions.log("PARSER - parseWhileStatement()");
             CSTTree.addNode("WhileStatement", "branch");
+            ASTTree.addNode("WhileStatement", "branch");
             this.parseWhile(parseTokens);
             this.parseBoolExpr(parseTokens);
             this.parseBlock(parseTokens);
             CSTTree.climbTree();
+            ASTTree.climbTree();
         };
         //Expected tokens: if boolexpr block
         parse.parseIfStatement = function (parseTokens) {
             _Functions.log("PARSER - parseIfStatement()");
             CSTTree.addNode("IfStatement", "branch");
+            ASTTree.addNode("IfStatement", "branch");
             this.parseIf(parseTokens);
             this.parseBoolExpr(parseTokens);
             this.parseBlock(parseTokens);
             CSTTree.climbTree();
+            ASTTree.climbTree();
         };
         //Expected tokens: intexpr, stringexpr, boolexpr, id
         parse.parseExpr = function (parseTokens) {
@@ -209,6 +227,7 @@ var mackintosh;
         parse.parseIntExpr = function (parseTokens) {
             _Functions.log("PARSER - parseIntExpr()");
             CSTTree.addNode("IntExpr", "branch");
+            ASTTree.addNode("IntExpr", "branch");
             //Check if this is to be an expression or a single digit.
             if (parseTokens[tokenPointer + 1] == "+") {
                 this.parseDigit(parseTokens);
@@ -219,21 +238,25 @@ var mackintosh;
                 this.parseDigit(parseTokens);
             }
             CSTTree.climbTree();
+            CSTTree.climbTree();
         };
         //Expected tokens: "charlist"
         parse.parseStringExpr = function (parseTokens) {
             _Functions.log("PARSER - parseStringExpr()");
             CSTTree.addNode("StringExpr", "branch");
+            ASTTree.addNode("StringExpr", "branch");
             this.parseQuotes(parseTokens);
             this.parseCharList(parseTokens);
             this.parseQuotes(parseTokens);
             CSTTree.climbTree();
+            ASTTree.climbTree();
         };
         //Expected tokens: ( expr boolop expr)
         //OR: boolval
         parse.parseBoolExpr = function (parseTokens) {
             _Functions.log("PARSER - parseBoolExpr()");
             CSTTree.addNode("BooleanExpr", "branch");
+            ASTTree.addNode("BooleanExpr", "branch");
             //If match parenthesis = true: (expr boolop expr)
             if (parseTokens[tokenPointer] == "(" || parseTokens[tokenPointer] == ")") {
                 this.parseParen(parseTokens);
@@ -247,6 +270,7 @@ var mackintosh;
                 this.parseBoolVal(parseTokens);
             }
             CSTTree.climbTree();
+            ASTTree.climbTree();
         };
         //Expected tokens: char
         parse.parseId = function (parseTokens) {

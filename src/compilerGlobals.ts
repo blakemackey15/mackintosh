@@ -55,7 +55,7 @@ var whitespace = new RegExp('[ \t]');
 var CSTTree = new mackintosh.CST;
 var isMatch : boolean = false;
 var tokenPointer : number = 0;
-var ASTTree = new mackintosh.AST;
+var ASTTree = new mackintosh.CST;
 
 
 

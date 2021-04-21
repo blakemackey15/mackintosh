@@ -5,7 +5,6 @@ var mackintosh;
         }
         //AST and symbol table implementations.
         semanticAnalyser.createAST = function (parseTokens) {
-            ASTTree = new mackintosh.AST();
         };
         return semanticAnalyser;
     }());

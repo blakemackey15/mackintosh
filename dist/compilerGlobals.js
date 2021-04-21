@@ -51,5 +51,5 @@ var whitespace = new RegExp('[ \t]');
 var CSTTree = new mackintosh.CST;
 var isMatch = false;
 var tokenPointer = 0;
-var ASTTree = new mackintosh.AST;
+var ASTTree = new mackintosh.CST;
 //# sourceMappingURL=compilerGlobals.js.map
