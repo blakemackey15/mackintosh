@@ -57,5 +57,8 @@ var isMatch : boolean = false;
 var tokenPointer : number = 0;
 var ASTTree = new mackintosh.CST;
 
-
-
+//Semantic Analysis Globals
+var scopePointer = 0;
+var isInitialized = false;
+var isUsed = false;
+var symbolTable = new Map();

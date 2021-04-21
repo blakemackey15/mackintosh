@@ -71,6 +71,11 @@ var CSTTree = new mackintosh.CST;
 var isMatch = false;
 var tokenPointer = 0;
 var ASTTree = new mackintosh.CST;
+//Semantic Analysis Globals
+var scopePointer = 0;
+var isInitialized = false;
+var isUsed = false;
+var symbolTable = new Map();
 /*
 References: Here is a list of the resources I referenced while developing this project.
 https://regex101.com/ - Useful tool I used to test my regular expressions for my tokens.
@@ -1053,50 +1058,20 @@ var mackintosh;
 })(mackintosh || (mackintosh = {}));
 var mackintosh;
 (function (mackintosh) {
-    //AST code based off CST which is based off JavaScript tree demo
-    //https://www.labouseur.com/projects/jsTreeDemo/treeDemo.js
-    //Class to represent a node in the AST.
-    var ASTNode = /** @class */ (function () {
-        function ASTNode(nodeName) {
-            this.nodeName = nodeName;
-            this.children = [];
-        }
-        ASTNode.prototype.setNodeName = function (nodeName) {
-            this.nodeName = nodeName;
-        };
-        ASTNode.prototype.getNodeName = function () {
-            return this.nodeName;
-        };
-        ASTNode.prototype.getChildren = function () {
-            return this.children;
-        };
-        ASTNode.prototype.addChildren = function (child) {
-            this.children.push(child);
-        };
-        ASTNode.prototype.getParent = function () {
-            return this.parent;
-        };
-        ASTNode.prototype.setParent = function (parNode) {
-            this.parent = parNode;
-        };
-        return ASTNode;
-    }());
-    mackintosh.ASTNode = ASTNode;
-    //Class to represent the AST.
-    var AST = /** @class */ (function () {
-        function AST() {
-        }
-        return AST;
-    }());
-    mackintosh.AST = AST;
-})(mackintosh || (mackintosh = {}));
-var mackintosh;
-(function (mackintosh) {
     var semanticAnalyser = /** @class */ (function () {
         function semanticAnalyser() {
         }
         //AST and symbol table implementations.
         semanticAnalyser.semAnalysis = function () {
+            debugger;
+            //Reset gloabl variables.
+            symbolTable = new Map();
+            scopePointer = 0;
+            isInitialized = false;
+            isUsed = false;
+            _Functions.log("\n");
+            _Functions.log("\n");
+            _Functions.log("SEMANTIC ANALYZER - Semantic Analysis " + (programCount - 1));
         };
         return semanticAnalyser;
     }());

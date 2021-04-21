@@ -52,4 +52,9 @@ var CSTTree = new mackintosh.CST;
 var isMatch = false;
 var tokenPointer = 0;
 var ASTTree = new mackintosh.CST;
+//Semantic Analysis Globals
+var scopePointer = 0;
+var isInitialized = false;
+var isUsed = false;
+var symbolTable = new Map();
 //# sourceMappingURL=compilerGlobals.js.map
