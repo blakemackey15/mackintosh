@@ -4,7 +4,7 @@ var mackintosh;
         function semanticAnalyser() {
         }
         //AST and symbol table implementations.
-        semanticAnalyser.createAST = function (parseTokens) {
+        semanticAnalyser.semAnalysis = function () {
         };
         return semanticAnalyser;
     }());

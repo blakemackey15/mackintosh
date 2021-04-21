@@ -5,8 +5,9 @@ module mackintosh {
     export class parse {
 
         //Recursive descent parser implimentation.
-        public static parse(parseTokens : Array<string>) {
+        public static parse(parseTokens : Array<string>) : boolean {
             debugger;
+            let isParsed = false;
             CSTTree = new CST();
             ASTTree = new CST();
             tokenPointer = 0;
@@ -29,6 +30,7 @@ module mackintosh {
                     parseWarnCount + " warnings");
                     //Prints the CST if there are no more errors.
                     if(parseErrCount <= 0) {
+                        isParsed = true;
                         _Functions.log("\n");
                         _Functions.log("\n");
                         _Functions.log("PARSER - Program " + (programCount - 1) + " CST:");
@@ -37,6 +39,14 @@ module mackintosh {
                         _Functions.log("\n");
                         _Functions.log("PARSER - Program " + (programCount - 1) + " AST:")
                         _Functions.log(ASTTree.toString());
+                    }
+
+                    else {
+                        isParsed = false;
+                        _Functions.log("\n");
+                        _Functions.log("\n");
+                        _Functions.log("PARSER - CST and AST not displayed due to parse errors.");
+                        
                     }
                 }
 
@@ -47,6 +57,8 @@ module mackintosh {
                 }
 
             }
+
+            return isParsed;
         }
 
         //Match function.

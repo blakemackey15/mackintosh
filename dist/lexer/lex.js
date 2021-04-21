@@ -61,8 +61,13 @@ var mackintosh;
                 if (program[i] == '$') {
                     if (errCount == 0) {
                         _Functions.log('LEXER - Lex Completed With ' + errCount + ' Errors and ' + warnCount + ' Warnings');
-                        _Parser.parse(tokenStream);
-                        _SemanticAnalyzer.createAST(tokenStream);
+                        var isParsed = _Parser.parse(tokenStream);
+                        if (isParsed) {
+                            _SemanticAnalyzer.semAnalysis();
+                        }
+                        else {
+                            _Functions.log("PARSER - Semantic analysis skipped due to parse errors.");
+                        }
                         //Check if this is the end of the program. If not, begin lexing the next program.
                         if (typeof program[i] != undefined) {
                             _Functions.log('\n');
