@@ -52,6 +52,7 @@ var CSTTree = new mackintosh.CST;
 var isMatch = false;
 var tokenPointer = 0;
 var ASTTree = new mackintosh.CST;
+var isASTNode = false;
 //Semantic Analysis Globals
 var scopePointer = 0;
 var isInitialized = false;

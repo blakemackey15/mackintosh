@@ -74,9 +74,14 @@ module mackintosh {
             if(isMatch) {
                 _Functions.log("PARSER - Token Matched! " + parseToken);
                 CSTTree.addNode(parseToken, "leaf");
-                ASTTree.addNode(parseToken, "leaf");
                 tokenPointer++;
                 isMatch = false;
+
+                //Add AST Node.
+                if(isASTNode) {
+                    ASTTree.addNode(parseToken, "leaf");
+                }
+                isASTNode = false;
             }
 
             else {
@@ -365,11 +370,13 @@ module mackintosh {
 
         //Expected tokens: int, string, boolean
         public static parseType(parseTokens : Array<string>) {
+            isASTNode = true;
             this.match(["int", "string", "boolean"], parseTokens[tokenPointer]);
         }
 
         //Expected tokens: a-z
         public static parseChar(parseTokens : Array<string>) {
+            isASTNode = true;
             this.match(["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k",
             "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", 
             "y", "z"], parseTokens[tokenPointer]);
@@ -382,6 +389,7 @@ module mackintosh {
 
         //Expected tokens: 0-9
         public static parseDigit(parseTokens : Array<string>) {
+            isASTNode = true;
             this.match(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"], parseTokens[tokenPointer]);
         }
 
@@ -392,6 +400,7 @@ module mackintosh {
 
         //Expected tokens: false, true
         public static parseBoolVal(parseTokens : Array<string>) {
+            isASTNode = true;
             this.match(["false", "true"], parseTokens[tokenPointer]);
         }
 
@@ -413,10 +422,12 @@ module mackintosh {
         }
 
         public static parseIf(parseTokens : Array<string>) {
+            isASTNode = true;
             this.match(["if"], parseTokens[tokenPointer]);
         }
 
         public static parseWhile(parseTokens : Array<string>) {
+            isASTNode = true;
             this.match(["while"], parseTokens[tokenPointer]);
         }
 

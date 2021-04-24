@@ -71,6 +71,7 @@ var CSTTree = new mackintosh.CST;
 var isMatch = false;
 var tokenPointer = 0;
 var ASTTree = new mackintosh.CST;
+var isASTNode = false;
 //Semantic Analysis Globals
 var scopePointer = 0;
 var isInitialized = false;
@@ -176,7 +177,7 @@ var mackintosh;
                         _Functions.log('LEXER - Lex Completed With ' + errCount + ' Errors and ' + warnCount + ' Warnings');
                         var isParsed = _Parser.parse(tokenStream);
                         if (isParsed) {
-                            _SemanticAnalyzer.semAnalysis(tokenStream);
+                            //_SemanticAnalyzer.semAnalysis(tokenStream);
                         }
                         else {
                             _Functions.log("PARSER - Semantic analysis skipped due to parse errors.");
@@ -753,9 +754,13 @@ var mackintosh;
             if (isMatch) {
                 _Functions.log("PARSER - Token Matched! " + parseToken);
                 CSTTree.addNode(parseToken, "leaf");
-                ASTTree.addNode(parseToken, "leaf");
                 tokenPointer++;
                 isMatch = false;
+                //Add AST Node.
+                if (isASTNode) {
+                    ASTTree.addNode(parseToken, "leaf");
+                }
+                isASTNode = false;
             }
             else {
                 _Functions.log("PARSER ERROR - Expected tokens (" + expectedTokens.toString() + ") but got "
@@ -1000,10 +1005,12 @@ var mackintosh;
         };
         //Expected tokens: int, string, boolean
         parse.parseType = function (parseTokens) {
+            isASTNode = true;
             this.match(["int", "string", "boolean"], parseTokens[tokenPointer]);
         };
         //Expected tokens: a-z
         parse.parseChar = function (parseTokens) {
+            isASTNode = true;
             this.match(["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k",
                 "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x",
                 "y", "z"], parseTokens[tokenPointer]);
@@ -1014,6 +1021,7 @@ var mackintosh;
         };
         //Expected tokens: 0-9
         parse.parseDigit = function (parseTokens) {
+            isASTNode = true;
             this.match(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"], parseTokens[tokenPointer]);
         };
         //Expected tokens: ==, !=
@@ -1022,6 +1030,7 @@ var mackintosh;
         };
         //Expected tokens: false, true
         parse.parseBoolVal = function (parseTokens) {
+            isASTNode = true;
             this.match(["false", "true"], parseTokens[tokenPointer]);
         };
         //Expected tokens: +
@@ -1038,9 +1047,11 @@ var mackintosh;
             this.match(['"', '"'], parseTokens[tokenPointer]);
         };
         parse.parseIf = function (parseTokens) {
+            isASTNode = true;
             this.match(["if"], parseTokens[tokenPointer]);
         };
         parse.parseWhile = function (parseTokens) {
+            isASTNode = true;
             this.match(["while"], parseTokens[tokenPointer]);
         };
         parse.parsePrint = function (parseTokens) {
@@ -1058,6 +1069,7 @@ var mackintosh;
 })(mackintosh || (mackintosh = {}));
 var mackintosh;
 (function (mackintosh) {
+    //TypeScript Hashmap interface source: https://github.com/TylorS/typed-hashmap
     var semanticAnalyser = /** @class */ (function () {
         function semanticAnalyser() {
         }
@@ -1091,8 +1103,55 @@ var mackintosh;
             //A new block means new scope. Open and close scope when token pointer is equal to { or }
             scopePointer++;
             _Functions.log("SEMANTIC ANALYZER - Block found: Opening new scope " + scopePointer);
+            //Call analyze statement list to check the statement within the block.
+            this.analyzeStatementList(tokenStream);
             _Functions.log("SEMANTIC ANALYZER - Close block found: Closing scope" + scopePointer);
             scopePointer--;
+        };
+        semanticAnalyser.analyzeStatementList = function (tokenStream) {
+            _Functions.log("SEMANTIC ANALYZER - analyzeStatementList()");
+            while (tokenStream[tokenPointer] != "}") {
+                _Functions.log("PARSER - parseStatement()");
+                if (printRegEx.test(tokenStream[tokenPointer])) {
+                    this.analyzePrintStatement(tokenStream);
+                }
+                //Check for assignment op.
+                else if (assignment.test(tokenStream[tokenPointer + 1])) {
+                    this.analyzeAssignmentStatement(tokenStream);
+                }
+                //Check for var declaration types - boolean, int, string.
+                else if (boolRegEx.test(tokenStream[tokenPointer]) || stringRegEx.test(tokenStream[tokenPointer])
+                    || intRegEx.test(tokenStream[tokenPointer])) {
+                    this.analyzeVarDecl(tokenStream);
+                }
+                //Check for while statement.
+                else if (whileRegEx.test(tokenStream[tokenPointer])) {
+                    this.analyzeWhileStatement(tokenStream);
+                }
+                //Check for if statement.
+                else if (ifRegEx.test(tokenStream[tokenPointer])) {
+                    this.analyzeIfStatement(tokenStream);
+                }
+                //Check for opening or closing block.
+                else if (leftBlock.test(tokenStream[tokenPointer])) {
+                    this.analyzeBlock(tokenStream);
+                }
+            }
+        };
+        semanticAnalyser.analyzePrintStatement = function (tokenStream) {
+            _Functions.log("PARSER - analyzePrintStatement");
+        };
+        semanticAnalyser.analyzeAssignmentStatement = function (tokenStream) {
+            _Functions.log("PARSER - analyzeAssignmentStatement()");
+        };
+        semanticAnalyser.analyzeVarDecl = function (tokenStream) {
+            _Functions.log("PARSER - analyzeVarDecl()");
+        };
+        semanticAnalyser.analyzeWhileStatement = function (tokenStream) {
+            _Functions.log("PARSER - analyzeWhileStatement()");
+        };
+        semanticAnalyser.analyzeIfStatement = function (tokenStream) {
+            _Functions.log("PARSER - analyzeIfStatement()");
         };
         return semanticAnalyser;
     }());

@@ -64,9 +64,13 @@ var mackintosh;
             if (isMatch) {
                 _Functions.log("PARSER - Token Matched! " + parseToken);
                 CSTTree.addNode(parseToken, "leaf");
-                ASTTree.addNode(parseToken, "leaf");
                 tokenPointer++;
                 isMatch = false;
+                //Add AST Node.
+                if (isASTNode) {
+                    ASTTree.addNode(parseToken, "leaf");
+                }
+                isASTNode = false;
             }
             else {
                 _Functions.log("PARSER ERROR - Expected tokens (" + expectedTokens.toString() + ") but got "
@@ -311,10 +315,12 @@ var mackintosh;
         };
         //Expected tokens: int, string, boolean
         parse.parseType = function (parseTokens) {
+            isASTNode = true;
             this.match(["int", "string", "boolean"], parseTokens[tokenPointer]);
         };
         //Expected tokens: a-z
         parse.parseChar = function (parseTokens) {
+            isASTNode = true;
             this.match(["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k",
                 "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x",
                 "y", "z"], parseTokens[tokenPointer]);
@@ -325,6 +331,7 @@ var mackintosh;
         };
         //Expected tokens: 0-9
         parse.parseDigit = function (parseTokens) {
+            isASTNode = true;
             this.match(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"], parseTokens[tokenPointer]);
         };
         //Expected tokens: ==, !=
@@ -333,6 +340,7 @@ var mackintosh;
         };
         //Expected tokens: false, true
         parse.parseBoolVal = function (parseTokens) {
+            isASTNode = true;
             this.match(["false", "true"], parseTokens[tokenPointer]);
         };
         //Expected tokens: +
@@ -349,9 +357,11 @@ var mackintosh;
             this.match(['"', '"'], parseTokens[tokenPointer]);
         };
         parse.parseIf = function (parseTokens) {
+            isASTNode = true;
             this.match(["if"], parseTokens[tokenPointer]);
         };
         parse.parseWhile = function (parseTokens) {
+            isASTNode = true;
             this.match(["while"], parseTokens[tokenPointer]);
         };
         parse.parsePrint = function (parseTokens) {
