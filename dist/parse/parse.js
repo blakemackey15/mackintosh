@@ -251,7 +251,7 @@ var mackintosh;
                 this.parseDigit(parseTokens);
             }
             CSTTree.climbTree();
-            CSTTree.climbTree();
+            ASTTree.climbTree();
         };
         //Expected tokens: "charlist"
         parse.parseStringExpr = function (parseTokens) {

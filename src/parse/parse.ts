@@ -293,7 +293,7 @@ module mackintosh {
             }
 
             CSTTree.climbTree();
-            CSTTree.climbTree();
+            ASTTree.climbTree();
         }
 
         //Expected tokens: "charlist"
