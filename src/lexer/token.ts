@@ -139,8 +139,8 @@ module mackintosh {
                         switch(boolOperator.test(input)) {
                             case true:
                                 this.setTokenValue(input);
-                                this.setTokenCode("BOOLEAN CHECK EQUAL" + input);
-                                this.isToken;
+                                this.setTokenCode("BOOLEAN CHECK EQUAL " + input);
+                                this.isToken = true;
                                 this.index = counter;
                                 this.setBoolOp(true);
                                 break;
