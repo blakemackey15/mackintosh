@@ -1072,7 +1072,10 @@ var mackintosh;
 (function (mackintosh) {
     //Class to represent a node in the scope tree.
     var scopeTreeNode = /** @class */ (function () {
-        function scopeTreeNode() {
+        function scopeTreeNode(key, values) {
+            this.scopeMap = new Map();
+            this.children = [];
+            this.scopeMap.set(key, values);
         }
         return scopeTreeNode;
     }());
