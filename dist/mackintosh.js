@@ -76,8 +76,8 @@ var isASTNode = false;
 var scopePointer = 0;
 var isInitialized = false;
 var isUsed = false;
-var symbolTable = new Map();
-var scope = new mackintosh.scopeTree(null);
+var curScope = new Map();
+var symbolTable = new mackintosh.scopeTree();
 /*
 References: Here is a list of the resources I referenced while developing this project.
 https://regex101.com/ - Useful tool I used to test my regular expressions for my tokens.
@@ -178,7 +178,7 @@ var mackintosh;
                         _Functions.log('LEXER - Lex Completed With ' + errCount + ' Errors and ' + warnCount + ' Warnings');
                         var isParsed = _Parser.parse(tokenStream);
                         if (isParsed) {
-                            //_SemanticAnalyzer.semAnalysis(tokenStream);
+                            _SemanticAnalyzer.semAnalysis();
                         }
                         else {
                             _Functions.log("PARSER - Semantic analysis skipped due to parse errors.");
@@ -1073,11 +1073,13 @@ var mackintosh;
 (function (mackintosh) {
     //Class to represent a node in the scope tree.
     var scopeTreeNode = /** @class */ (function () {
-        function scopeTreeNode(key, values) {
+        function scopeTreeNode(key, values, parent) {
             this.scopeMap = new Map();
             this.values = values;
             this.scopeMap.set(key, values);
             this.isUsed = false;
+            this.children = [];
+            this.parent = parent;
         }
         scopeTreeNode.prototype.addValue = function (key, value) {
             this.values.push(value);
@@ -1085,6 +1087,18 @@ var mackintosh;
         };
         scopeTreeNode.prototype.getValues = function () {
             return this.scopeMap.values();
+        };
+        scopeTreeNode.prototype.getParentScope = function () {
+            return this.parent;
+        };
+        scopeTreeNode.prototype.setParentScope = function (parent) {
+            this.parent = parent;
+        };
+        scopeTreeNode.prototype.addChildScope = function (key, values, parent) {
+            this.children.push(new scopeTreeNode(key, values, parent));
+        };
+        scopeTreeNode.prototype.getChild = function (scopePointer) {
+            return this.children[scopePointer];
         };
         scopeTreeNode.prototype.setIsUsed = function (isUsed) {
             this.isUsed = isUsed;
@@ -1097,21 +1111,27 @@ var mackintosh;
     mackintosh.scopeTreeNode = scopeTreeNode;
     //Class to represent the scope tree - tree of hash maps.
     var scopeTree = /** @class */ (function () {
-        function scopeTree(parent) {
-            this.children = [];
-            this.parent = parent;
+        function scopeTree() {
+            this.root = null;
         }
-        scopeTree.prototype.getParentScope = function () {
-            return this.parent;
+        scopeTree.prototype.getRoot = function () {
+            return this.root;
         };
-        scopeTree.prototype.setParentScope = function (parent) {
-            this.parent = parent;
+        scopeTree.prototype.getCurScope = function () {
+            return this.curScope;
         };
-        scopeTree.prototype.createChildScope = function (values, key) {
-            this.children.push(new scopeTreeNode(key, values));
-        };
-        scopeTree.prototype.getChild = function (scopePointer) {
-            return this.children[scopePointer];
+        scopeTree.prototype.addNode = function (key, values, parent) {
+            //Create new scope node based on the key, values, and parent.
+            var newScope = new scopeTreeNode(key, values, parent);
+            //Check if the root is null, and then set the node to be the root if not.
+            if (this.root == null) {
+                this.root = newScope;
+            }
+            //Child node - set parent and child scope.
+            else {
+                newScope.setParentScope(parent);
+                this.curScope.addChildScope(key, values, newScope);
+            }
         };
         //Print out symbol table tree.
         scopeTree.prototype.toString = function () {
@@ -1127,10 +1147,10 @@ var mackintosh;
         function semanticAnalyser() {
         }
         //AST and symbol table implementations.
-        semanticAnalyser.semAnalysis = function (tokenStream) {
+        semanticAnalyser.semAnalysis = function () {
             debugger;
             //Reset gloabl variables.
-            symbolTable = new Map();
+            curScope = new Map();
             scopePointer = 0;
             isInitialized = false;
             isUsed = false;
@@ -1141,69 +1161,43 @@ var mackintosh;
             var values = new Array();
             _Functions.log("\n");
             _Functions.log("\n");
-            _Functions.log("SEMANTIC ANALYZER - Beginning Semantic Analysis " + (programCount - 1));
+            _Functions.log("SEMANTIC ANALYZER - Beginning Semantic Analysis Program " + (programCount - 1));
             try {
-                this.analyzeProgram(tokenStream);
+                this.analyzeProgram();
             }
             catch (error) {
                 _Functions.log("SEMANTIC ANALYZER - Semantic Analysis ended due to error.");
             }
         };
-        semanticAnalyser.analyzeProgram = function (tokenStream) {
-            this.analyzeBlock(tokenStream);
+        semanticAnalyser.analyzeProgram = function () {
+            this.analyzeBlock();
         };
-        semanticAnalyser.analyzeBlock = function (tokenStream) {
+        semanticAnalyser.analyzeBlock = function () {
             //A new block means new scope. Open and close scope when token pointer is equal to { or }
+            //Initilize a new scope map, and then add it to the symbol table.
             scopePointer++;
             _Functions.log("SEMANTIC ANALYZER - Block found: Opening new scope " + scopePointer);
             //Call analyze statement list to check the statement within the block.
-            this.analyzeStatementList(tokenStream);
+            this.analyzeStatementList();
             _Functions.log("SEMANTIC ANALYZER - Close block found: Closing scope" + scopePointer);
             scopePointer--;
         };
-        semanticAnalyser.analyzeStatementList = function (tokenStream) {
+        semanticAnalyser.analyzeStatementList = function () {
             _Functions.log("SEMANTIC ANALYZER - analyzeStatementList()");
-            while (tokenStream[tokenPointer] != "}") {
-                _Functions.log("PARSER - parseStatement()");
-                if (printRegEx.test(tokenStream[tokenPointer])) {
-                    this.analyzePrintStatement(tokenStream);
-                }
-                //Check for assignment op.
-                else if (assignment.test(tokenStream[tokenPointer + 1])) {
-                    this.analyzeAssignmentStatement(tokenStream);
-                }
-                //Check for var declaration types - boolean, int, string.
-                else if (boolRegEx.test(tokenStream[tokenPointer]) || stringRegEx.test(tokenStream[tokenPointer])
-                    || intRegEx.test(tokenStream[tokenPointer])) {
-                    this.analyzeVarDecl(tokenStream);
-                }
-                //Check for while statement.
-                else if (whileRegEx.test(tokenStream[tokenPointer])) {
-                    this.analyzeWhileStatement(tokenStream);
-                }
-                //Check for if statement.
-                else if (ifRegEx.test(tokenStream[tokenPointer])) {
-                    this.analyzeIfStatement(tokenStream);
-                }
-                //Check for opening or closing block.
-                else if (leftBlock.test(tokenStream[tokenPointer])) {
-                    this.analyzeBlock(tokenStream);
-                }
-            }
         };
-        semanticAnalyser.analyzePrintStatement = function (tokenStream) {
+        semanticAnalyser.analyzePrintStatement = function () {
             _Functions.log("PARSER - analyzePrintStatement");
         };
-        semanticAnalyser.analyzeAssignmentStatement = function (tokenStream) {
+        semanticAnalyser.analyzeAssignmentStatement = function () {
             _Functions.log("PARSER - analyzeAssignmentStatement()");
         };
-        semanticAnalyser.analyzeVarDecl = function (tokenStream) {
+        semanticAnalyser.analyzeVarDecl = function () {
             _Functions.log("PARSER - analyzeVarDecl()");
         };
-        semanticAnalyser.analyzeWhileStatement = function (tokenStream) {
+        semanticAnalyser.analyzeWhileStatement = function () {
             _Functions.log("PARSER - analyzeWhileStatement()");
         };
-        semanticAnalyser.analyzeIfStatement = function (tokenStream) {
+        semanticAnalyser.analyzeIfStatement = function () {
             _Functions.log("PARSER - analyzeIfStatement()");
         };
         return semanticAnalyser;

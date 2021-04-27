@@ -72,7 +72,7 @@ module mackintosh {
                         _Functions.log('LEXER - Lex Completed With ' +  errCount + ' Errors and ' + warnCount + ' Warnings');
                         let isParsed = _Parser.parse(tokenStream);
                         if(isParsed) {
-                            //_SemanticAnalyzer.semAnalysis(tokenStream);
+                            _SemanticAnalyzer.semAnalysis();
                         }
 
                         else {

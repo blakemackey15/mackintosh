@@ -63,7 +63,7 @@ var mackintosh;
                         _Functions.log('LEXER - Lex Completed With ' + errCount + ' Errors and ' + warnCount + ' Warnings');
                         var isParsed = _Parser.parse(tokenStream);
                         if (isParsed) {
-                            //_SemanticAnalyzer.semAnalysis(tokenStream);
+                            _SemanticAnalyzer.semAnalysis();
                         }
                         else {
                             _Functions.log("PARSER - Semantic analysis skipped due to parse errors.");
