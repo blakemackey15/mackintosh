@@ -1073,10 +1073,10 @@ var mackintosh;
 (function (mackintosh) {
     //Class to represent a node in the scope tree.
     var scopeTreeNode = /** @class */ (function () {
-        function scopeTreeNode(key, values, parent) {
+        function scopeTreeNode(scopeMap, parent) {
+            if (scopeMap === void 0) { scopeMap = new Map(); }
             this.scopeMap = new Map();
-            this.values = values;
-            this.scopeMap.set(key, values);
+            this.scopeMap = scopeMap;
             this.isUsed = false;
             this.children = [];
             this.parent = parent;
@@ -1094,8 +1094,9 @@ var mackintosh;
         scopeTreeNode.prototype.setParentScope = function (parent) {
             this.parent = parent;
         };
-        scopeTreeNode.prototype.addChildScope = function (key, values, parent) {
-            this.children.push(new scopeTreeNode(key, values, parent));
+        scopeTreeNode.prototype.addChildScope = function (scopeMap, parent) {
+            if (scopeMap === void 0) { scopeMap = new Map(); }
+            this.children.push(new scopeTreeNode(scopeMap, parent));
         };
         scopeTreeNode.prototype.getChild = function (scopePointer) {
             return this.children[scopePointer];
@@ -1120,9 +1121,10 @@ var mackintosh;
         scopeTree.prototype.getCurScope = function () {
             return this.curScope;
         };
-        scopeTree.prototype.addNode = function (key, values, parent) {
+        scopeTree.prototype.addNode = function (scopeMap, parent, kind) {
+            if (scopeMap === void 0) { scopeMap = new Map(); }
             //Create new scope node based on the key, values, and parent.
-            var newScope = new scopeTreeNode(key, values, parent);
+            var newScope = new scopeTreeNode(scopeMap, parent);
             //Check if the root is null, and then set the node to be the root if not.
             if (this.root == null) {
                 this.root = newScope;
@@ -1130,7 +1132,19 @@ var mackintosh;
             //Child node - set parent and child scope.
             else {
                 newScope.setParentScope(parent);
-                this.curScope.addChildScope(key, values, newScope);
+                this.curScope.addChildScope(scopeMap, newScope);
+            }
+            if (kind == "branch") {
+                this.curScope = newScope;
+            }
+        };
+        //Move up the scope tree to the parent scope.
+        scopeTree.prototype.closeScope = function () {
+            if (this.curScope.getParentScope() !== null) {
+                this.curScope = this.curScope.getParentScope();
+            }
+            else {
+                _Functions.log("SYMBOL TABLE ERROR - Parent Scope does not exist.");
             }
         };
         //Print out symbol table tree.

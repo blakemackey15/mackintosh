@@ -7,9 +7,8 @@ module mackintosh {
         private parent : scopeTreeNode;
         private isUsed : boolean;
 
-        constructor(key : string, values : Array<string>, parent : scopeTreeNode) {
-            this.values = values;
-            this.scopeMap.set(key, values);
+        constructor(scopeMap = new Map(), parent : scopeTreeNode) {
+            this.scopeMap = scopeMap;
             this.isUsed = false;   
             this.children = [];
             this.parent = parent;  
@@ -32,8 +31,8 @@ module mackintosh {
             this.parent = parent;
         }
 
-        public addChildScope(key : string, values : Array<string>, parent : scopeTreeNode) {
-            this.children.push(new scopeTreeNode(key, values, parent));
+        public addChildScope(scopeMap = new Map(), parent : scopeTreeNode) {
+            this.children.push(new scopeTreeNode(scopeMap, parent));
         }
 
         public getChild(scopePointer : number) : scopeTreeNode {
@@ -66,9 +65,9 @@ module mackintosh {
             return this.curScope;
         }
 
-        public addNode(key : string, values : Array<string>, parent : scopeTreeNode, kind : string) {
+        public addNode(scopeMap = new Map(), parent : scopeTreeNode, kind : string) {
             //Create new scope node based on the key, values, and parent.
-            let newScope = new scopeTreeNode(key, values, parent);
+            let newScope = new scopeTreeNode(scopeMap, parent);
             //Check if the root is null, and then set the node to be the root if not.
             if(this.root == null) {
                 this.root = newScope;
@@ -77,7 +76,7 @@ module mackintosh {
             //Child node - set parent and child scope.
             else {
                 newScope.setParentScope(parent);
-                this.curScope.addChildScope(key, values, newScope);
+                this.curScope.addChildScope(scopeMap, newScope);
             }
 
             if(kind == "branch") {
