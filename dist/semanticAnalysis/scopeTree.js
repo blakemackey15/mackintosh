@@ -33,6 +33,9 @@ var mackintosh;
         scopeTree.prototype.getParentScope = function () {
             return this.parent;
         };
+        scopeTree.prototype.setParentScope = function (parent) {
+            this.parent = parent;
+        };
         scopeTree.prototype.createChildScope = function (values, key) {
             this.children.push(new scopeTreeNode(key, values));
         };

@@ -58,4 +58,5 @@ var scopePointer = 0;
 var isInitialized = false;
 var isUsed = false;
 var symbolTable = new Map();
+var scope = new mackintosh.scopeTree(null);
 //# sourceMappingURL=compilerGlobals.js.map

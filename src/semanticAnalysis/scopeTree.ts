@@ -43,6 +43,10 @@ module mackintosh {
             return this.parent;
         }
 
+        public setParentScope(parent : scopeTreeNode) {
+            this.parent = parent;
+        }
+
         public createChildScope(values : Array<string>, key : string) {
             this.children.push(new scopeTreeNode(key, values));
         }

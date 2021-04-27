@@ -77,6 +77,7 @@ var scopePointer = 0;
 var isInitialized = false;
 var isUsed = false;
 var symbolTable = new Map();
+var scope = new mackintosh.scopeTree(null);
 /*
 References: Here is a list of the resources I referenced while developing this project.
 https://regex101.com/ - Useful tool I used to test my regular expressions for my tokens.
@@ -1102,6 +1103,9 @@ var mackintosh;
         }
         scopeTree.prototype.getParentScope = function () {
             return this.parent;
+        };
+        scopeTree.prototype.setParentScope = function (parent) {
+            this.parent = parent;
         };
         scopeTree.prototype.createChildScope = function (values, key) {
             this.children.push(new scopeTreeNode(key, values));
