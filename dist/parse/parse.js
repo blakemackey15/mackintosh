@@ -355,6 +355,7 @@ var mackintosh;
             this.match(["="], parseTokens[tokenPointer]);
         };
         parse.parseQuotes = function (parseTokens) {
+            isASTNode = true;
             this.match(['"', '"'], parseTokens[tokenPointer]);
         };
         parse.parseIf = function (parseTokens) {
