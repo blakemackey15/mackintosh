@@ -92,6 +92,50 @@ module mackintosh {
             }
         }
 
+        //Traverses AST and builds table.
+        public traverseAST(values : Array<string>, key : string) {
+            function expand(node : CSTNode, depth : number, values : Array<string>, key : string) {
+
+                //Check if it is an AST leaf node. Depending on the type, it'll be added to the appropriate area in the map.
+                if(node.getChildren().length === 0) {
+                    let name = node.getNodeName();
+
+                    //Add types.
+                    if(name == "int") {
+                        //Set the type to be int.
+                        values.push(name);
+                    }
+
+                    else if(name == "string") {
+                        //Set type to string.
+                        values.push(name);
+                    }
+
+                    else if(name == "boolean") {
+                        //Set type to boolean.
+                        values.push(name);
+                    }
+
+                    //Set this variable to be the key.
+                    else if(characters.test(name)) {
+                        key = name;
+                    }
+                }
+                
+                //Traverse through children.
+                else {
+                    for(let i = 0; i < node.getChildren().length; i++) {
+                        expand(node.getChildren()[i], depth + 1, values, key);
+                    }
+                }
+            }
+
+            expand(this.rootNode, 0, values, key);
+            let tempMap = new Map();
+            tempMap.set(key, values);
+            return tempMap;
+        }
+
         public toString() {
             let treeString : string = "";
 

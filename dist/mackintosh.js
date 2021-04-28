@@ -74,10 +74,9 @@ var ASTTree = new mackintosh.CST;
 var isASTNode = false;
 //Semantic Analysis Globals
 var scopePointer = 0;
-var isInitialized = false;
-var isUsed = false;
 var curScope = new Map();
-var symbolTable = new mackintosh.scopeTree();
+var semErr = 0;
+var semWarn = 0;
 /*
 References: Here is a list of the resources I referenced while developing this project.
 https://regex101.com/ - Useful tool I used to test my regular expressions for my tokens.
@@ -178,7 +177,7 @@ var mackintosh;
                         _Functions.log('LEXER - Lex Completed With ' + errCount + ' Errors and ' + warnCount + ' Warnings');
                         var isParsed = _Parser.parse(tokenStream);
                         if (isParsed) {
-                            _SemanticAnalyzer.semAnalysis();
+                            //_SemanticAnalyzer.semAnalysis();
                         }
                         else {
                             _Functions.log("PARSER - Semantic analysis skipped due to parse errors.");
@@ -661,6 +660,42 @@ var mackintosh;
                 _Functions.log("CST ERROR - Parent node does not exist.");
             }
         };
+        //Traverses AST and builds table.
+        CST.prototype.traverseAST = function (values, key) {
+            function expand(node, depth, values, key) {
+                //Check if it is an AST leaf node. Depending on the type, it'll be added to the appropriate area in the map.
+                if (node.getChildren().length === 0) {
+                    var name_1 = node.getNodeName();
+                    //Add types.
+                    if (name_1 == "int") {
+                        //Set the type to be int.
+                        values.push(name_1);
+                    }
+                    else if (name_1 == "string") {
+                        //Set type to string.
+                        values.push(name_1);
+                    }
+                    else if (name_1 == "boolean") {
+                        //Set type to boolean.
+                        values.push(name_1);
+                    }
+                    //Set this variable to be the key.
+                    else if (characters.test(name_1)) {
+                        key = name_1;
+                    }
+                }
+                //Traverse through children.
+                else {
+                    for (var i = 0; i < node.getChildren().length; i++) {
+                        expand(node.getChildren()[i], depth + 1, values, key);
+                    }
+                }
+            }
+            expand(this.rootNode, 0, values, key);
+            var tempMap = new Map();
+            tempMap.set(key, values);
+            return tempMap;
+        };
         CST.prototype.toString = function () {
             var treeString = "";
             //Handles the expansion of nodes using recursion.
@@ -1046,6 +1081,7 @@ var mackintosh;
             this.match(["="], parseTokens[tokenPointer]);
         };
         parse.parseQuotes = function (parseTokens) {
+            isASTNode = true;
             this.match(['"', '"'], parseTokens[tokenPointer]);
         };
         parse.parseIf = function (parseTokens) {
@@ -1071,151 +1107,101 @@ var mackintosh;
 })(mackintosh || (mackintosh = {}));
 var mackintosh;
 (function (mackintosh) {
-    //Class to represent a node in the scope tree.
-    var scopeTreeNode = /** @class */ (function () {
-        function scopeTreeNode(scopeMap, parent) {
-            if (scopeMap === void 0) { scopeMap = new Map(); }
-            this.scopeMap = new Map();
-            this.scopeMap = scopeMap;
-            this.isUsed = false;
-            this.children = [];
-            this.parent = parent;
-        }
-        scopeTreeNode.prototype.addValue = function (key, value) {
-            this.values.push(value);
-            this.scopeMap.set(key, this.values);
-        };
-        scopeTreeNode.prototype.getValues = function () {
-            return this.scopeMap.values();
-        };
-        scopeTreeNode.prototype.getParentScope = function () {
-            return this.parent;
-        };
-        scopeTreeNode.prototype.setParentScope = function (parent) {
-            this.parent = parent;
-        };
-        scopeTreeNode.prototype.addChildScope = function (scopeMap, parent) {
-            if (scopeMap === void 0) { scopeMap = new Map(); }
-            this.children.push(new scopeTreeNode(scopeMap, parent));
-        };
-        scopeTreeNode.prototype.getChild = function (scopePointer) {
-            return this.children[scopePointer];
-        };
-        scopeTreeNode.prototype.setIsUsed = function (isUsed) {
-            this.isUsed = isUsed;
-        };
-        scopeTreeNode.prototype.getIsUsed = function () {
-            return this.isUsed;
-        };
-        return scopeTreeNode;
-    }());
-    mackintosh.scopeTreeNode = scopeTreeNode;
-    //Class to represent the scope tree - tree of hash maps.
-    var scopeTree = /** @class */ (function () {
-        function scopeTree() {
-            this.root = null;
-        }
-        scopeTree.prototype.getRoot = function () {
-            return this.root;
-        };
-        scopeTree.prototype.getCurScope = function () {
-            return this.curScope;
-        };
-        scopeTree.prototype.addNode = function (scopeMap, parent, kind) {
-            if (scopeMap === void 0) { scopeMap = new Map(); }
-            //Create new scope node based on the key, values, and parent.
-            var newScope = new scopeTreeNode(scopeMap, parent);
-            //Check if the root is null, and then set the node to be the root if not.
-            if (this.root == null) {
-                this.root = newScope;
-            }
-            //Child node - set parent and child scope.
-            else {
-                newScope.setParentScope(parent);
-                this.curScope.addChildScope(scopeMap, newScope);
-            }
-            if (kind == "branch") {
-                this.curScope = newScope;
-            }
-        };
-        //Move up the scope tree to the parent scope.
-        scopeTree.prototype.closeScope = function () {
-            if (this.curScope.getParentScope() !== null) {
-                this.curScope = this.curScope.getParentScope();
-            }
-            else {
-                _Functions.log("SYMBOL TABLE ERROR - Parent Scope does not exist.");
-            }
-        };
-        //Print out symbol table tree.
-        scopeTree.prototype.toString = function () {
-        };
-        return scopeTree;
-    }());
-    mackintosh.scopeTree = scopeTree;
-})(mackintosh || (mackintosh = {}));
-var mackintosh;
-(function (mackintosh) {
     //TypeScript Hashmap interface source: https://github.com/TylorS/typed-hashmap
     var semanticAnalyser = /** @class */ (function () {
         function semanticAnalyser() {
         }
-        //AST and symbol table implementations.
-        semanticAnalyser.semAnalysis = function () {
-            debugger;
-            //Reset gloabl variables.
-            curScope = new Map();
-            scopePointer = 0;
-            isInitialized = false;
-            isUsed = false;
-            tokenPointer = 0;
-            //Represents map values when adding new entry to symbol table.
-            //Map key: symbol
-            //Values order: Type, Scope, Line
-            var values = new Array();
-            _Functions.log("\n");
-            _Functions.log("\n");
-            _Functions.log("SEMANTIC ANALYZER - Beginning Semantic Analysis Program " + (programCount - 1));
-            try {
-                this.analyzeProgram();
-            }
-            catch (error) {
-                _Functions.log("SEMANTIC ANALYZER - Semantic Analysis ended due to error.");
-            }
-        };
-        semanticAnalyser.analyzeProgram = function () {
-            this.analyzeBlock();
-        };
-        semanticAnalyser.analyzeBlock = function () {
-            //A new block means new scope. Open and close scope when token pointer is equal to { or }
-            //Initilize a new scope map, and then add it to the symbol table.
-            scopePointer++;
-            _Functions.log("SEMANTIC ANALYZER - Block found: Opening new scope " + scopePointer);
-            //Call analyze statement list to check the statement within the block.
-            this.analyzeStatementList();
-            _Functions.log("SEMANTIC ANALYZER - Close block found: Closing scope" + scopePointer);
-            scopePointer--;
-        };
-        semanticAnalyser.analyzeStatementList = function () {
-            _Functions.log("SEMANTIC ANALYZER - analyzeStatementList()");
-        };
-        semanticAnalyser.analyzePrintStatement = function () {
-            _Functions.log("PARSER - analyzePrintStatement");
-        };
-        semanticAnalyser.analyzeAssignmentStatement = function () {
-            _Functions.log("PARSER - analyzeAssignmentStatement()");
-        };
-        semanticAnalyser.analyzeVarDecl = function () {
-            _Functions.log("PARSER - analyzeVarDecl()");
-        };
-        semanticAnalyser.analyzeWhileStatement = function () {
-            _Functions.log("PARSER - analyzeWhileStatement()");
-        };
-        semanticAnalyser.analyzeIfStatement = function () {
-            _Functions.log("PARSER - analyzeIfStatement()");
-        };
         return semanticAnalyser;
     }());
     mackintosh.semanticAnalyser = semanticAnalyser;
+})(mackintosh || (mackintosh = {}));
+var mackintosh;
+(function (mackintosh) {
+    //Represents a node in the symbol table tree.
+    var symbolTableNode = /** @class */ (function () {
+        //Takes in the symbol, value, and type of an entry in the symbol table.
+        //The symbol is the key in the hash map entry.
+        function symbolTableNode(symbol, value, type) {
+            this.symbolTableEntry = new Map();
+            this.isUsed = false;
+            this.value = value;
+            this.type = type;
+            this.symbol = symbol;
+        }
+        symbolTableNode.prototype.setValue = function (value) {
+            this.value = value;
+        };
+        symbolTableNode.prototype.getValue = function () {
+            return this.value;
+        };
+        symbolTableNode.prototype.setType = function (type) {
+            this.type = type;
+        };
+        symbolTableNode.prototype.getType = function () {
+            return this.type;
+        };
+        symbolTableNode.prototype.setSymbol = function (symbol) {
+            this.symbol = symbol;
+        };
+        symbolTableNode.prototype.getSymbol = function () {
+            return this.symbol;
+        };
+        symbolTableNode.prototype.setIsUsed = function (isUsed) {
+            this.isUsed = isUsed;
+        };
+        symbolTableNode.prototype.getIsUsed = function () {
+            return this.isUsed;
+        };
+        symbolTableNode.prototype.setParent = function (entry) {
+            this.parent = entry;
+        };
+        symbolTableNode.prototype.getParent = function () {
+            return this.parent;
+        };
+        symbolTableNode.prototype.addChild = function (child) {
+            this.children.push(child);
+        };
+        symbolTableNode.prototype.getChildren = function () {
+            return this.children;
+        };
+        symbolTableNode.prototype.createEntry = function (newSymbol) {
+            //Check if the symbol already exists in the symbol table.
+            if (this.symbol == this.symbolTableEntry.get(newSymbol)) {
+                _Functions.log("SEMANTIC ANALYSIS ERROR - Identifier" + newSymbol +
+                    "has already been declared in current scope.");
+                semErr++;
+            }
+            else {
+                var values = new Array();
+                //1st entry - type.
+                //2nd entry - value.
+                //3rd entry - used.
+                values.push(this.getType());
+                values.push(this.getValue());
+                values.push(this.getIsUsed());
+                this.symbolTableEntry.set(this.getSymbol(), values);
+            }
+        };
+        symbolTableNode.prototype.lookup = function (symbol) {
+            if (this.symbolTableEntry.has(symbol)) {
+                return this.symbolTableEntry.get(symbol);
+            }
+            else {
+                _Functions.log("SEMANTIC ANALYSIS ERROR - Identifier " + symbol
+                    + " was used before being initialized.");
+            }
+        };
+        symbolTableNode.prototype.getEntry = function () {
+            return this.symbolTableEntry;
+        };
+        return symbolTableNode;
+    }());
+    mackintosh.symbolTableNode = symbolTableNode;
+    var symbolTable = /** @class */ (function () {
+        function symbolTable() {
+        }
+        return symbolTable;
+    }());
+    mackintosh.symbolTable = symbolTable;
 })(mackintosh || (mackintosh = {}));
 //# sourceMappingURL=mackintosh.js.map
