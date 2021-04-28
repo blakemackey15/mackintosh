@@ -67,6 +67,42 @@ var mackintosh;
                 _Functions.log("CST ERROR - Parent node does not exist.");
             }
         };
+        //Traverses AST and builds table.
+        CST.prototype.traverseAST = function (values, key) {
+            function expand(node, depth, values, key) {
+                //Check if it is an AST leaf node. Depending on the type, it'll be added to the appropriate area in the map.
+                if (node.getChildren().length === 0) {
+                    var name_1 = node.getNodeName();
+                    //Add types.
+                    if (name_1 == "int") {
+                        //Set the type to be int.
+                        values.push(name_1);
+                    }
+                    else if (name_1 == "string") {
+                        //Set type to string.
+                        values.push(name_1);
+                    }
+                    else if (name_1 == "boolean") {
+                        //Set type to boolean.
+                        values.push(name_1);
+                    }
+                    //Set this variable to be the key.
+                    else if (characters.test(name_1)) {
+                        key = name_1;
+                    }
+                }
+                //Traverse through children.
+                else {
+                    for (var i = 0; i < node.getChildren().length; i++) {
+                        expand(node.getChildren()[i], depth + 1, values, key);
+                    }
+                }
+            }
+            expand(this.rootNode, 0, values, key);
+            var tempMap = new Map();
+            tempMap.set(key, values);
+            return tempMap;
+        };
         CST.prototype.toString = function () {
             var treeString = "";
             //Handles the expansion of nodes using recursion.
