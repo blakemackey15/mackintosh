@@ -84,6 +84,13 @@ var mackintosh;
         function symbolTable() {
             this.rootScope = null;
         }
+        symbolTable.prototype.getRootScope = function () {
+            return this.rootScope;
+        };
+        symbolTable.prototype.getCurScope = function () {
+            return this.curScope;
+        };
+        //Add a node to the symbol table tree.
         symbolTable.prototype.addNode = function (symbol, value, type, kind) {
             var node = new symbolTableNode(symbol, value, type);
             //Check if this node is the root node.
@@ -105,10 +112,28 @@ var mackintosh;
             }
             //This shouldn't happen in theory but just in case it does.
             else {
-                _Functions.log("SMYBOL TREE ERROR - Parent node does not exist.");
+                _Functions.log("SYMBOL TREE ERROR - Parent node does not exist.");
             }
         };
-        symbolTable.prototype.traverseAST = function () {
+        //Traverse the AST and add the symbols to an array.
+        symbolTable.prototype.traverseAST = function (ASTTree) {
+            //Create an array to store the symbols while traversing the tree.
+            var symbols = new Array();
+            function expand(node, depth) {
+                //Found a leaf node, add it to the symbols array.
+                if (node.getChildren().length === 0) {
+                    symbols.push(node.getNodeName());
+                }
+                //Traverse through tree and find named nodes.
+                else {
+                    for (var i = 0; i < node.getChildren().length; i++) {
+                        expand(node.getChildren()[i], depth + 1);
+                    }
+                }
+            }
+            expand(ASTTree.getRoot(), 0);
+            _Functions.log(symbols.toString());
+            return symbols;
         };
         return symbolTable;
     }());

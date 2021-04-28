@@ -4,6 +4,10 @@ var mackintosh;
     var semanticAnalyser = /** @class */ (function () {
         function semanticAnalyser() {
         }
+        semanticAnalyser.semAnalysis = function () {
+            var symbolTable = new mackintosh.symbolTable;
+            symbolTable.traverseAST(ASTTree);
+        };
         return semanticAnalyser;
     }());
     mackintosh.semanticAnalyser = semanticAnalyser;

@@ -110,6 +110,15 @@ module mackintosh {
             this.rootScope = null;
         }
 
+        public getRootScope() : symbolTableNode {
+            return this.rootScope;
+        }
+
+        public getCurScope() : symbolTableNode {
+            return this.curScope;
+        }
+
+        //Add a node to the symbol table tree.
         public addNode(symbol : any, value : any, type : any, kind : string) {
             let node = new symbolTableNode(symbol, value, type);
 
@@ -137,12 +146,31 @@ module mackintosh {
 
             //This shouldn't happen in theory but just in case it does.
             else {
-                _Functions.log("SMYBOL TREE ERROR - Parent node does not exist.");
+                _Functions.log("SYMBOL TREE ERROR - Parent node does not exist.");
             }
         }
 
-        public traverseAST() {
+        //Traverse the AST and add the symbols to an array.
+        public traverseAST(ASTTree : CST) {
+            //Create an array to store the symbols while traversing the tree.
+            let symbols = new Array<string>();
+            function expand(node : CSTNode, depth : number) {
+                //Found a leaf node, add it to the symbols array.
+                if(node.getChildren().length === 0) {
+                    symbols.push(node.getNodeName());
+                }
 
+                //Traverse through tree and find named nodes.
+                else {
+                    for(let i = 0; i < node.getChildren().length; i++) {
+                        expand(node.getChildren()[i], depth + 1);
+                    }
+                }
+            }
+
+            expand(ASTTree.getRoot(), 0);
+            _Functions.log(symbols.toString());
+            return symbols;
         }
 
     }
