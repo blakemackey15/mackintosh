@@ -82,7 +82,34 @@ var mackintosh;
     mackintosh.symbolTableNode = symbolTableNode;
     var symbolTable = /** @class */ (function () {
         function symbolTable() {
+            this.rootScope = null;
         }
+        symbolTable.prototype.addNode = function (symbol, value, type, kind) {
+            var node = new symbolTableNode(symbol, value, type);
+            //Check if this node is the root node.
+            if (this.rootScope == null) {
+                this.rootScope = null;
+            }
+            else {
+                node.setParent(this.curScope);
+                this.curScope.addChild(node);
+            }
+            //Update the current scope and add an entry to the symbol table.
+            this.curScope = node;
+            node.createEntry(symbol);
+        };
+        //Make the current scope the parent scope.
+        symbolTable.prototype.closeScope = function () {
+            if (this.curScope.getParent() !== null) {
+                this.curScope = this.curScope.getParent();
+            }
+            //This shouldn't happen in theory but just in case it does.
+            else {
+                _Functions.log("SMYBOL TREE ERROR - Parent node does not exist.");
+            }
+        };
+        symbolTable.prototype.traverseAST = function () {
+        };
         return symbolTable;
     }());
     mackintosh.symbolTable = symbolTable;

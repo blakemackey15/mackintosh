@@ -107,6 +107,41 @@ module mackintosh {
         private curScope : symbolTableNode;
 
         constructor() {
+            this.rootScope = null;
+        }
+
+        public addNode(symbol : any, value : any, type : any, kind : string) {
+            let node = new symbolTableNode(symbol, value, type);
+
+            //Check if this node is the root node.
+            if(this.rootScope == null) {
+                this.rootScope = null;
+            }
+
+            else {
+                node.setParent(this.curScope);
+                this.curScope.addChild(node);
+            }
+
+            //Update the current scope and add an entry to the symbol table.
+            this.curScope = node;
+            node.createEntry(symbol);
+
+        }
+
+        //Make the current scope the parent scope.
+        public closeScope() {
+            if(this.curScope.getParent() !== null) {
+                this.curScope = this.curScope.getParent();
+            }
+
+            //This shouldn't happen in theory but just in case it does.
+            else {
+                _Functions.log("SMYBOL TREE ERROR - Parent node does not exist.");
+            }
+        }
+
+        public traverseAST() {
 
         }
 
