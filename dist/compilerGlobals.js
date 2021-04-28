@@ -55,8 +55,7 @@ var ASTTree = new mackintosh.CST;
 var isASTNode = false;
 //Semantic Analysis Globals
 var scopePointer = 0;
-var isInitialized = false;
-var isUsed = false;
 var curScope = new Map();
-var symbolTable = new mackintosh.scopeTree();
+var semErr = 0;
+var semWarn = 0;
 //# sourceMappingURL=compilerGlobals.js.map
