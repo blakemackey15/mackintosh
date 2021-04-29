@@ -50,9 +50,9 @@ var mackintosh;
         symbolTableNode.prototype.createEntry = function (newSymbol) {
             //Check if the symbol already exists in the symbol table.
             if (this.symbol == this.symbolTableEntry.get(newSymbol)) {
-                _Functions.log("SEMANTIC ANALYSIS ERROR - Identifier" + newSymbol +
-                    "has already been declared in current scope.");
                 semErr++;
+                throw new Error("SEMANTIC ANALYSIS - Identifier " + newSymbol +
+                    " has already been declared in current scope " + scopePointer + ".");
             }
             else {
                 var values = new Array();
@@ -70,8 +70,8 @@ var mackintosh;
                 return this.symbolTableEntry.get(symbol);
             }
             else {
-                _Functions.log("SEMANTIC ANALYSIS ERROR - Identifier " + symbol
-                    + " was used before being initialized.");
+                semErr++;
+                throw new Error("SEMANTIC ANALYSIS - Symbol " + symbol + "does not exist in current scope" + scopePointer + ".");
             }
         };
         symbolTableNode.prototype.getEntry = function () {
