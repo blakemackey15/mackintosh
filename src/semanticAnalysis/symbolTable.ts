@@ -119,7 +119,7 @@ module mackintosh {
         }
 
         //Add a node to the symbol table tree.
-        public addNode(symbol : any, value : any, type : any, kind : string) {
+        public openScope(symbol : any, value : any, type : any, kind : string) {
             let node = new symbolTableNode(symbol, value, type);
 
             //Check if this node is the root node.
@@ -136,6 +136,42 @@ module mackintosh {
             this.curScope = node;
             node.createEntry(symbol);
 
+        }
+
+        public checkType() {
+
+        }
+
+        //Returns if the scope has unused ids.
+        public hasUnusedIds(node : symbolTableNode) : boolean {
+            let symbols = node.getEntry();
+
+            for(let i = 0; i < symbols.size; i++) {
+                let entry = symbols.get(i);
+                //Position 0 in the values table is isUsed, so lets get that one.
+                if(!entry[0]) {
+                    return true;
+                }
+            }
+
+            //If we got here, there are no unused ids.
+            return false;
+        }
+
+        //Gets the list of unused ids.
+        public findUnusedIds(node : symbolTableNode) {
+            let symbols = node.getEntry();
+            let unused = new Array<any>();
+
+            for(let i = 0; i < symbols.size; i++) {
+                let entry = symbols.get(i);
+                //Position 0 in the values table is isUsed, so lets get that one.
+                if(!entry[0]) {
+                    unused.push(entry[0]);
+                }
+            }
+
+            return unused;
         }
 
         //Make the current scope the parent scope.
@@ -162,6 +198,18 @@ module mackintosh {
 
                 //Traverse through tree and find named nodes.
                 else {
+                    symbols.push(node.getNodeName());
+
+                    //Check if the symbol is a block. Then, open a new scope.
+                    if(node.getNodeName() == "Block") {
+                        scopePointer++;
+                        _Functions.log("SEMANTIC ANALYSIS - Opening New Scope " + scopePointer);
+                    }
+
+                    else if(node.getNodeName() == "VarDecl") {
+
+                    }
+
                     for(let i = 0; i < node.getChildren().length; i++) {
                         expand(node.getChildren()[i], depth + 1);
                     }

@@ -91,7 +91,7 @@ var mackintosh;
             return this.curScope;
         };
         //Add a node to the symbol table tree.
-        symbolTable.prototype.addNode = function (symbol, value, type, kind) {
+        symbolTable.prototype.openScope = function (symbol, value, type, kind) {
             var node = new symbolTableNode(symbol, value, type);
             //Check if this node is the root node.
             if (this.rootScope == null) {
@@ -104,6 +104,34 @@ var mackintosh;
             //Update the current scope and add an entry to the symbol table.
             this.curScope = node;
             node.createEntry(symbol);
+        };
+        symbolTable.prototype.checkType = function () {
+        };
+        //Returns if the scope has unused ids.
+        symbolTable.prototype.hasUnusedIds = function (node) {
+            var symbols = node.getEntry();
+            for (var i = 0; i < symbols.size; i++) {
+                var entry = symbols.get(i);
+                //Position 0 in the values table is isUsed, so lets get that one.
+                if (!entry[0]) {
+                    return true;
+                }
+            }
+            //If we got here, there are no unused ids.
+            return false;
+        };
+        //Gets the list of unused ids.
+        symbolTable.prototype.findUnusedIds = function (node) {
+            var symbols = node.getEntry();
+            var unused = new Array();
+            for (var i = 0; i < symbols.size; i++) {
+                var entry = symbols.get(i);
+                //Position 0 in the values table is isUsed, so lets get that one.
+                if (!entry[0]) {
+                    unused.push(entry[0]);
+                }
+            }
+            return unused;
         };
         //Make the current scope the parent scope.
         symbolTable.prototype.closeScope = function () {
@@ -126,6 +154,14 @@ var mackintosh;
                 }
                 //Traverse through tree and find named nodes.
                 else {
+                    symbols.push(node.getNodeName());
+                    //Check if the symbol is a block. Then, open a new scope.
+                    if (node.getNodeName() == "Block") {
+                        scopePointer++;
+                        _Functions.log("SEMANTIC ANALYSIS - Opening New Scope " + scopePointer);
+                    }
+                    else if (node.getNodeName() == "VarDecl") {
+                    }
                     for (var i = 0; i < node.getChildren().length; i++) {
                         expand(node.getChildren()[i], depth + 1);
                     }
