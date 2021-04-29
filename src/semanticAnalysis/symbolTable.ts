@@ -86,14 +86,19 @@ module mackintosh {
             }
         }
 
-        public lookup(symbol : any) : any {
+        public lookup(symbol : any) : boolean {
+            //Check if the entry has the symbol.
             if(this.symbolTableEntry.has(symbol)) {
-                return this.symbolTableEntry.get(symbol);
+                return true;
+            }
+
+            //Check if the parent scope has the symbol.
+            else if(this.parent.getEntry().has(symbol)) {
+                return true;
             }
 
             else {
-                semErr++;
-                throw new Error("SEMANTIC ANALYSIS - Symbol " + symbol + "does not exist in current scope" + scopePointer + ".");
+                return false;
             }
         }
 
@@ -187,7 +192,7 @@ module mackintosh {
         }
 
         //Traverse the AST and add the symbols to an array.
-        public traverseAST(ASTTree : CST) {
+        public traverseAST(ASTTree : CST, symbolMap : symbolTable) {
             //Create an array to store the symbols while traversing the tree.
             let symbols = new Array<string>();
             function expand(node : CSTNode, depth : number) {
@@ -204,10 +209,29 @@ module mackintosh {
                     if(node.getNodeName() == "Block") {
                         scopePointer++;
                         _Functions.log("SEMANTIC ANALYSIS - Opening New Scope " + scopePointer);
+                        //Set all the default values to null. This will be changed as the AST is traversed.
+                        symbolMap.openScope(null, null, null, null);
                     }
 
                     else if(node.getNodeName() == "VarDecl") {
+                        //Set the type and id.
+                        symbolMap.getCurScope().setType(node.getChildren()[0].getNodeName());
+                        symbolMap.getCurScope().createEntry(node.getChildren()[1].getNodeName);
+                    }
 
+                    else if(node.getNodeName() == "AssignmentStatement") {
+                        //Look up the symbol in the symbol table's current scope.
+                        //Then, add the value to the entry.
+                        if(symbolMap.getCurScope().lookup(node.getChildren()[0].getNodeName())) {
+                            symbolMap.getCurScope().setValue(node.getChildren()[1].getNodeName());
+                            symbolMap.getCurScope().createEntry(node.getChildren()[0].getNodeName());
+                        }
+
+                        //This means the symbol us not in the table.
+                        else {
+                            semErr++;
+                            throw new Error("SEMANTIC ANALYSIS - Symbol " + symbolMap.getCurScope().getSymbol() + "does not exist in current scope" + scopePointer + ".");
+                        }
                     }
 
                     for(let i = 0; i < node.getChildren().length; i++) {
