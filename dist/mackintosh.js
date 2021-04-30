@@ -1189,19 +1189,17 @@ var mackintosh;
             return this.curScope;
         };
         //Add a node to the symbol table tree.
-        symbolTable.prototype.openScope = function (symbol, value, type, kind) {
+        symbolTable.prototype.openScope = function (symbol, value, type) {
             var node = new symbolTableNode(symbol, value, type);
             //Check if this node is the root node.
             if (this.rootScope == null) {
-                this.rootScope = null;
+                this.rootScope = node;
             }
             else {
                 node.setParent(this.curScope);
                 this.curScope.addChild(node);
             }
-            //Update the current scope and add an entry to the symbol table.
             this.curScope = node;
-            node.createEntry(symbol);
         };
         symbolTable.prototype.checkType = function () {
         };
@@ -1244,11 +1242,12 @@ var mackintosh;
         symbolTable.prototype.analyzeBlock = function (symbolMap) {
             scopePointer++;
             _Functions.log("SEMANTIC ANALYSIS - Opening New Scope " + scopePointer);
-            //Set all the default values to null. This will be changed as the AST is traversed.
-            symbolMap.openScope(null, null, null, null);
+            //Set all the default values to 0. This will be changed as the AST is traversed.
+            symbolMap.openScope(0, 0, 0);
         };
         symbolTable.prototype.analyzeVarDecl = function (symbolMap, node) {
             //Set the type and id.
+            _Functions.log(node.getChildren()[0].getNodeName());
             symbolMap.getCurScope().setType(node.getChildren()[0].getNodeName());
             symbolMap.getCurScope().createEntry(node.getChildren()[1].getNodeName);
         };
