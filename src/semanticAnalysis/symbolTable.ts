@@ -181,7 +181,7 @@ module mackintosh {
 
         //Make the current scope the parent scope.
         public closeScope() {
-            if(this.curScope.getParent() !== null) {
+            if(this.curScope.getParent() !== undefined) {
                 this.curScope = this.curScope.getParent();
             }
 
@@ -239,15 +239,20 @@ module mackintosh {
         }
 
         public analyzeWhileStatement(symbolMap : symbolTable, node : CSTNode) {
-
+            
         }
 
         public analyzeIfStatement(symbolMap : symbolTable, node : CSTNode) {
+            let firstId = symbolMap.getCurScope().lookup(node.getChildren()[0].getChildren()[0]);
+            let secondId = symbolMap.getCurScope().lookup(node.getChildren()[0].getChildren()[1]);
 
+            //Check the types of the ids.
+            if(symbolMap.getCurScope().getMap().get(firstId)[0] == symbolMap.getCurScope().getMap().get(secondId)[0]) {
+            }
         }
 
         //Traverse the AST and add the symbols to an array.
-        public static traverseAST(ASTTree : CST, symbolMap : symbolTable) {
+        public traverseAST(ASTTree : CST, symbolMap : symbolTable) {
             //Create an array to store the symbols while traversing the tree.
             let symbols = new Array<string>();
             function expand(node : CSTNode, depth : number) {
@@ -262,27 +267,27 @@ module mackintosh {
 
                     //Check if the symbol is a block. Then, open a new scope.
                     if(node.getNodeName() == "Block") {
-                        this.analyzeBlock(symbolMap);
+                        symbolMap.analyzeBlock(symbolMap);
                     }
 
                     else if(node.getNodeName() == "VarDecl") {
-                        this.analyzeVarDecl(symbolMap, node);
+                        symbolMap.analyzeVarDecl(symbolMap, node);
                     }
 
                     else if(node.getNodeName() == "AssignmentStatement") {
-                        this.analyzeAssignmentStatement(symbolMap, node);
+                        symbolMap.analyzeAssignmentStatement(symbolMap, node);
                     }
 
                     else if(node.getNodeName() == "PrintStatement") {
-                        this.analyzePrintStatement(symbolMap, node);
+                        symbolMap.analyzePrintStatement(symbolMap, node);
                     }
 
                     else if(node.getNodeName() == "WhileStatement") {
-                        this.analyzeWhileStatement(symbolMap, node);
+                        symbolMap.analyzeWhileStatement(symbolMap, node);
                     }
 
                     else if(node.getNodeName() == "IfStatement") {
-                        this.analyzeIfStatement(symbolMap, node);
+                        symbolMap.analyzeIfStatement(symbolMap, node);
                     }
 
                     for(let i = 0; i < node.getChildren().length; i++) {

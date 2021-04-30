@@ -139,7 +139,7 @@ var mackintosh;
         };
         //Make the current scope the parent scope.
         symbolTable.prototype.closeScope = function () {
-            if (this.curScope.getParent() !== null) {
+            if (this.curScope.getParent() !== undefined) {
                 this.curScope = this.curScope.getParent();
             }
             //This shouldn't happen in theory but just in case it does.
@@ -191,9 +191,14 @@ var mackintosh;
         symbolTable.prototype.analyzeWhileStatement = function (symbolMap, node) {
         };
         symbolTable.prototype.analyzeIfStatement = function (symbolMap, node) {
+            var firstId = symbolMap.getCurScope().lookup(node.getChildren()[0].getChildren()[0]);
+            var secondId = symbolMap.getCurScope().lookup(node.getChildren()[0].getChildren()[1]);
+            //Check the types of the ids.
+            if (symbolMap.getCurScope().getMap().get(firstId)[0] == symbolMap.getCurScope().getMap().get(secondId)[0]) {
+            }
         };
         //Traverse the AST and add the symbols to an array.
-        symbolTable.traverseAST = function (ASTTree, symbolMap) {
+        symbolTable.prototype.traverseAST = function (ASTTree, symbolMap) {
             //Create an array to store the symbols while traversing the tree.
             var symbols = new Array();
             function expand(node, depth) {
@@ -206,22 +211,22 @@ var mackintosh;
                     symbols.push(node.getNodeName());
                     //Check if the symbol is a block. Then, open a new scope.
                     if (node.getNodeName() == "Block") {
-                        this.analyzeBlock(symbolMap);
+                        symbolMap.analyzeBlock(symbolMap);
                     }
                     else if (node.getNodeName() == "VarDecl") {
-                        this.analyzeVarDecl(symbolMap, node);
+                        symbolMap.analyzeVarDecl(symbolMap, node);
                     }
                     else if (node.getNodeName() == "AssignmentStatement") {
-                        this.analyzeAssignmentStatement(symbolMap, node);
+                        symbolMap.analyzeAssignmentStatement(symbolMap, node);
                     }
                     else if (node.getNodeName() == "PrintStatement") {
-                        this.analyzePrintStatement(symbolMap, node);
+                        symbolMap.analyzePrintStatement(symbolMap, node);
                     }
                     else if (node.getNodeName() == "WhileStatement") {
-                        this.analyzeWhileStatement(symbolMap, node);
+                        symbolMap.analyzeWhileStatement(symbolMap, node);
                     }
                     else if (node.getNodeName() == "IfStatement") {
-                        this.analyzeIfStatement(symbolMap, node);
+                        symbolMap.analyzeIfStatement(symbolMap, node);
                     }
                     for (var i = 0; i < node.getChildren().length; i++) {
                         expand(node.getChildren()[i], depth + 1);

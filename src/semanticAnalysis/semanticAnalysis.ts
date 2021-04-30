@@ -7,25 +7,12 @@ module mackintosh {
                 let symbolTable = new mackintosh.symbolTable;
                 scopePointer = 0;
                 _Functions.log("SEMANTIC ANALYSIS - Beginning Semantic Analysis " + (programCount - 1));
-                this.semProgram(symbolTable, symbolTable.getRootScope(), ASTTree.getRoot());
+                symbolTable.traverseAST(ASTTree, symbolTable);
             } catch (error) {
                 _Functions.log(error);
                 _Functions.log("SEMANTIC ANALYSIS - Ended due to error.");
             }
             //symbolTable.traverseAST(ASTTree);
-        }
-
-        //Begin semantic analysis methods.
-        public static semProgram(symbolTable : symbolTable, node : symbolTableNode, astNode : CSTNode) {
-            this.semBlock(symbolTable, node, astNode);
-        }
-
-        public static semBlock(symbolTable : symbolTable, node : symbolTableNode, astNode : CSTNode) {
-            scopePointer++;
-            _Functions.log("SEMANTIC ANALYSIS - Opening new scope: " + scopePointer);
-            //Close the scope when recursion is over.
-            _Functions.log("SEMANTIC ANALYSIS - Closing scope: " + scopePointer);
-            symbolTable.closeScope();
         }
     }
 }
