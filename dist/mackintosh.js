@@ -1176,14 +1176,14 @@ var mackintosh;
                 return true;
             }
             //Check if the parent scope has the symbol.
-            else if (this.parent.getEntry().has(symbol)) {
+            else if (this.parent.getMap().has(symbol)) {
                 return true;
             }
             else {
                 return false;
             }
         };
-        symbolTableNode.prototype.getEntry = function () {
+        symbolTableNode.prototype.getMap = function () {
             return this.symbolTableEntry;
         };
         return symbolTableNode;
@@ -1218,7 +1218,7 @@ var mackintosh;
         };
         //Returns if the scope has unused ids.
         symbolTable.prototype.hasUnusedIds = function (node) {
-            var symbols = node.getEntry();
+            var symbols = node.getMap();
             for (var i = 0; i < symbols.size; i++) {
                 var entry = symbols.get(i);
                 //Position 0 in the values table is isUsed, so lets get that one.
@@ -1231,7 +1231,7 @@ var mackintosh;
         };
         //Gets the list of unused ids.
         symbolTable.prototype.findUnusedIds = function (node) {
-            var symbols = node.getEntry();
+            var symbols = node.getMap();
             var unused = new Array();
             for (var i = 0; i < symbols.size; i++) {
                 var entry = symbols.get(i);
@@ -1252,8 +1252,53 @@ var mackintosh;
                 _Functions.log("SYMBOL TREE ERROR - Parent node does not exist.");
             }
         };
+        symbolTable.prototype.analyzeBlock = function (symbolMap) {
+            scopePointer++;
+            _Functions.log("SEMANTIC ANALYSIS - Opening New Scope " + scopePointer);
+            //Set all the default values to null. This will be changed as the AST is traversed.
+            symbolMap.openScope(null, null, null, null);
+        };
+        symbolTable.prototype.analyzeVarDecl = function (symbolMap, node) {
+            //Set the type and id.
+            symbolMap.getCurScope().setType(node.getChildren()[0].getNodeName());
+            symbolMap.getCurScope().createEntry(node.getChildren()[1].getNodeName);
+        };
+        symbolTable.prototype.analyzeAssignmentStatement = function (symbolMap, node) {
+            //Look up the symbol in the symbol table's current scope.
+            //Then, add the value to the entry.
+            if (symbolMap.getCurScope().lookup(node.getChildren()[0].getNodeName())) {
+                symbolMap.getCurScope().setValue(node.getChildren()[1].getNodeName());
+                symbolMap.getCurScope().setIsUsed(true);
+                symbolMap.getCurScope().createEntry(node.getChildren()[0].getNodeName());
+            }
+            //This means the symbol us not in the table.
+            else {
+                semErr++;
+                throw new Error("SEMANTIC ANALYSIS - Symbol " + symbolMap.getCurScope().getSymbol() +
+                    "does not exist in current scope" + scopePointer + ".");
+            }
+        };
+        symbolTable.prototype.analyzePrintStatement = function (symbolMap, node) {
+            if (symbolMap.getCurScope().lookup(node.getChildren()[0].getNodeName())) {
+                if (symbolMap.getCurScope().getValue() == null) {
+                    semErr++;
+                    throw new Error("SEMANTIC ANALYSIS - Symbol " + symbolMap.getCurScope().getSymbol()
+                        + " does not have a value to print.");
+                }
+                symbolMap.getCurScope().setIsUsed(true);
+            }
+            else {
+                semErr++;
+                throw new Error("SEMANTIC ANALYSIS - Symbol " + symbolMap.getCurScope().getSymbol() +
+                    "does not exist in current scope" + scopePointer + ".");
+            }
+        };
+        symbolTable.prototype.analyzeWhileStatement = function (symbolMap, node) {
+        };
+        symbolTable.prototype.analyzeIfStatement = function (symbolMap, node) {
+        };
         //Traverse the AST and add the symbols to an array.
-        symbolTable.prototype.traverseAST = function (ASTTree, symbolMap) {
+        symbolTable.traverseAST = function (ASTTree, symbolMap) {
             //Create an array to store the symbols while traversing the tree.
             var symbols = new Array();
             function expand(node, depth) {
@@ -1266,28 +1311,22 @@ var mackintosh;
                     symbols.push(node.getNodeName());
                     //Check if the symbol is a block. Then, open a new scope.
                     if (node.getNodeName() == "Block") {
-                        scopePointer++;
-                        _Functions.log("SEMANTIC ANALYSIS - Opening New Scope " + scopePointer);
-                        //Set all the default values to null. This will be changed as the AST is traversed.
-                        symbolMap.openScope(null, null, null, null);
+                        this.analyzeBlock(symbolMap);
                     }
                     else if (node.getNodeName() == "VarDecl") {
-                        //Set the type and id.
-                        symbolMap.getCurScope().setType(node.getChildren()[0].getNodeName());
-                        symbolMap.getCurScope().createEntry(node.getChildren()[1].getNodeName);
+                        this.analyzeVarDecl(symbolMap, node);
                     }
                     else if (node.getNodeName() == "AssignmentStatement") {
-                        //Look up the symbol in the symbol table's current scope.
-                        //Then, add the value to the entry.
-                        if (symbolMap.getCurScope().lookup(node.getChildren()[0].getNodeName())) {
-                            symbolMap.getCurScope().setValue(node.getChildren()[1].getNodeName());
-                            symbolMap.getCurScope().createEntry(node.getChildren()[0].getNodeName());
-                        }
-                        //This means the symbol us not in the table.
-                        else {
-                            semErr++;
-                            throw new Error("SEMANTIC ANALYSIS - Symbol " + symbolMap.getCurScope().getSymbol() + "does not exist in current scope" + scopePointer + ".");
-                        }
+                        this.analyzeAssignmentStatement(symbolMap, node);
+                    }
+                    else if (node.getNodeName() == "PrintStatement") {
+                        this.analyzePrintStatement(symbolMap, node);
+                    }
+                    else if (node.getNodeName() == "WhileStatement") {
+                        this.analyzeWhileStatement(symbolMap, node);
+                    }
+                    else if (node.getNodeName() == "IfStatement") {
+                        this.analyzeIfStatement(symbolMap, node);
                     }
                     for (var i = 0; i < node.getChildren().length; i++) {
                         expand(node.getChildren()[i], depth + 1);
