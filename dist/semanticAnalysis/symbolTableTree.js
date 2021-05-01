@@ -24,6 +24,15 @@ var mackintosh;
         symbolTableNode.prototype.addChild = function (child) {
             this.children.push(child);
         };
+        symbolTableNode.prototype.addSymbol = function (symbol, value) {
+            if (this.hashmap.has(symbol)) {
+                semErr++;
+                throw new Error("SEMANTIC ANALYSIS - Id has already been declared in this scope.");
+            }
+            else {
+                this.hashmap.set(symbol, value);
+            }
+        };
         //Check if the scope has unused identifiers.
         symbolTableNode.prototype.hasUnusedIds = function () {
             for (var i = 0; i < this.hashmap.size; i++) {
@@ -48,6 +57,7 @@ var mackintosh;
         symbolTableNode.prototype.assignment = function (symbol, value) {
             var newScope = this.lookup(symbol);
             if (newScope == null) {
+                semErr++;
                 throw new Error("SEMANTIC ANALYSIS - Id " + symbol + " has not been identified in symbol table.");
             }
             else {
@@ -65,6 +75,16 @@ var mackintosh;
                 this.parent.lookup(symbol);
             }
             return null;
+        };
+        symbolTableNode.prototype.checkType = function (value, type) {
+            if (typeof value == type) {
+                return true;
+            }
+            else {
+                semErr++;
+                throw new Error("SEMANTIC ANALYSIS - Type mismatch, expected "
+                    + typeof type + "but got " + typeof value + "instead.");
+            }
         };
         return symbolTableNode;
     }());

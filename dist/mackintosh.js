@@ -1124,70 +1124,6 @@ var mackintosh;
             performed on the AST.
         */
         semanticAnalyser.traverseAST = function () {
-            function expand(node, depth) {
-                var scopeVal = new mackintosh.scope(null, null);
-                var map = new Map();
-                //Check node names. Then, perform the correct analysis.
-                if (node.getNodeName() == "Block") {
-                    scopeVal = semanticBlock(map, node, scopeVal);
-                }
-                if (node.getNodeName() == "PrintStatement") {
-                }
-                if (node.getNodeName() == "AssignmentStatement") {
-                }
-                if (node.getNodeName() == "VarDecl") {
-                    semanticVarDecl(map, node, scopeVal);
-                }
-                if (node.getNodeName() == "WhileStatement") {
-                }
-                if (node.getNodeName() == "IfStatement") {
-                }
-                //Continue on to the next nodes in the tree.
-                for (var i = 0; i < node.getChildren().length; i++) {
-                    expand(node.getChildren()[i], depth + 1);
-                }
-            }
-            function semanticBlock(map, node, scope) {
-                scopePointer++;
-                _Functions.log("SEMANTIC ANALYSIS - Found Block, opening new scope " + scopePointer);
-                scope.setType(null);
-                scope.setValue(null);
-                return scope;
-            }
-            function semanticPrintStatement(map, node) {
-            }
-            function semanticAssignmentStatement(map, node, scope) {
-                var children = node.getChildren();
-                var symbol = children[0].getNodeName();
-                var value = children[1].getNodeName();
-                scope.setValue(value);
-                //Check if the symbol is in the map. If not, throw an error.
-                if (map.has(symbol)) {
-                    map.set(symbol, scope);
-                }
-                //Check if the parent scopes have the symbol.
-                else if (symbolTable.getCurNode().getParentScope().getMap().has(symbol)) {
-                }
-                else {
-                    throw new Error("SEMANTIC ANALYSIS - Symbo");
-                }
-            }
-            function semanticVarDecl(map, node, scope) {
-                //Get the children and their names, and then add them to the map.
-                var children = node.getChildren();
-                var type = children[0].getNodeName();
-                var symbol = children[1].getNodeName();
-                //Define the value of the scope, and then add it to the tree.
-                scope.setType(type);
-                map.set(symbol, scope);
-                symbolTable.addNode(map);
-            }
-            function semanticWhileStatement(map, node) {
-            }
-            function semanticIfStatement(map, node) {
-            }
-            //Start from the root node.
-            expand(ASTTree.getRoot(), 0);
         };
         return semanticAnalyser;
     }());
@@ -1219,6 +1155,15 @@ var mackintosh;
         symbolTableNode.prototype.addChild = function (child) {
             this.children.push(child);
         };
+        symbolTableNode.prototype.addSymbol = function (symbol, value) {
+            if (this.hashmap.has(symbol)) {
+                semErr++;
+                throw new Error("SEMANTIC ANALYSIS - Id has already been declared in this scope.");
+            }
+            else {
+                this.hashmap.set(symbol, value);
+            }
+        };
         //Check if the scope has unused identifiers.
         symbolTableNode.prototype.hasUnusedIds = function () {
             for (var i = 0; i < this.hashmap.size; i++) {
@@ -1243,6 +1188,7 @@ var mackintosh;
         symbolTableNode.prototype.assignment = function (symbol, value) {
             var newScope = this.lookup(symbol);
             if (newScope == null) {
+                semErr++;
                 throw new Error("SEMANTIC ANALYSIS - Id " + symbol + " has not been identified in symbol table.");
             }
             else {
@@ -1260,6 +1206,16 @@ var mackintosh;
                 this.parent.lookup(symbol);
             }
             return null;
+        };
+        symbolTableNode.prototype.checkType = function (value, type) {
+            if (typeof value == type) {
+                return true;
+            }
+            else {
+                semErr++;
+                throw new Error("SEMANTIC ANALYSIS - Type mismatch, expected "
+                    + typeof type + "but got " + typeof value + "instead.");
+            }
         };
         return symbolTableNode;
     }());

@@ -34,6 +34,17 @@ module mackintosh {
             this.children.push(child);
         }
 
+        public addSymbol(symbol : any, value : scope) {
+            if(this.hashmap.has(symbol)) {
+                semErr++;
+                throw new Error("SEMANTIC ANALYSIS - Id has already been declared in this scope.");
+            }
+
+            else {
+                this.hashmap.set(symbol, value);
+            }
+        }
+
         //Check if the scope has unused identifiers.
         public hasUnusedIds() : boolean {
             for(let i = 0; i < this.hashmap.size; i++) {
@@ -62,6 +73,7 @@ module mackintosh {
             let newScope = this.lookup(symbol);
 
             if(newScope == null) {
+                semErr++;
                 throw new Error("SEMANTIC ANALYSIS - Id " + symbol + " has not been identified in symbol table.");
             }
 
@@ -83,6 +95,18 @@ module mackintosh {
             }
 
             return null;
+        }
+
+        public checkType(value : any, type : any) : boolean {
+            if(typeof value == type) {
+                return true;
+            }
+
+            else {
+                semErr++;
+                throw new Error("SEMANTIC ANALYSIS - Type mismatch, expected " 
+                + typeof type + "but got " + typeof value + "instead.");
+            }
         }
 
     }
