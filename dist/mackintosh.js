@@ -1102,10 +1102,8 @@ var mackintosh;
         }
         semanticAnalyser.semAnalysis = function () {
             try {
-                var symbolTable = new mackintosh.symbolTable;
                 scopePointer = 0;
                 _Functions.log("SEMANTIC ANALYSIS - Beginning Semantic Analysis " + (programCount - 1));
-                symbolTable.traverseAST(ASTTree, symbolTable);
             }
             catch (error) {
                 _Functions.log(error);

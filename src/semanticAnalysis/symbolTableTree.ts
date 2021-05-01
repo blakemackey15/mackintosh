@@ -4,6 +4,10 @@ module mackintosh {
         private children : Array<symbolTableNode>;
         private parent : symbolTableNode;
 
+        constructor() {
+            
+        }
+
     }
 
     //Represent the symbol table tree.
