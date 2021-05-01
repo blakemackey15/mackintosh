@@ -65,19 +65,6 @@ var mackintosh;
                 this.symbolTableEntry.set(this.getSymbol(), values);
             }
         };
-        symbolTableNode.prototype.lookup = function (symbol) {
-            //Check if the entry has the symbol.
-            if (this.symbolTableEntry.has(symbol)) {
-                return true;
-            }
-            //Check if the parent scope has the symbol.
-            else if (this.parent.getMap().has(symbol)) {
-                return true;
-            }
-            else {
-                return false;
-            }
-        };
         symbolTableNode.prototype.getMap = function () {
             return this.symbolTableEntry;
         };
@@ -106,6 +93,7 @@ var mackintosh;
                 this.curScope.addChild(node);
             }
             this.curScope = node;
+            return node;
         };
         symbolTable.prototype.checkType = function () {
         };
@@ -135,6 +123,19 @@ var mackintosh;
             }
             return unused;
         };
+        symbolTable.prototype.lookup = function (symbol, node) {
+            //Check if the entry has the symbol.
+            if (this.curScope.getMap().has(symbol)) {
+                return true;
+            }
+            //Check if the parent scope has the symbol.
+            else if (this.curScope.getParent().getMap().has(symbol)) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        };
         //Make the current scope the parent scope.
         symbolTable.prototype.closeScope = function () {
             if (this.curScope.getParent() !== undefined) {
@@ -144,97 +145,6 @@ var mackintosh;
             else {
                 _Functions.log("SYMBOL TREE ERROR - Parent node does not exist.");
             }
-        };
-        symbolTable.prototype.analyzeBlock = function (symbolMap) {
-            scopePointer++;
-            _Functions.log("SEMANTIC ANALYSIS - Opening New Scope " + scopePointer);
-            //Set all the default values to 0. This will be changed as the AST is traversed.
-            symbolMap.openScope(0, 0, 0);
-        };
-        symbolTable.prototype.analyzeVarDecl = function (symbolMap, node) {
-            //Set the type and id.
-            _Functions.log(node.getChildren()[0].getNodeName());
-            symbolMap.getCurScope().setType(node.getChildren()[0].getNodeName());
-            symbolMap.getCurScope().createEntry(node.getChildren()[1].getNodeName);
-        };
-        symbolTable.prototype.analyzeAssignmentStatement = function (symbolMap, node) {
-            //Look up the symbol in the symbol table's current scope.
-            //Then, add the value to the entry.
-            if (symbolMap.getCurScope().lookup(node.getChildren()[0].getNodeName())) {
-                symbolMap.getCurScope().setValue(node.getChildren()[1].getNodeName());
-                symbolMap.getCurScope().setIsUsed(true);
-                symbolMap.getCurScope().createEntry(node.getChildren()[0].getNodeName());
-            }
-            //This means the symbol us not in the table.
-            else {
-                semErr++;
-                throw new Error("SEMANTIC ANALYSIS - Symbol " + symbolMap.getCurScope().getSymbol() +
-                    "does not exist in current scope" + scopePointer + ".");
-            }
-        };
-        symbolTable.prototype.analyzePrintStatement = function (symbolMap, node) {
-            if (symbolMap.getCurScope().lookup(node.getChildren()[0].getNodeName())) {
-                if (symbolMap.getCurScope().getValue() == null) {
-                    semErr++;
-                    throw new Error("SEMANTIC ANALYSIS - Symbol " + symbolMap.getCurScope().getSymbol()
-                        + " does not have a value to print.");
-                }
-                symbolMap.getCurScope().setIsUsed(true);
-            }
-            else {
-                semErr++;
-                throw new Error("SEMANTIC ANALYSIS - Symbol " + symbolMap.getCurScope().getSymbol() +
-                    "does not exist in current scope" + scopePointer + ".");
-            }
-        };
-        symbolTable.prototype.analyzeWhileStatement = function (symbolMap, node) {
-        };
-        symbolTable.prototype.analyzeIfStatement = function (symbolMap, node) {
-            var firstId = symbolMap.getCurScope().lookup(node.getChildren()[0].getChildren()[0]);
-            var secondId = symbolMap.getCurScope().lookup(node.getChildren()[0].getChildren()[1]);
-            //Check the types of the ids.
-            if (symbolMap.getCurScope().getMap().get(firstId)[0] == symbolMap.getCurScope().getMap().get(secondId)[0]) {
-            }
-        };
-        //Traverse the AST and add the symbols to an array.
-        symbolTable.prototype.traverseAST = function (ASTTree, symbolMap) {
-            //Create an array to store the symbols while traversing the tree.
-            var symbols = new Array();
-            function expand(node, depth) {
-                //Found a leaf node, add it to the symbols array.
-                if (node.getChildren().length === 0) {
-                    symbols.push(node.getNodeName());
-                }
-                //Traverse through tree and find named nodes.
-                else {
-                    symbols.push(node.getNodeName());
-                    //Check if the symbol is a block. Then, open a new scope.
-                    if (node.getNodeName() == "Block") {
-                        symbolMap.analyzeBlock(symbolMap);
-                    }
-                    else if (node.getNodeName() == "VarDecl") {
-                        symbolMap.analyzeVarDecl(symbolMap, node);
-                    }
-                    else if (node.getNodeName() == "AssignmentStatement") {
-                        symbolMap.analyzeAssignmentStatement(symbolMap, node);
-                    }
-                    else if (node.getNodeName() == "PrintStatement") {
-                        symbolMap.analyzePrintStatement(symbolMap, node);
-                    }
-                    else if (node.getNodeName() == "WhileStatement") {
-                        symbolMap.analyzeWhileStatement(symbolMap, node);
-                    }
-                    else if (node.getNodeName() == "IfStatement") {
-                        symbolMap.analyzeIfStatement(symbolMap, node);
-                    }
-                    for (var i = 0; i < node.getChildren().length; i++) {
-                        expand(node.getChildren()[i], depth + 1);
-                    }
-                }
-            }
-            expand(ASTTree.getRoot(), 0);
-            _Functions.log(symbols.toString());
-            return symbols;
         };
         return symbolTable;
     }());

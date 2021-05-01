@@ -6,10 +6,10 @@ var mackintosh;
         }
         semanticAnalyser.semAnalysis = function () {
             try {
-                var symbolTable_1 = new mackintosh.symbolTable;
+                var symbolTable = new mackintosh.symbolTable;
                 scopePointer = 0;
                 _Functions.log("SEMANTIC ANALYSIS - Beginning Semantic Analysis " + (programCount - 1));
-                symbolTable_1.traverseAST(ASTTree, symbolTable_1);
+                symbolTable.traverseAST(ASTTree, symbolTable);
             }
             catch (error) {
                 _Functions.log(error);
