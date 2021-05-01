@@ -22,9 +22,17 @@ module mackintosh {
             public getValue() : any {
                 return this.value;
             }
+
+            public setValue(value : any) {
+                this.value = value;
+            }
     
             public getType() : any {
                 return this.type;
+            }
+
+            public setType(type : any) {
+                this.type = type;
             }
         }
 }

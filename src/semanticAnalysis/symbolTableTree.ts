@@ -1,16 +1,16 @@
 module mackintosh {
     //Represents a node in the symbol table.
     export class symbolTableNode {
-        private hashmap = new Map();
+        private hashmap : Map<any, scope>;
         private children : Array<symbolTableNode>;
         private parent : symbolTableNode;
 
-        constructor(map = new Map()) {
+        constructor(map : Map<any, scope>) {
             this.hashmap = map;
             this.children = [];
         }
 
-        public setMap(map = new Map()) {
+        public setMap(map : Map<any, scope>) {
             this.hashmap = map;
         }
 
@@ -34,6 +34,57 @@ module mackintosh {
             this.children.push(child);
         }
 
+        //Check if the scope has unused identifiers.
+        public hasUnusedIds() : boolean {
+            for(let i = 0; i < this.hashmap.size; i++) {
+                if(!this.hashmap.values()[i].getIsUsed()) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        //Get the list of unused identifiers.
+        public getUnusedIds() : Array<any> {
+            let unusedIds = [];
+            for(let i = 0; i < this.hashmap.size; i++) {
+                //Check if the symbol has not been used.
+                if(!this.hashmap.values()[i].getIsUsed()) {
+                    unusedIds.push(this.hashmap.keys[i]);
+                }
+            }
+
+            //Return the list of unused ids.
+            return unusedIds;
+        }
+
+        public assignment(symbol : any, value : any) {
+            let newScope = this.lookup(symbol);
+
+            if(newScope == null) {
+                throw new Error("SEMANTIC ANALYSIS - Id " + symbol + " has not been identified in symbol table.");
+            }
+
+            else {
+                let type = newScope.getType();
+                newScope.setValue(value);
+                this.hashmap.set(symbol, newScope);
+            }
+        }
+
+        public lookup(symbol : any) {
+            if(this.hashmap.has(symbol)) {
+                return this.hashmap.get(symbol);
+            }
+
+            //If it wasn't found and the parent isn't null check and see if its there.
+            else if(this.parent != null) {
+                this.parent.lookup(symbol);
+            }
+
+            return null;
+        }
+
     }
 
     //Represent the symbol table tree.
@@ -53,7 +104,7 @@ module mackintosh {
             return this.curNode;
         }
 
-        public addNode(map = new Map()) {
+        public addNode(map : Map<any, scope>) {
             let node = new symbolTableNode(map);
 
             if(this.rootNode == null) {

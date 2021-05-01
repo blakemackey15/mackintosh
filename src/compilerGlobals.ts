@@ -60,6 +60,6 @@ var isASTNode : boolean = false;
 
 //Semantic Analysis Globals
 var scopePointer : number = 0;
-var curScope = new Map();
 var semErr : number = 0; 
 var semWarn : number = 0;
+var symbolTable = new mackintosh.symbolTableTree;

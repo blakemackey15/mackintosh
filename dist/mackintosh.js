@@ -74,9 +74,9 @@ var ASTTree = new mackintosh.CST;
 var isASTNode = false;
 //Semantic Analysis Globals
 var scopePointer = 0;
-var curScope = new Map();
 var semErr = 0;
 var semWarn = 0;
+var symbolTable = new mackintosh.symbolTableTree;
 /*
 References: Here is a list of the resources I referenced while developing this project.
 https://regex101.com/ - Useful tool I used to test my regular expressions for my tokens.
@@ -177,7 +177,7 @@ var mackintosh;
                         _Functions.log('LEXER - Lex Completed With ' + errCount + ' Errors and ' + warnCount + ' Warnings');
                         var isParsed = _Parser.parse(tokenStream);
                         if (isParsed) {
-                            _SemanticAnalyzer.semAnalysis();
+                            _SemanticAnalyzer.semanticAnalysis();
                         }
                         else {
                             _Functions.log("PARSER - Semantic analysis skipped due to parse errors.");
@@ -1087,8 +1087,14 @@ var mackintosh;
         scope.prototype.getValue = function () {
             return this.value;
         };
+        scope.prototype.setValue = function (value) {
+            this.value = value;
+        };
         scope.prototype.getType = function () {
             return this.type;
+        };
+        scope.prototype.setType = function (type) {
+            this.type = type;
         };
         return scope;
     }());
@@ -1100,9 +1106,10 @@ var mackintosh;
     var semanticAnalyser = /** @class */ (function () {
         function semanticAnalyser() {
         }
-        semanticAnalyser.semAnalysis = function () {
+        semanticAnalyser.semanticAnalysis = function () {
             try {
                 scopePointer = 0;
+                symbolTable = new mackintosh.symbolTableTree();
                 _Functions.log("SEMANTIC ANALYSIS - Beginning Semantic Analysis " + (programCount - 1));
             }
             catch (error) {
@@ -1110,6 +1117,77 @@ var mackintosh;
                 _Functions.log("SEMANTIC ANALYSIS - Ended due to error.");
             }
             //symbolTable.traverseAST(ASTTree);
+        };
+        /*
+            Method to traverse through the AST and perform semantic analysis.
+            Based on the toString method. Instead of traversing and turning it into a string, semantic analysis will be
+            performed on the AST.
+        */
+        semanticAnalyser.traverseAST = function () {
+            function expand(node, depth) {
+                var scopeVal = new mackintosh.scope(null, null);
+                var map = new Map();
+                //Check node names. Then, perform the correct analysis.
+                if (node.getNodeName() == "Block") {
+                    scopeVal = semanticBlock(map, node, scopeVal);
+                }
+                if (node.getNodeName() == "PrintStatement") {
+                }
+                if (node.getNodeName() == "AssignmentStatement") {
+                }
+                if (node.getNodeName() == "VarDecl") {
+                    semanticVarDecl(map, node, scopeVal);
+                }
+                if (node.getNodeName() == "WhileStatement") {
+                }
+                if (node.getNodeName() == "IfStatement") {
+                }
+                //Continue on to the next nodes in the tree.
+                for (var i = 0; i < node.getChildren().length; i++) {
+                    expand(node.getChildren()[i], depth + 1);
+                }
+            }
+            function semanticBlock(map, node, scope) {
+                scopePointer++;
+                _Functions.log("SEMANTIC ANALYSIS - Found Block, opening new scope " + scopePointer);
+                scope.setType(null);
+                scope.setValue(null);
+                return scope;
+            }
+            function semanticPrintStatement(map, node) {
+            }
+            function semanticAssignmentStatement(map, node, scope) {
+                var children = node.getChildren();
+                var symbol = children[0].getNodeName();
+                var value = children[1].getNodeName();
+                scope.setValue(value);
+                //Check if the symbol is in the map. If not, throw an error.
+                if (map.has(symbol)) {
+                    map.set(symbol, scope);
+                }
+                //Check if the parent scopes have the symbol.
+                else if (symbolTable.getCurNode().getParentScope().getMap().has(symbol)) {
+                }
+                else {
+                    throw new Error("SEMANTIC ANALYSIS - Symbo");
+                }
+            }
+            function semanticVarDecl(map, node, scope) {
+                //Get the children and their names, and then add them to the map.
+                var children = node.getChildren();
+                var type = children[0].getNodeName();
+                var symbol = children[1].getNodeName();
+                //Define the value of the scope, and then add it to the tree.
+                scope.setType(type);
+                map.set(symbol, scope);
+                symbolTable.addNode(map);
+            }
+            function semanticWhileStatement(map, node) {
+            }
+            function semanticIfStatement(map, node) {
+            }
+            //Start from the root node.
+            expand(ASTTree.getRoot(), 0);
         };
         return semanticAnalyser;
     }());
@@ -1120,13 +1198,10 @@ var mackintosh;
     //Represents a node in the symbol table.
     var symbolTableNode = /** @class */ (function () {
         function symbolTableNode(map) {
-            if (map === void 0) { map = new Map(); }
-            this.hashmap = new Map();
             this.hashmap = map;
             this.children = [];
         }
         symbolTableNode.prototype.setMap = function (map) {
-            if (map === void 0) { map = new Map(); }
             this.hashmap = map;
         };
         symbolTableNode.prototype.getMap = function () {
@@ -1144,6 +1219,48 @@ var mackintosh;
         symbolTableNode.prototype.addChild = function (child) {
             this.children.push(child);
         };
+        //Check if the scope has unused identifiers.
+        symbolTableNode.prototype.hasUnusedIds = function () {
+            for (var i = 0; i < this.hashmap.size; i++) {
+                if (!this.hashmap.values()[i].getIsUsed()) {
+                    return true;
+                }
+            }
+            return false;
+        };
+        //Get the list of unused identifiers.
+        symbolTableNode.prototype.getUnusedIds = function () {
+            var unusedIds = [];
+            for (var i = 0; i < this.hashmap.size; i++) {
+                //Check if the symbol has not been used.
+                if (!this.hashmap.values()[i].getIsUsed()) {
+                    unusedIds.push(this.hashmap.keys[i]);
+                }
+            }
+            //Return the list of unused ids.
+            return unusedIds;
+        };
+        symbolTableNode.prototype.assignment = function (symbol, value) {
+            var newScope = this.lookup(symbol);
+            if (newScope == null) {
+                throw new Error("SEMANTIC ANALYSIS - Id " + symbol + " has not been identified in symbol table.");
+            }
+            else {
+                var type = newScope.getType();
+                newScope.setValue(value);
+                this.hashmap.set(symbol, newScope);
+            }
+        };
+        symbolTableNode.prototype.lookup = function (symbol) {
+            if (this.hashmap.has(symbol)) {
+                return this.hashmap.get(symbol);
+            }
+            //If it wasn't found and the parent isn't null check and see if its there.
+            else if (this.parent != null) {
+                this.parent.lookup(symbol);
+            }
+            return null;
+        };
         return symbolTableNode;
     }());
     mackintosh.symbolTableNode = symbolTableNode;
@@ -1159,7 +1276,6 @@ var mackintosh;
             return this.curNode;
         };
         symbolTableTree.prototype.addNode = function (map) {
-            if (map === void 0) { map = new Map(); }
             var node = new symbolTableNode(map);
             if (this.rootNode == null) {
                 this.rootNode = node;

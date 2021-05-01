@@ -16,8 +16,14 @@ var mackintosh;
         scope.prototype.getValue = function () {
             return this.value;
         };
+        scope.prototype.setValue = function (value) {
+            this.value = value;
+        };
         scope.prototype.getType = function () {
             return this.type;
+        };
+        scope.prototype.setType = function (type) {
+            this.type = type;
         };
         return scope;
     }());
