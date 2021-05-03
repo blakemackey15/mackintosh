@@ -63,6 +63,7 @@ var mackintosh;
             else {
                 var type = newScope.getType();
                 newScope.setValue(value);
+                newScope.setIsUsed(true);
                 this.hashmap.set(symbol, newScope);
             }
         };
