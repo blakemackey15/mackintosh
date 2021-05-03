@@ -162,27 +162,18 @@ module mackintosh {
 
             function expand(node : symbolTableNode, depth : number) {
                 for(let i = 0; i < depth; i++) {
-                    tableString += "-";
+                    //tableString += "Scope " + i + "\n";
                 }
 
-                if(node.getChildren().length === 0) {
-                    for(let i = 0; i < node.getMap().size; i++) {
-                        tableString += "[" + node.getMap().entries[i] + "]";
-                    }
+                //Iterate through each key value pair and add them to the tree.
+                let map = node.getMap()
+                map.forEach((value : scope, key : any) => {
+                    tableString += key + "     " + value.getType() as string + "     " + value.getValue() as string + 
+                    "     " + value.getIsUsed() as unknown as string + "\n";
+                });
 
-                    tableString += "\n";
-                }
-
-                else {
-                    for(let i = 0; i < node.getMap().size; i++) {
-                        tableString += "<" + node.getMap().entries[i] + ">";
-                    }
-
-                    tableString += "\n";
-
-                    for(let i = 0; i < node.getChildren().length; i++) {
-                        expand(node.getChildren[i], depth + 1);
-                    }
+                for(let i = 0; i < node.getChildren().length; i++) {
+                    expand(node.getChildren()[i], depth + 1);
                 }
             }
             expand(this.rootNode, 0);

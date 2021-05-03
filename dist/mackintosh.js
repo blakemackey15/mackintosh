@@ -861,7 +861,7 @@ var mackintosh;
             this.parseAssignmentOp(parseTokens);
             this.parseExpr(parseTokens);
             CSTTree.climbTree();
-            ASTTree.climbTree();
+            //ASTTree.climbTree();
         };
         //Expected tokens: type id
         parse.parseVarDecl = function (parseTokens) {
@@ -1125,6 +1125,10 @@ var mackintosh;
                     _Functions.log("\n");
                     _Functions.log("\n");
                     _Functions.log("SEMANTIC ANALYSIS - Program " + (programCount - 1) + " Symbol Table:");
+                    _Functions.log("\n");
+                    _Functions.log("-------------------------------");
+                    _Functions.log("Symbol  Type  Value  isUsed");
+                    _Functions.log("-------------------------------");
                     _Functions.log(symbolTable.toString());
                 }
                 else {
@@ -1398,22 +1402,16 @@ var mackintosh;
             var tableString = "";
             function expand(node, depth) {
                 for (var i = 0; i < depth; i++) {
-                    tableString += "-";
+                    //tableString += "Scope " + i + "\n";
                 }
-                if (node.getChildren().length === 0) {
-                    for (var i = 0; i < node.getMap().size; i++) {
-                        tableString += "[" + node.getMap().entries[i] + "]";
-                    }
-                    tableString += "\n";
-                }
-                else {
-                    for (var i = 0; i < node.getMap().size; i++) {
-                        tableString += "<" + node.getMap().entries[i] + ">";
-                    }
-                    tableString += "\n";
-                    for (var i = 0; i < node.getChildren().length; i++) {
-                        expand(node.getChildren[i], depth + 1);
-                    }
+                //Iterate through each key value pair and add them to the tree.
+                var map = node.getMap();
+                map.forEach(function (value, key) {
+                    tableString += key + "     " + value.getType() + "     " + value.getValue() +
+                        "     " + value.getIsUsed() + "\n";
+                });
+                for (var i = 0; i < node.getChildren().length; i++) {
+                    expand(node.getChildren()[i], depth + 1);
                 }
             }
             expand(this.rootNode, 0);

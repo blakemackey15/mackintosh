@@ -23,6 +23,10 @@ var mackintosh;
                     _Functions.log("\n");
                     _Functions.log("\n");
                     _Functions.log("SEMANTIC ANALYSIS - Program " + (programCount - 1) + " Symbol Table:");
+                    _Functions.log("\n");
+                    _Functions.log("-------------------------------");
+                    _Functions.log("Symbol  Type  Value  isUsed");
+                    _Functions.log("-------------------------------");
                     _Functions.log(symbolTable.toString());
                 }
                 else {
