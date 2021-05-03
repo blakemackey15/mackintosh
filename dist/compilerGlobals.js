@@ -8,6 +8,7 @@ var _Parser = mackintosh.parse;
 var _Token = mackintosh.token;
 var _Functions = mackintosh.compilerFunctions;
 var _SemanticAnalyzer = mackintosh.semanticAnalyser;
+var symbolTable = new mackintosh.symbolTableTree;
 //Lex errors.
 var errCount = 0;
 //Parse errors.
@@ -57,5 +58,4 @@ var isASTNode = false;
 var scopePointer = 0;
 var semErr = 0;
 var semWarn = 0;
-var symbolTable = new mackintosh.symbolTableTree;
 //# sourceMappingURL=compilerGlobals.js.map

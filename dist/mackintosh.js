@@ -27,6 +27,7 @@ var _Parser = mackintosh.parse;
 var _Token = mackintosh.token;
 var _Functions = mackintosh.compilerFunctions;
 var _SemanticAnalyzer = mackintosh.semanticAnalyser;
+var symbolTable = new mackintosh.symbolTableTree;
 //Lex errors.
 var errCount = 0;
 //Parse errors.
@@ -76,7 +77,6 @@ var isASTNode = false;
 var scopePointer = 0;
 var semErr = 0;
 var semWarn = 0;
-var symbolTable = new mackintosh.symbolTableTree;
 /*
 References: Here is a list of the resources I referenced while developing this project.
 https://regex101.com/ - Useful tool I used to test my regular expressions for my tokens.
