@@ -112,6 +112,31 @@ var mackintosh;
             }
             this.curNode = node;
         };
+        symbolTableTree.prototype.toString = function () {
+            var tableString = "";
+            function expand(node, depth) {
+                for (var i = 0; i < depth; i++) {
+                    tableString += "-";
+                }
+                if (node.getChildren().length === 0) {
+                    for (var i = 0; i < node.getMap().size; i++) {
+                        tableString += "[" + node.getMap().entries[i] + "]";
+                    }
+                    tableString += "\n";
+                }
+                else {
+                    for (var i = 0; i < node.getMap().size; i++) {
+                        tableString += "<" + node.getMap().entries[i] + ">";
+                    }
+                    tableString += "\n";
+                    for (var i = 0; i < node.getChildren().length; i++) {
+                        expand(node.getChildren[i], depth + 1);
+                    }
+                }
+            }
+            expand(this.rootNode, 0);
+            return tableString;
+        };
         return symbolTableTree;
     }());
     mackintosh.symbolTableTree = symbolTableTree;

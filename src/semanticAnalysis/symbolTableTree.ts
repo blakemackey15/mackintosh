@@ -144,6 +144,36 @@ module mackintosh {
             this.curNode = node;
         }
 
-        
+        public toString() {
+            let tableString = "";
+
+            function expand(node : symbolTableNode, depth : number) {
+                for(let i = 0; i < depth; i++) {
+                    tableString += "-";
+                }
+
+                if(node.getChildren().length === 0) {
+                    for(let i = 0; i < node.getMap().size; i++) {
+                        tableString += "[" + node.getMap().entries[i] + "]";
+                    }
+
+                    tableString += "\n";
+                }
+
+                else {
+                    for(let i = 0; i < node.getMap().size; i++) {
+                        tableString += "<" + node.getMap().entries[i] + ">";
+                    }
+
+                    tableString += "\n";
+
+                    for(let i = 0; i < node.getChildren().length; i++) {
+                        expand(node.getChildren[i], depth + 1);
+                    }
+                }
+            }
+            expand(this.rootNode, 0);
+            return tableString;
+        }
     }
 }

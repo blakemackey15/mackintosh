@@ -4,13 +4,35 @@ module mackintosh {
     export class semanticAnalyser {
         public static semanticAnalysis() {
             debugger;
+            scopePointer = 0;
+            symbolTable = new symbolTableTree();
+            semErr = 0;
+            semWarn = 0;
+            let isSemantic = false;
+            _Functions.log("\n");
+            _Functions.log("\n");
+            _Functions.log("SEMANTIC ANALYSIS - Beginning Semantic Analysis " + (programCount - 1));
+            
             try {
-                scopePointer = 0;
-                symbolTable = new symbolTableTree();
-                _Functions.log("\n");
-                _Functions.log("\n");
-                _Functions.log("SEMANTIC ANALYSIS - Beginning Semantic Analysis " + (programCount - 1));
                 this.traverseAST();
+                _Functions.log("SEMANTIC ANALYSIS - Completed Semantic Analysis " + (programCount - 1) + " with " 
+                + semErr + " errors and " + semWarn + " warnings.");
+
+                if(semErr <= 0) {
+                    isSemantic = true;
+                    _Functions.log("\n");
+                    _Functions.log("\n");
+                    _Functions.log("SEMANTIC ANALYSIS - Program " + (programCount - 1) + " symbol table:");
+                    _Functions.log(symbolTable.toString());
+                }
+
+                else {
+                    isSemantic = false;
+                    _Functions.log("\n");
+                    _Functions.log("\n");
+                    _Functions.log("SEMANTIC ANALYSIS - Symbol table not displayed due to semantic analysis errors.");
+                }
+
             } catch (error) {
                 _Functions.log(error);
                 _Functions.log("SEMANTIC ANALYSIS - Ended due to error.");

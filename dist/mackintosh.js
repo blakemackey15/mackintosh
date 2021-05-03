@@ -1108,13 +1108,31 @@ var mackintosh;
         }
         semanticAnalyser.semanticAnalysis = function () {
             debugger;
+            scopePointer = 0;
+            symbolTable = new mackintosh.symbolTableTree();
+            semErr = 0;
+            semWarn = 0;
+            var isSemantic = false;
+            _Functions.log("\n");
+            _Functions.log("\n");
+            _Functions.log("SEMANTIC ANALYSIS - Beginning Semantic Analysis " + (programCount - 1));
             try {
-                scopePointer = 0;
-                symbolTable = new mackintosh.symbolTableTree();
-                _Functions.log("\n");
-                _Functions.log("\n");
-                _Functions.log("SEMANTIC ANALYSIS - Beginning Semantic Analysis " + (programCount - 1));
                 this.traverseAST();
+                _Functions.log("SEMANTIC ANALYSIS - Completed Semantic Analysis " + (programCount - 1) + " with "
+                    + semErr + " errors and " + semWarn + " warnings.");
+                if (semErr <= 0) {
+                    isSemantic = true;
+                    _Functions.log("\n");
+                    _Functions.log("\n");
+                    _Functions.log("SEMANTIC ANALYSIS - Program " + (programCount - 1) + " symbol table:");
+                    _Functions.log(symbolTable.toString());
+                }
+                else {
+                    isSemantic = false;
+                    _Functions.log("\n");
+                    _Functions.log("\n");
+                    _Functions.log("SEMANTIC ANALYSIS - Symbol table not displayed due to semantic analysis errors.");
+                }
             }
             catch (error) {
                 _Functions.log(error);
@@ -1353,6 +1371,31 @@ var mackintosh;
                 this.curNode.addChild(node);
             }
             this.curNode = node;
+        };
+        symbolTableTree.prototype.toString = function () {
+            var tableString = "";
+            function expand(node, depth) {
+                for (var i = 0; i < depth; i++) {
+                    tableString += "-";
+                }
+                if (node.getChildren().length === 0) {
+                    for (var i = 0; i < node.getMap().size; i++) {
+                        tableString += "[" + node.getMap().entries[i] + "]";
+                    }
+                    tableString += "\n";
+                }
+                else {
+                    for (var i = 0; i < node.getMap().size; i++) {
+                        tableString += "<" + node.getMap().entries[i] + ">";
+                    }
+                    tableString += "\n";
+                    for (var i = 0; i < node.getChildren().length; i++) {
+                        expand(node.getChildren[i], depth + 1);
+                    }
+                }
+            }
+            expand(this.rootNode, 0);
+            return tableString;
         };
         return symbolTableTree;
     }());
