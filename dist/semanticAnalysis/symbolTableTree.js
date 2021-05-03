@@ -123,6 +123,15 @@ var mackintosh;
             }
             this.curNode = node;
         };
+        symbolTableTree.prototype.closeScope = function () {
+            //Move up the tree to parent node.
+            if (this.curNode.getParentScope() !== null && this.curNode.getParentScope() !== undefined) {
+                this.curNode = this.curNode.getParentScope();
+            }
+            else {
+                throw new Error("SEMANTIC ANALYSIS - Parent scope does not exist.");
+            }
+        };
         symbolTableTree.prototype.toString = function () {
             var tableString = "";
             function expand(node, depth) {

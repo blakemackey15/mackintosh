@@ -2,9 +2,10 @@ var mackintosh;
 (function (mackintosh) {
     //Represents the values in the hash map.
     var scope = /** @class */ (function () {
-        function scope(value, type) {
+        function scope(value, type, scopePointer) {
             this.isUsed = false;
             this.value = value;
+            this.scopePointer = scopePointer;
             this.type = type;
         }
         scope.prototype.setIsUsed = function (isUsed) {

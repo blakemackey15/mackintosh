@@ -75,7 +75,7 @@ module mackintosh {
                     let scopeType = node.getChildren()[0].getNodeName();
                     let symbol = node.getChildren()[1].getNodeName();
                     //This symbol has not been given a value, so it will be null for now.
-                    let scope = new mackintosh.scope(null, scopeType);
+                    let scope = new mackintosh.scope(null, scopeType, scopePointer);
                     let current = symbolTable.getCurNode();
                     symbolTable.getCurNode().addSymbol(symbol, scope);
                 }
@@ -160,6 +160,7 @@ module mackintosh {
                     let symbol = node.getChildren()[0].getNodeName();
                     //Check if the symbol to be printed is in the symbol table.
                     if(symbolTable.getCurNode().lookup(symbol) != null) {
+                        _Functions.log(symbolTable.getCurNode().lookup(symbol) as unknown as string);
                         _Functions.log("SEMANTIC ANALYSIS - Print " + symbol);
                     }
 

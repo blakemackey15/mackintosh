@@ -861,7 +861,7 @@ var mackintosh;
             this.parseAssignmentOp(parseTokens);
             this.parseExpr(parseTokens);
             CSTTree.climbTree();
-            //ASTTree.climbTree();
+            ASTTree.climbTree();
         };
         //Expected tokens: type id
         parse.parseVarDecl = function (parseTokens) {
@@ -1073,9 +1073,10 @@ var mackintosh;
 (function (mackintosh) {
     //Represents the values in the hash map.
     var scope = /** @class */ (function () {
-        function scope(value, type) {
+        function scope(value, type, scopePointer) {
             this.isUsed = false;
             this.value = value;
+            this.scopePointer = scopePointer;
             this.type = type;
         }
         scope.prototype.setIsUsed = function (isUsed) {
@@ -1173,7 +1174,7 @@ var mackintosh;
                     var scopeType = node.getChildren()[0].getNodeName();
                     var symbol = node.getChildren()[1].getNodeName();
                     //This symbol has not been given a value, so it will be null for now.
-                    var scope_1 = new mackintosh.scope(null, scopeType);
+                    var scope_1 = new mackintosh.scope(null, scopeType, scopePointer);
                     var current = symbolTable.getCurNode();
                     symbolTable.getCurNode().addSymbol(symbol, scope_1);
                 }
@@ -1244,6 +1245,7 @@ var mackintosh;
                     var symbol = node.getChildren()[0].getNodeName();
                     //Check if the symbol to be printed is in the symbol table.
                     if (symbolTable.getCurNode().lookup(symbol) != null) {
+                        _Functions.log(symbolTable.getCurNode().lookup(symbol));
                         _Functions.log("SEMANTIC ANALYSIS - Print " + symbol);
                     }
                     else {
@@ -1397,6 +1399,15 @@ var mackintosh;
                 this.curNode.addChild(node);
             }
             this.curNode = node;
+        };
+        symbolTableTree.prototype.closeScope = function () {
+            //Move up the tree to parent node.
+            if (this.curNode.getParentScope() !== null && this.curNode.getParentScope() !== undefined) {
+                this.curNode = this.curNode.getParentScope();
+            }
+            else {
+                throw new Error("SEMANTIC ANALYSIS - Parent scope does not exist.");
+            }
         };
         symbolTableTree.prototype.toString = function () {
             var tableString = "";

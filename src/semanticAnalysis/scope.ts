@@ -4,10 +4,12 @@ module mackintosh {
             private isUsed : boolean
             private value : any;
             private type : any;
+            private scopePointer : number;
     
-            constructor(value : any, type : any) {
+            constructor(value : any, type : any, scopePointer : number) {
                 this.isUsed = false;
                 this.value = value;
+                this.scopePointer = scopePointer;
                 this.type = type;
             }
     

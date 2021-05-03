@@ -157,6 +157,17 @@ module mackintosh {
             this.curNode = node;
         }
 
+        public closeScope() {
+            //Move up the tree to parent node.
+            if(this.curNode.getParentScope() !== null && this.curNode.getParentScope() !== undefined) {
+                this.curNode = this.curNode.getParentScope();
+            }
+
+            else {
+                throw new Error("SEMANTIC ANALYSIS - Parent scope does not exist.");
+            }
+        }
+
         public toString() {
             let tableString = "";
 

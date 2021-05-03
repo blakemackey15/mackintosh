@@ -199,7 +199,7 @@ module mackintosh {
             this.parseAssignmentOp(parseTokens);
             this.parseExpr(parseTokens);
             CSTTree.climbTree();
-            //ASTTree.climbTree();
+            ASTTree.climbTree();
         }
 
         //Expected tokens: type id
