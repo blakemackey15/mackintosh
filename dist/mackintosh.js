@@ -1107,6 +1107,7 @@ var mackintosh;
         function semanticAnalyser() {
         }
         semanticAnalyser.semanticAnalysis = function () {
+            debugger;
             try {
                 scopePointer = 0;
                 symbolTable = new mackintosh.symbolTableTree();
@@ -1126,6 +1127,7 @@ var mackintosh;
             performed on the AST.
         */
         semanticAnalyser.traverseAST = function () {
+            debugger;
             //Function to traverse through the AST and build the symbol table.
             function expand(node, depth) {
                 //Depth first in order traversal through the array of children to get the nodes.
@@ -1133,11 +1135,12 @@ var mackintosh;
                     AST Nodes that are added to symbol table:
                     VarDecl, while statement, if statement, print statement, assignment statement, block
                 */
+                var test = node.getNodeName();
                 if (node.getNodeName() === "Block") {
                     //Open up a new scope and add it to the symbol table.
                     scopePointer++;
                     var newScope = void 0;
-                    var scope_1;
+                    newScope = new Map();
                     _Functions.log("SEMANTIC ANALYSIS - Block found, opening new scope " + scopePointer);
                     symbolTable.addNode(newScope);
                 }
@@ -1148,8 +1151,9 @@ var mackintosh;
                     var type = node.getChildren()[0].getNodeName();
                     var symbol = node.getChildren()[1].getNodeName();
                     //This symbol has not been given a value, so it will be null for now.
-                    var scope_2 = new mackintosh.scope(null, type);
-                    symbolTable.getCurNode().addSymbol(symbol, scope_2);
+                    var scope_1 = new mackintosh.scope(null, type);
+                    var current = symbolTable.getCurNode();
+                    symbolTable.getCurNode().addSymbol(symbol, scope_1);
                 }
                 if (node.getNodeName() === "AssignmentStatement") {
                     _Functions.log("SEMANTIC ANALYSIS - Assignment Statement found.");
@@ -1225,9 +1229,10 @@ var mackintosh;
                     }
                 }
                 for (var i = 0; i < node.getChildren().length; i++) {
-                    expand(node.getChildren[i], depth + 1);
+                    expand(node.getChildren()[i], depth + 1);
                 }
             }
+            var test = ASTTree.getRoot();
             expand(ASTTree.getRoot(), 0);
             return symbolTable;
         };
@@ -1347,6 +1352,7 @@ var mackintosh;
                 node.setParentScope(this.curNode);
                 this.curNode.addChild(node);
             }
+            this.curNode = node;
         };
         return symbolTableTree;
     }());

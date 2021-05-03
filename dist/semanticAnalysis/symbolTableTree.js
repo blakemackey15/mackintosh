@@ -110,6 +110,7 @@ var mackintosh;
                 node.setParentScope(this.curNode);
                 this.curNode.addChild(node);
             }
+            this.curNode = node;
         };
         return symbolTableTree;
     }());

@@ -3,6 +3,7 @@ module mackintosh {
     //TypeScript Hashmap interface source: https://github.com/TylorS/typed-hashmap
     export class semanticAnalyser {
         public static semanticAnalysis() {
+            debugger;
             try {
                 scopePointer = 0;
                 symbolTable = new symbolTableTree();
@@ -21,6 +22,7 @@ module mackintosh {
             performed on the AST. 
         */
         public static traverseAST() : symbolTableTree {
+            debugger;
             //Function to traverse through the AST and build the symbol table.
             function expand(node : CSTNode, depth : number) {
                 //Depth first in order traversal through the array of children to get the nodes.
@@ -28,11 +30,12 @@ module mackintosh {
                     AST Nodes that are added to symbol table:
                     VarDecl, while statement, if statement, print statement, assignment statement, block
                 */
+                let test = node.getNodeName();
                 if(node.getNodeName() === "Block") {
                     //Open up a new scope and add it to the symbol table.
                     scopePointer++;
                     let newScope : Map<any, scope>;
-                    let scope : scope;
+                    newScope = new Map();
                     _Functions.log("SEMANTIC ANALYSIS - Block found, opening new scope " + scopePointer);
                     symbolTable.addNode(newScope);
                 }
@@ -45,6 +48,7 @@ module mackintosh {
                     let symbol = node.getChildren()[1].getNodeName();
                     //This symbol has not been given a value, so it will be null for now.
                     let scope = new mackintosh.scope(null, type);
+                    let current = symbolTable.getCurNode();
                     symbolTable.getCurNode().addSymbol(symbol, scope);
                 }
 
@@ -137,10 +141,11 @@ module mackintosh {
                 }
 
                 for(let i = 0; i < node.getChildren().length; i++) {
-                    expand(node.getChildren[i], depth + 1);
+                    expand(node.getChildren()[i], depth + 1);
                 }
             }
 
+            let test = ASTTree.getRoot();
             expand(ASTTree.getRoot(), 0);
             return symbolTable;
         }
