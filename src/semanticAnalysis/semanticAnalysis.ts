@@ -81,7 +81,6 @@ module mackintosh {
                     let symbol = node.getChildren()[0].getNodeName();
                     let value = node.getChildren()[1].getNodeName();
                     let scope = symbolTable.getCurNode().getMap().get(symbol);
-                    let scopeType = scope.getType();
                     let dataValue;
                     let dataType;
 
@@ -106,7 +105,7 @@ module mackintosh {
                     }
 
                     else {
-                        let type = symbolExists.getType();
+                        let scopeType = symbolExists.getType();
                         if(intRegEx.test(scopeType)) {
                             dataType = scopeType as number;
                         }
@@ -115,7 +114,7 @@ module mackintosh {
                             dataType = scopeType as string;
                         }
     
-                        else if(boolRegEx.test(type) || falseRegEx.test(type)) {
+                        else if(boolRegEx.test(scopeType) || falseRegEx.test(scopeType)) {
                             dataType = scopeType as boolean;
                         }
 
@@ -174,6 +173,19 @@ module mackintosh {
             let test = ASTTree.getRoot();
             expand(ASTTree.getRoot(), 0);
             return symbolTable;
+        }
+
+        //Method to go through the symbol table and find unused ids.
+        public static findUnusedIds() {
+            let unusedIds = [];
+            function expand(node : symbolTableNode, depth : number) {
+
+                for(let i = 0; i < node.getChildren().length; i++) {
+                    expand(node.getChildren()[i], depth + 1);
+                }
+            }
+
+            expand(symbolTable.getRoot(), 0);
         }
     }
 }

@@ -1178,7 +1178,6 @@ var mackintosh;
                     var symbol = node.getChildren()[0].getNodeName();
                     var value = node.getChildren()[1].getNodeName();
                     var scope_2 = symbolTable.getCurNode().getMap().get(symbol);
-                    var scopeType = scope_2.getType();
                     var dataValue = void 0;
                     var dataType = void 0;
                     //Cast the value to the corresponding data type.
@@ -1198,14 +1197,14 @@ var mackintosh;
                         throw new Error("SEMANTIC ANALYSIS - Symbol " + symbol + " does not exist in current scope.");
                     }
                     else {
-                        var type = symbolExists.getType();
+                        var scopeType = symbolExists.getType();
                         if (intRegEx.test(scopeType)) {
                             dataType = scopeType;
                         }
                         else if (stringRegEx.test(scopeType)) {
                             dataType = scopeType;
                         }
-                        else if (boolRegEx.test(type) || falseRegEx.test(type)) {
+                        else if (boolRegEx.test(scopeType) || falseRegEx.test(scopeType)) {
                             dataType = scopeType;
                         }
                         if (symbolTable.getCurNode().checkType(dataValue, dataType)) {
@@ -1255,6 +1254,16 @@ var mackintosh;
             var test = ASTTree.getRoot();
             expand(ASTTree.getRoot(), 0);
             return symbolTable;
+        };
+        //Method to go through the symbol table and find unused ids.
+        semanticAnalyser.findUnusedIds = function () {
+            var unusedIds = [];
+            function expand(node, depth) {
+                for (var i = 0; i < node.getChildren().length; i++) {
+                    expand(node.getChildren()[i], depth + 1);
+                }
+            }
+            expand(symbolTable.getRoot(), 0);
         };
         return semanticAnalyser;
     }());
@@ -1339,14 +1348,25 @@ var mackintosh;
             }
             return null;
         };
-        symbolTableNode.prototype.checkType = function (value, type) {
-            if (typeof value == type) {
+        symbolTableNode.prototype.checkType = function (value, scopeType) {
+            //Change to the correct data type.
+            var dataType;
+            if (digits.test(value)) {
+                dataType = "int";
+            }
+            if (characters.test(value)) {
+                dataType = "string";
+            }
+            if (trueRegEx.test(value) || falseRegEx.test(value)) {
+                dataType = "boolean";
+            }
+            if (scopeType == dataType) {
                 return true;
             }
             else {
                 semErr++;
                 throw new Error("SEMANTIC ANALYSIS - Type mismatch, expected "
-                    + typeof type + "but got " + typeof value + "instead.");
+                    + scopeType + " but got " + dataType + " instead.");
             }
         };
         return symbolTableNode;

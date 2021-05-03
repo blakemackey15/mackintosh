@@ -98,15 +98,28 @@ module mackintosh {
             return null;
         }
 
-        public checkType(value : any, type : any) : boolean {
-            if(typeof value == type) {
+        public checkType(value : any, scopeType : any) : boolean {
+            //Change to the correct data type.
+            let dataType;
+            if(digits.test(value)) {
+                dataType = "int";
+            }
+
+            if(characters.test(value)) {
+                dataType = "string";
+            }
+
+            if(trueRegEx.test(value) || falseRegEx.test(value)) {
+                dataType = "boolean";
+            }
+            if(scopeType == dataType) {
                 return true;
             }
 
             else {
                 semErr++;
                 throw new Error("SEMANTIC ANALYSIS - Type mismatch, expected " 
-                + typeof type + "but got " + typeof value + "instead.");
+                + scopeType + " but got " + dataType + " instead.");
             }
         }
 
