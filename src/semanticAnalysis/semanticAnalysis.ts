@@ -12,7 +12,7 @@ module mackintosh {
             _Functions.log("\n");
             _Functions.log("\n");
             _Functions.log("SEMANTIC ANALYSIS - Beginning Semantic Analysis " + (programCount - 1));
-            
+
             try {
                 this.traverseAST();
                 _Functions.log("SEMANTIC ANALYSIS - Completed Semantic Analysis " + (programCount - 1) + " with " 
@@ -22,7 +22,7 @@ module mackintosh {
                     isSemantic = true;
                     _Functions.log("\n");
                     _Functions.log("\n");
-                    _Functions.log("SEMANTIC ANALYSIS - Program " + (programCount - 1) + " symbol table:");
+                    _Functions.log("SEMANTIC ANALYSIS - Program " + (programCount - 1) + " Symbol Table:");
                     _Functions.log(symbolTable.toString());
                 }
 
@@ -38,11 +38,13 @@ module mackintosh {
                 _Functions.log("SEMANTIC ANALYSIS - Ended due to error.");
             }
         }
+
         /* 
             Method to traverse through the AST and perform semantic analysis.
             Based on the toString method. Instead of traversing and turning it into a string, semantic analysis will be
             performed on the AST. 
         */
+
         public static traverseAST() : symbolTableTree {
             debugger;
             //Function to traverse through the AST and build the symbol table.
@@ -66,10 +68,10 @@ module mackintosh {
                     //Add the symbol to the symbol table if it has not been declared already.
                     _Functions.log("SEMANTIC ANALYSIS - VarDecl found.");
                     //let map = symbolTable.getCurNode().getMap();
-                    let type = node.getChildren()[0].getNodeName();
+                    let scopeType = node.getChildren()[0].getNodeName();
                     let symbol = node.getChildren()[1].getNodeName();
                     //This symbol has not been given a value, so it will be null for now.
-                    let scope = new mackintosh.scope(null, type);
+                    let scope = new mackintosh.scope(null, scopeType);
                     let current = symbolTable.getCurNode();
                     symbolTable.getCurNode().addSymbol(symbol, scope);
                 }
@@ -78,6 +80,8 @@ module mackintosh {
                     _Functions.log("SEMANTIC ANALYSIS - Assignment Statement found.");
                     let symbol = node.getChildren()[0].getNodeName();
                     let value = node.getChildren()[1].getNodeName();
+                    let scope = symbolTable.getCurNode().getMap().get(symbol);
+                    let scopeType = scope.getType();
                     let dataValue;
                     let dataType;
 
@@ -103,16 +107,16 @@ module mackintosh {
 
                     else {
                         let type = symbolExists.getType();
-                        if(digits.test(type)) {
-                            dataType = type as number;
+                        if(intRegEx.test(scopeType)) {
+                            dataType = scopeType as number;
                         }
     
-                        else if(characters.test(value)) {
-                            dataType = type as string;
+                        else if(stringRegEx.test(scopeType)) {
+                            dataType = scopeType as string;
                         }
     
-                        else if(trueRegEx.test(type) || falseRegEx.test(type)) {
-                            dataType = type as boolean;
+                        else if(boolRegEx.test(type) || falseRegEx.test(type)) {
+                            dataType = scopeType as boolean;
                         }
 
                         if(symbolTable.getCurNode().checkType(dataValue, dataType)) {

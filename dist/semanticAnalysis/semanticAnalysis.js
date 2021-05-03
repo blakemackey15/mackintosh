@@ -22,7 +22,7 @@ var mackintosh;
                     isSemantic = true;
                     _Functions.log("\n");
                     _Functions.log("\n");
-                    _Functions.log("SEMANTIC ANALYSIS - Program " + (programCount - 1) + " symbol table:");
+                    _Functions.log("SEMANTIC ANALYSIS - Program " + (programCount - 1) + " Symbol Table:");
                     _Functions.log(symbolTable.toString());
                 }
                 else {
@@ -64,10 +64,10 @@ var mackintosh;
                     //Add the symbol to the symbol table if it has not been declared already.
                     _Functions.log("SEMANTIC ANALYSIS - VarDecl found.");
                     //let map = symbolTable.getCurNode().getMap();
-                    var type = node.getChildren()[0].getNodeName();
+                    var scopeType = node.getChildren()[0].getNodeName();
                     var symbol = node.getChildren()[1].getNodeName();
                     //This symbol has not been given a value, so it will be null for now.
-                    var scope_1 = new mackintosh.scope(null, type);
+                    var scope_1 = new mackintosh.scope(null, scopeType);
                     var current = symbolTable.getCurNode();
                     symbolTable.getCurNode().addSymbol(symbol, scope_1);
                 }
@@ -75,6 +75,8 @@ var mackintosh;
                     _Functions.log("SEMANTIC ANALYSIS - Assignment Statement found.");
                     var symbol = node.getChildren()[0].getNodeName();
                     var value = node.getChildren()[1].getNodeName();
+                    var scope_2 = symbolTable.getCurNode().getMap().get(symbol);
+                    var scopeType = scope_2.getType();
                     var dataValue = void 0;
                     var dataType = void 0;
                     //Cast the value to the corresponding data type.
@@ -95,14 +97,14 @@ var mackintosh;
                     }
                     else {
                         var type = symbolExists.getType();
-                        if (digits.test(type)) {
-                            dataType = type;
+                        if (intRegEx.test(scopeType)) {
+                            dataType = scopeType;
                         }
-                        else if (characters.test(value)) {
-                            dataType = type;
+                        else if (stringRegEx.test(scopeType)) {
+                            dataType = scopeType;
                         }
-                        else if (trueRegEx.test(type) || falseRegEx.test(type)) {
-                            dataType = type;
+                        else if (boolRegEx.test(type) || falseRegEx.test(type)) {
+                            dataType = scopeType;
                         }
                         if (symbolTable.getCurNode().checkType(dataValue, dataType)) {
                             symbolTable.getCurNode().assignment(symbol, dataValue);
