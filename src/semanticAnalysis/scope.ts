@@ -36,5 +36,13 @@ module mackintosh {
             public setType(type : any) {
                 this.type = type;
             }
+
+            public getScopePointer() {
+                return this.scopePointer;
+            }
+
+            public setScopePointer(scopePointer : number) {
+                this.scopePointer = scopePointer; 
+            }
         }
 }

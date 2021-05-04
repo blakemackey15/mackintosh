@@ -26,7 +26,7 @@ module mackintosh {
                     _Functions.log("SEMANTIC ANALYSIS - Program " + (programCount - 1) + " Symbol Table:");
                     _Functions.log("\n");
                     _Functions.log("-------------------------------");
-                    _Functions.log("Symbol  Type  Value  isUsed");
+                    _Functions.log("Symbol        Type        Scope");
                     _Functions.log("-------------------------------");
                     _Functions.log(symbolTable.toString());
                 }
@@ -71,6 +71,7 @@ module mackintosh {
             //this.analyzeStatement(astNode.getChildren()[0]);
             _Functions.log("SEMANTIC ANALYSIS - Closing scope " + scopePointer);
             symbolTable.closeScope();
+            scopePointer--;
             //Add check for unused ids.
         }
 
@@ -174,7 +175,10 @@ module mackintosh {
             let value = astNode.getChildren()[1].getNodeName();
             let scope = symbolTable.getCurNode().getMap().get(symbol);
             let dataValue;
+            let dataValue2;
             let dataType;
+            let dataType2;
+            let secondValue;
 
             //Cast the value to the corresponding data type.
             if(digits.test(value)) {
@@ -182,7 +186,13 @@ module mackintosh {
             }
 
             else if(characters.test(value)) {
-                dataValue = value as string;
+                if(value.length == 0) {
+                    secondValue = symbolTable.getCurNode().lookup(value);
+                }
+
+                else {
+                    dataValue = value as string;
+                }
             }
 
             else if(trueRegEx.test(value) || falseRegEx.test(value)) {

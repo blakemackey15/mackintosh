@@ -185,8 +185,8 @@ module mackintosh {
                 //Iterate through each key value pair and add them to the tree.
                 let map = node.getMap()
                 map.forEach((value : scope, key : any) => {
-                    tableString += key + "     " + value.getType() as string + "     " + value.getValue() as string + 
-                    "     " + value.getIsUsed() as unknown as string + "\n";
+                    tableString += key + "            " + value.getValue() as string + 
+                    "            " + value.getScopePointer() as unknown as string + "\n";
                 });
 
                 for(let i = 0; i < node.getChildren().length; i++) {

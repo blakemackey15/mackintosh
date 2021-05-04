@@ -26,7 +26,7 @@ var mackintosh;
                     _Functions.log("SEMANTIC ANALYSIS - Program " + (programCount - 1) + " Symbol Table:");
                     _Functions.log("\n");
                     _Functions.log("-------------------------------");
-                    _Functions.log("Symbol  Type  Value  isUsed");
+                    _Functions.log("Symbol        Type        Scope");
                     _Functions.log("-------------------------------");
                     _Functions.log(symbolTable.toString());
                 }
@@ -67,6 +67,7 @@ var mackintosh;
             //this.analyzeStatement(astNode.getChildren()[0]);
             _Functions.log("SEMANTIC ANALYSIS - Closing scope " + scopePointer);
             symbolTable.closeScope();
+            scopePointer--;
             //Add check for unused ids.
         };
         semanticAnalyser.analyzeStatement = function (astNode) {
@@ -152,13 +153,21 @@ var mackintosh;
             var value = astNode.getChildren()[1].getNodeName();
             var scope = symbolTable.getCurNode().getMap().get(symbol);
             var dataValue;
+            var dataValue2;
             var dataType;
+            var dataType2;
+            var secondValue;
             //Cast the value to the corresponding data type.
             if (digits.test(value)) {
                 dataValue = value;
             }
             else if (characters.test(value)) {
-                dataValue = value;
+                if (value.length == 0) {
+                    secondValue = symbolTable.getCurNode().lookup(value);
+                }
+                else {
+                    dataValue = value;
+                }
             }
             else if (trueRegEx.test(value) || falseRegEx.test(value)) {
                 dataValue = value;

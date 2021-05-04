@@ -26,6 +26,12 @@ var mackintosh;
         scope.prototype.setType = function (type) {
             this.type = type;
         };
+        scope.prototype.getScopePointer = function () {
+            return this.scopePointer;
+        };
+        scope.prototype.setScopePointer = function (scopePointer) {
+            this.scopePointer = scopePointer;
+        };
         return scope;
     }());
     mackintosh.scope = scope;
