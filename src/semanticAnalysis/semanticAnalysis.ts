@@ -2,7 +2,7 @@ module mackintosh {
 
     //TypeScript Hashmap interface source: https://github.com/TylorS/typed-hashmap
     export class semanticAnalyser {
-        public static semanticAnalysis() {
+        public static semanticAnalysis() : boolean {
             debugger;
             scopePointer = 0;
             symbolTable = new symbolTableTree();
@@ -14,7 +14,8 @@ module mackintosh {
             _Functions.log("SEMANTIC ANALYSIS - Beginning Semantic Analysis " + (programCount - 1));
 
             try {
-                this.traverseAST();
+                this.analyzeBlock(ASTTree.getRoot());
+                //this.traverseAST();
                 _Functions.log("SEMANTIC ANALYSIS - Completed Semantic Analysis " + (programCount - 1) + " with " 
                 + semErr + " errors and " + semWarn + " warnings.");
 
@@ -41,143 +42,164 @@ module mackintosh {
                 _Functions.log(error);
                 _Functions.log("SEMANTIC ANALYSIS - Ended due to error.");
             }
+
+            return isSemantic;
         }
 
         /* 
             Method to traverse through the AST and perform semantic analysis.
             Based on the toString method. Instead of traversing and turning it into a string, semantic analysis will be
             performed on the AST. 
+            AST Nodes that are added to symbol table:
+            VarDecl, while statement, if statement, print statement, assignment statement, block
         */
+        public static analyzeBlock(astNode : CSTNode) {
+            //Open up a new scope and add it to the symbol table.
+            //Once the recursion ends the scope will be closed.
+            scopePointer++;
+            let newScope : Map<any, scope>;
+            newScope = new Map();
+            _Functions.log("SEMANTIC ANALYSIS - Block found, opening new scope " + scopePointer);
+            symbolTable.addNode(newScope);
 
-        public static traverseAST() : symbolTableTree {
-            debugger;
-            //Function to traverse through the AST and build the symbol table.
-            function expand(node : CSTNode, depth : number) {
-                //Depth first in order traversal through the array of children to get the nodes.
-                /*
-                    AST Nodes that are added to symbol table:
-                    VarDecl, while statement, if statement, print statement, assignment statement, block
-                */
-                let test = node.getNodeName();
-                if(node.getNodeName() === "Block") {
-                    //Open up a new scope and add it to the symbol table.
-                    scopePointer++;
-                    let newScope : Map<any, scope>;
-                    newScope = new Map();
-                    _Functions.log("SEMANTIC ANALYSIS - Block found, opening new scope " + scopePointer);
-                    symbolTable.addNode(newScope);
-                }
-
-                if(node.getNodeName() === "VarDecl") {
-                    //Add the symbol to the symbol table if it has not been declared already.
-                    _Functions.log("SEMANTIC ANALYSIS - VarDecl found.");
-                    //let map = symbolTable.getCurNode().getMap();
-                    let scopeType = node.getChildren()[0].getNodeName();
-                    let symbol = node.getChildren()[1].getNodeName();
-                    //This symbol has not been given a value, so it will be null for now.
-                    let scope = new mackintosh.scope(null, scopeType, scopePointer);
-                    let current = symbolTable.getCurNode();
-                    symbolTable.getCurNode().addSymbol(symbol, scope);
-                }
-
-                if(node.getNodeName() === "AssignmentStatement") {
-                    _Functions.log("SEMANTIC ANALYSIS - Assignment Statement found.");
-                    let symbol = node.getChildren()[0].getNodeName();
-                    let value = node.getChildren()[1].getNodeName();
-                    let scope = symbolTable.getCurNode().getMap().get(symbol);
-                    let dataValue;
-                    let dataType;
-
-                    //Cast the value to the corresponding data type.
-                    if(digits.test(value)) {
-                        dataValue = value as number;
-                    }
-
-                    else if(characters.test(value)) {
-                        dataValue = value as string;
-                    }
-
-                    else if(trueRegEx.test(value) || falseRegEx.test(value)) {
-                        dataValue = value as boolean;
-                    }
-
-                    let symbolExists = symbolTable.getCurNode().getMap().get(symbol);
-                    //Check if the symbol is in the table.
-                    if(symbolExists == null) {
-                        semErr++;
-                        throw new Error("SEMANTIC ANALYSIS - Symbol " + symbol + " does not exist in current scope.");
-                    }
-
-                    else {
-                        let scopeType = symbolExists.getType();
-                        if(intRegEx.test(scopeType)) {
-                            dataType = scopeType as number;
-                        }
-    
-                        else if(stringRegEx.test(scopeType)) {
-                            dataType = scopeType as string;
-                        }
-    
-                        else if(boolRegEx.test(scopeType) || falseRegEx.test(scopeType)) {
-                            dataType = scopeType as boolean;
-                        }
-
-                        if(symbolTable.getCurNode().checkType(dataValue, dataType)) {
-                            symbolTable.getCurNode().assignment(symbol, dataValue);
-                        }
-                    }
-                }
-
-                if(node.getNodeName() === "WhileStatement") {
-                    //Check if both ends of the statement are in the symbol table
-                    _Functions.log("SEMANTIC ANALYSIS - While Statement found.");
-                    let assign1 = symbolTable.getCurNode().getChildren()[0].getChildren()[0];
-                    let assign2 = symbolTable.getCurNode().getChildren()[0].getChildren()[1];
-
-                    if(symbolTable.getCurNode().lookup(assign1) != null 
-                    && symbolTable.getCurNode().lookup(assign2) != null) {
-                        _Functions.log("SEMANTIC ANALYSIS - While " + 
-                        assign1 + symbolTable.getCurNode().getChildren()[0] + assign2);
-                    }
-                }
-
-                if(node.getNodeName() === "IfStatement") {
-                    _Functions.log("SEMANTIC ANALYSIS - If Statement found.");
-                    //Check if both ends of the statement are in the symbol table
-                    _Functions.log("SEMANTIC ANALYSIS - While Statement found.");
-                    let if1 = symbolTable.getCurNode().getChildren()[0].getChildren()[0];
-                    let if2 = symbolTable.getCurNode().getChildren()[0].getChildren()[1];
-                                        
-                    if(symbolTable.getCurNode().lookup(if1) != null 
-                    && symbolTable.getCurNode().lookup(if2) != null) {
-                        _Functions.log("SEMANTIC ANALYSIS - While " + if1 + 
-                        symbolTable.getCurNode().getChildren()[0] + if2);
-                    }
-                }
-
-                if(node.getNodeName() === "PrintStatement") {
-                    _Functions.log("SEMANTIC ANALYSIS - Print Statement found.");
-                    let symbol = node.getChildren()[0].getNodeName();
-                    //Check if the symbol to be printed is in the symbol table.
-                    if(symbolTable.getCurNode().lookup(symbol) != null) {
-                        _Functions.log(symbolTable.getCurNode().lookup(symbol) as unknown as string);
-                        _Functions.log("SEMANTIC ANALYSIS - Print " + symbol);
-                    }
-
-                    else {
-                        semErr++;
-                        throw new Error("SEMANTIC ANALYSIS - Symbol " + symbol + " does not exist in symbol table")
-                    }
-                }
-
-                for(let i = 0; i < node.getChildren().length; i++) {
-                    expand(node.getChildren()[i], depth + 1);
+            if(astNode.getChildren().length != 0) {
+                //Use recursion to travel through the nodes.
+                for(let i = 0; i < astNode.getChildren().length; i++) {
+                    this.analyzeStatement(astNode.getChildren()[i]);
                 }
             }
+            //this.analyzeStatement(astNode.getChildren()[0]);
+            symbolTable.closeScope();
+            //Add check for unused ids.
+        }
 
-            let test = ASTTree.getRoot();
-            expand(ASTTree.getRoot(), 0);
-            return symbolTable;
+        public static analyzeStatement(astNode : CSTNode) {
+            if(astNode.getNodeName() === "Block") {
+                this.analyzeBlock(astNode);
+            }
+
+            if(astNode.getNodeName() === "VarDecl") {
+                this.analyzeVarDecl(astNode);
+            }
+
+            if(astNode.getNodeName() === "PrintStatement") {
+                this.analyzePrintStatement(astNode);
+            }
+
+            if(astNode.getNodeName() === "IfStatement") {
+                this.analyzeIfStatement(astNode);
+            }
+
+            if(astNode.getNodeName() === "WhileStatement") {
+                this.analyzeWhileStatement(astNode);
+            }
+
+            if(astNode.getNodeName() === "AssignmentStatement") {
+                this.analyzeAssignmentStatement(astNode);
+            }
+
+        }
+
+        public static analyzeVarDecl(astNode : CSTNode) {
+            //Add the symbol to the symbol table if it has not been declared already.
+            _Functions.log("SEMANTIC ANALYSIS - VarDecl found.");
+            //let map = symbolTable.getCurNode().getMap();
+            let scopeType = astNode.getChildren()[0].getNodeName();
+            let symbol = astNode.getChildren()[1].getNodeName();
+            //This symbol has not been given a value, so it will be null for now.
+            let scope = new mackintosh.scope(null, scopeType, scopePointer);
+            let current = symbolTable.getCurNode();
+            symbolTable.getCurNode().addSymbol(symbol, scope);
+        }
+
+        public static analyzePrintStatement(astNode : CSTNode) {
+            _Functions.log("SEMANTIC ANALYSIS - Print Statement found.");
+            let symbol = astNode.getChildren()[0].getNodeName();
+            //Check if the symbol to be printed is in the symbol table.
+            if(symbolTable.getCurNode().lookup(symbol) != null) {
+                _Functions.log(symbolTable.getCurNode().lookup(symbol) as unknown as string);
+                _Functions.log("SEMANTIC ANALYSIS - Print " + symbol);
+            }
+
+            else {
+                semErr++;
+                throw new Error("SEMANTIC ANALYSIS - Symbol " + symbol + " does not exist in symbol table")
+            }
+        }
+
+        public static analyzeIfStatement(astNode : CSTNode) {
+            _Functions.log("SEMANTIC ANALYSIS - If Statement found.");
+            //Check if both ends of the statement are in the symbol table
+            _Functions.log("SEMANTIC ANALYSIS - While Statement found.");
+            let if1 = astNode.getChildren()[0].getChildren()[0].getNodeName();
+            let if2 = astNode.getChildren()[0].getChildren()[1].getNodeName();
+                                
+            if(symbolTable.getCurNode().lookup(if1) != null 
+            && symbolTable.getCurNode().lookup(if2) != null) {
+                _Functions.log("SEMANTIC ANALYSIS - While " + if1 + " " +
+                astNode.getChildren()[0].getNodeName() + " " + if2);
+            }
+        }
+
+        public static analyzeWhileStatement(astNode : CSTNode) {
+            //Check if both ends of the statement are in the symbol table
+            _Functions.log("SEMANTIC ANALYSIS - While Statement found.");
+            let while1 = astNode.getChildren()[0].getChildren()[0].getNodeName();
+            let while2 = astNode.getChildren()[0].getChildren()[1].getNodeName();
+            
+            if(symbolTable.getCurNode().lookup(while1) != null 
+            && symbolTable.getCurNode().lookup(while2) != null) {
+                _Functions.log("SEMANTIC ANALYSIS - While " + 
+                while1 +  " " + astNode.getChildren()[0].getNodeName() + " " + while2);
+            }
+        }
+
+        public static analyzeAssignmentStatement(astNode : CSTNode) {
+            _Functions.log("SEMANTIC ANALYSIS - Assignment Statement found.");
+            let symbol = astNode.getChildren()[0].getNodeName();
+            let value = astNode.getChildren()[1].getNodeName();
+            let scope = symbolTable.getCurNode().getMap().get(symbol);
+            let dataValue;
+            let dataType;
+
+            //Cast the value to the corresponding data type.
+            if(digits.test(value)) {
+                dataValue = value as number;
+            }
+
+            else if(characters.test(value)) {
+                dataValue = value as string;
+            }
+
+            else if(trueRegEx.test(value) || falseRegEx.test(value)) {
+                dataValue = value as boolean;
+            }
+
+            let symbolExists = symbolTable.getCurNode().lookup(symbol);
+            //Check if the symbol is in the table.
+            if(symbolExists == null) {
+                semErr++;
+                throw new Error("SEMANTIC ANALYSIS - Symbol " + symbol + " does not exist in current scope.");
+            }
+
+            else {
+                let scopeType = symbolExists.getType();
+                if(intRegEx.test(scopeType)) {
+                    dataType = scopeType as number;
+                }
+    
+                else if(stringRegEx.test(scopeType)) {
+                    dataType = scopeType as string;
+                }
+    
+                else if(boolRegEx.test(scopeType) || falseRegEx.test(scopeType)) {
+                    dataType = scopeType as boolean;
+                }
+
+                if(symbolTable.getCurNode().checkType(dataValue, dataType)) {
+                    symbolTable.getCurNode().assignment(symbol, dataValue);
+                }
+            }
         }
 
         //Method to go through the symbol table and find unused ids.

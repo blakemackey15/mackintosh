@@ -142,7 +142,8 @@ var mackintosh;
                     this.parseBlock(parseTokens);
                 }
                 else {
-                    _Functions.log("PARSER ERROR - Expected beginning of statement tokens (if, print, while, {}, assignment statement, boolean, int, string)");
+                    _Functions.log("PARSER ERROR - Expected beginning of statement tokens"
+                        + "(if, print, while, {}, assignment statement, boolean, int, string)");
                     parseErrCount++;
                     break;
                 }
@@ -198,6 +199,7 @@ var mackintosh;
         parse.parseIfStatement = function (parseTokens) {
             _Functions.log("PARSER - parseIfStatement()");
             CSTTree.addNode("IfStatement", "branch");
+            ASTTree.addNode("WhileStatement", "branch");
             this.parseIf(parseTokens);
             this.parseBoolExpr(parseTokens);
             this.parseBlock(parseTokens);
@@ -359,11 +361,9 @@ var mackintosh;
             this.match(['"', '"'], parseTokens[tokenPointer]);
         };
         parse.parseIf = function (parseTokens) {
-            isASTNode = true;
             this.match(["if"], parseTokens[tokenPointer]);
         };
         parse.parseWhile = function (parseTokens) {
-            isASTNode = true;
             this.match(["while"], parseTokens[tokenPointer]);
         };
         parse.parsePrint = function (parseTokens) {

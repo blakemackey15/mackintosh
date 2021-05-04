@@ -5,6 +5,7 @@ var mackintosh;
         function symbolTableNode(map) {
             this.hashmap = map;
             this.children = [];
+            this.parent = null;
         }
         symbolTableNode.prototype.setMap = function (map) {
             this.hashmap = map;
@@ -72,8 +73,8 @@ var mackintosh;
                 return this.hashmap.get(symbol);
             }
             //If it wasn't found and the parent isn't null check and see if its there.
-            else if (this.parent != null) {
-                this.parent.lookup(symbol);
+            else if (this.parent !== null) {
+                return this.parent.lookup(symbol);
             }
             return null;
         };
@@ -129,6 +130,7 @@ var mackintosh;
                 this.curNode = this.curNode.getParentScope();
             }
             else {
+                semErr++;
                 throw new Error("SEMANTIC ANALYSIS - Parent scope does not exist.");
             }
         };

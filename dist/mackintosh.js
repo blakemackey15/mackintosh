@@ -176,11 +176,17 @@ var mackintosh;
                     if (errCount == 0) {
                         _Functions.log('LEXER - Lex Completed With ' + errCount + ' Errors and ' + warnCount + ' Warnings');
                         var isParsed = _Parser.parse(tokenStream);
+                        var isSemantic = void 0;
                         if (isParsed) {
-                            _SemanticAnalyzer.semanticAnalysis();
+                            isSemantic = _SemanticAnalyzer.semanticAnalysis();
                         }
                         else {
                             _Functions.log("PARSER - Semantic analysis skipped due to parse errors.");
+                        }
+                        if (isSemantic) {
+                        }
+                        else {
+                            _Functions.log("SEMANTIC ANALYSIS - Code generation skipped due to semantic errors.");
                         }
                         //Check if this is the end of the program. If not, begin lexing the next program.
                         if (typeof program[i] != undefined) {
@@ -832,7 +838,8 @@ var mackintosh;
                     this.parseBlock(parseTokens);
                 }
                 else {
-                    _Functions.log("PARSER ERROR - Expected beginning of statement tokens (if, print, while, {}, assignment statement, boolean, int, string)");
+                    _Functions.log("PARSER ERROR - Expected beginning of statement tokens"
+                        + "(if, print, while, {}, assignment statement, boolean, int, string)");
                     parseErrCount++;
                     break;
                 }
@@ -888,6 +895,7 @@ var mackintosh;
         parse.parseIfStatement = function (parseTokens) {
             _Functions.log("PARSER - parseIfStatement()");
             CSTTree.addNode("IfStatement", "branch");
+            ASTTree.addNode("WhileStatement", "branch");
             this.parseIf(parseTokens);
             this.parseBoolExpr(parseTokens);
             this.parseBlock(parseTokens);
@@ -1049,11 +1057,9 @@ var mackintosh;
             this.match(['"', '"'], parseTokens[tokenPointer]);
         };
         parse.parseIf = function (parseTokens) {
-            isASTNode = true;
             this.match(["if"], parseTokens[tokenPointer]);
         };
         parse.parseWhile = function (parseTokens) {
-            isASTNode = true;
             this.match(["while"], parseTokens[tokenPointer]);
         };
         parse.parsePrint = function (parseTokens) {
@@ -1118,7 +1124,8 @@ var mackintosh;
             _Functions.log("\n");
             _Functions.log("SEMANTIC ANALYSIS - Beginning Semantic Analysis " + (programCount - 1));
             try {
-                this.traverseAST();
+                this.analyzeBlock(ASTTree.getRoot());
+                //this.traverseAST();
                 _Functions.log("SEMANTIC ANALYSIS - Completed Semantic Analysis " + (programCount - 1) + " with "
                     + semErr + " errors and " + semWarn + " warnings.");
                 if (semErr <= 0) {
@@ -1143,123 +1150,138 @@ var mackintosh;
                 _Functions.log(error);
                 _Functions.log("SEMANTIC ANALYSIS - Ended due to error.");
             }
+            return isSemantic;
         };
         /*
             Method to traverse through the AST and perform semantic analysis.
             Based on the toString method. Instead of traversing and turning it into a string, semantic analysis will be
             performed on the AST.
+            AST Nodes that are added to symbol table:
+            VarDecl, while statement, if statement, print statement, assignment statement, block
         */
-        semanticAnalyser.traverseAST = function () {
-            debugger;
-            //Function to traverse through the AST and build the symbol table.
-            function expand(node, depth) {
-                //Depth first in order traversal through the array of children to get the nodes.
-                /*
-                    AST Nodes that are added to symbol table:
-                    VarDecl, while statement, if statement, print statement, assignment statement, block
-                */
-                var test = node.getNodeName();
-                if (node.getNodeName() === "Block") {
-                    //Open up a new scope and add it to the symbol table.
-                    scopePointer++;
-                    var newScope = void 0;
-                    newScope = new Map();
-                    _Functions.log("SEMANTIC ANALYSIS - Block found, opening new scope " + scopePointer);
-                    symbolTable.addNode(newScope);
-                }
-                if (node.getNodeName() === "VarDecl") {
-                    //Add the symbol to the symbol table if it has not been declared already.
-                    _Functions.log("SEMANTIC ANALYSIS - VarDecl found.");
-                    //let map = symbolTable.getCurNode().getMap();
-                    var scopeType = node.getChildren()[0].getNodeName();
-                    var symbol = node.getChildren()[1].getNodeName();
-                    //This symbol has not been given a value, so it will be null for now.
-                    var scope_1 = new mackintosh.scope(null, scopeType, scopePointer);
-                    var current = symbolTable.getCurNode();
-                    symbolTable.getCurNode().addSymbol(symbol, scope_1);
-                }
-                if (node.getNodeName() === "AssignmentStatement") {
-                    _Functions.log("SEMANTIC ANALYSIS - Assignment Statement found.");
-                    var symbol = node.getChildren()[0].getNodeName();
-                    var value = node.getChildren()[1].getNodeName();
-                    var scope_2 = symbolTable.getCurNode().getMap().get(symbol);
-                    var dataValue = void 0;
-                    var dataType = void 0;
-                    //Cast the value to the corresponding data type.
-                    if (digits.test(value)) {
-                        dataValue = value;
-                    }
-                    else if (characters.test(value)) {
-                        dataValue = value;
-                    }
-                    else if (trueRegEx.test(value) || falseRegEx.test(value)) {
-                        dataValue = value;
-                    }
-                    var symbolExists = symbolTable.getCurNode().getMap().get(symbol);
-                    //Check if the symbol is in the table.
-                    if (symbolExists == null) {
-                        semErr++;
-                        throw new Error("SEMANTIC ANALYSIS - Symbol " + symbol + " does not exist in current scope.");
-                    }
-                    else {
-                        var scopeType = symbolExists.getType();
-                        if (intRegEx.test(scopeType)) {
-                            dataType = scopeType;
-                        }
-                        else if (stringRegEx.test(scopeType)) {
-                            dataType = scopeType;
-                        }
-                        else if (boolRegEx.test(scopeType) || falseRegEx.test(scopeType)) {
-                            dataType = scopeType;
-                        }
-                        if (symbolTable.getCurNode().checkType(dataValue, dataType)) {
-                            symbolTable.getCurNode().assignment(symbol, dataValue);
-                        }
-                    }
-                }
-                if (node.getNodeName() === "WhileStatement") {
-                    //Check if both ends of the statement are in the symbol table
-                    _Functions.log("SEMANTIC ANALYSIS - While Statement found.");
-                    var assign1 = symbolTable.getCurNode().getChildren()[0].getChildren()[0];
-                    var assign2 = symbolTable.getCurNode().getChildren()[0].getChildren()[1];
-                    if (symbolTable.getCurNode().lookup(assign1) != null
-                        && symbolTable.getCurNode().lookup(assign2) != null) {
-                        _Functions.log("SEMANTIC ANALYSIS - While " +
-                            assign1 + symbolTable.getCurNode().getChildren()[0] + assign2);
-                    }
-                }
-                if (node.getNodeName() === "IfStatement") {
-                    _Functions.log("SEMANTIC ANALYSIS - If Statement found.");
-                    //Check if both ends of the statement are in the symbol table
-                    _Functions.log("SEMANTIC ANALYSIS - While Statement found.");
-                    var if1 = symbolTable.getCurNode().getChildren()[0].getChildren()[0];
-                    var if2 = symbolTable.getCurNode().getChildren()[0].getChildren()[1];
-                    if (symbolTable.getCurNode().lookup(if1) != null
-                        && symbolTable.getCurNode().lookup(if2) != null) {
-                        _Functions.log("SEMANTIC ANALYSIS - While " + if1 +
-                            symbolTable.getCurNode().getChildren()[0] + if2);
-                    }
-                }
-                if (node.getNodeName() === "PrintStatement") {
-                    _Functions.log("SEMANTIC ANALYSIS - Print Statement found.");
-                    var symbol = node.getChildren()[0].getNodeName();
-                    //Check if the symbol to be printed is in the symbol table.
-                    if (symbolTable.getCurNode().lookup(symbol) != null) {
-                        _Functions.log(symbolTable.getCurNode().lookup(symbol));
-                        _Functions.log("SEMANTIC ANALYSIS - Print " + symbol);
-                    }
-                    else {
-                        semErr++;
-                        throw new Error("SEMANTIC ANALYSIS - Symbol " + symbol + " does not exist in symbol table");
-                    }
-                }
-                for (var i = 0; i < node.getChildren().length; i++) {
-                    expand(node.getChildren()[i], depth + 1);
+        semanticAnalyser.analyzeBlock = function (astNode) {
+            //Open up a new scope and add it to the symbol table.
+            //Once the recursion ends the scope will be closed.
+            scopePointer++;
+            var newScope;
+            newScope = new Map();
+            _Functions.log("SEMANTIC ANALYSIS - Block found, opening new scope " + scopePointer);
+            symbolTable.addNode(newScope);
+            if (astNode.getChildren().length != 0) {
+                //Use recursion to travel through the nodes.
+                for (var i = 0; i < astNode.getChildren().length; i++) {
+                    this.analyzeStatement(astNode.getChildren()[i]);
                 }
             }
-            var test = ASTTree.getRoot();
-            expand(ASTTree.getRoot(), 0);
-            return symbolTable;
+            //this.analyzeStatement(astNode.getChildren()[0]);
+            symbolTable.closeScope();
+            //Add check for unused ids.
+        };
+        semanticAnalyser.analyzeStatement = function (astNode) {
+            if (astNode.getNodeName() === "Block") {
+                this.analyzeBlock(astNode);
+            }
+            if (astNode.getNodeName() === "VarDecl") {
+                this.analyzeVarDecl(astNode);
+            }
+            if (astNode.getNodeName() === "PrintStatement") {
+                this.analyzePrintStatement(astNode);
+            }
+            if (astNode.getNodeName() === "IfStatement") {
+                this.analyzeIfStatement(astNode);
+            }
+            if (astNode.getNodeName() === "WhileStatement") {
+                this.analyzeWhileStatement(astNode);
+            }
+            if (astNode.getNodeName() === "AssignmentStatement") {
+                this.analyzeAssignmentStatement(astNode);
+            }
+        };
+        semanticAnalyser.analyzeVarDecl = function (astNode) {
+            //Add the symbol to the symbol table if it has not been declared already.
+            _Functions.log("SEMANTIC ANALYSIS - VarDecl found.");
+            //let map = symbolTable.getCurNode().getMap();
+            var scopeType = astNode.getChildren()[0].getNodeName();
+            var symbol = astNode.getChildren()[1].getNodeName();
+            //This symbol has not been given a value, so it will be null for now.
+            var scope = new mackintosh.scope(null, scopeType, scopePointer);
+            var current = symbolTable.getCurNode();
+            symbolTable.getCurNode().addSymbol(symbol, scope);
+        };
+        semanticAnalyser.analyzePrintStatement = function (astNode) {
+            _Functions.log("SEMANTIC ANALYSIS - Print Statement found.");
+            var symbol = astNode.getChildren()[0].getNodeName();
+            //Check if the symbol to be printed is in the symbol table.
+            if (symbolTable.getCurNode().lookup(symbol) != null) {
+                _Functions.log(symbolTable.getCurNode().lookup(symbol));
+                _Functions.log("SEMANTIC ANALYSIS - Print " + symbol);
+            }
+            else {
+                semErr++;
+                throw new Error("SEMANTIC ANALYSIS - Symbol " + symbol + " does not exist in symbol table");
+            }
+        };
+        semanticAnalyser.analyzeIfStatement = function (astNode) {
+            _Functions.log("SEMANTIC ANALYSIS - If Statement found.");
+            //Check if both ends of the statement are in the symbol table
+            _Functions.log("SEMANTIC ANALYSIS - While Statement found.");
+            var if1 = astNode.getChildren()[0].getChildren()[0].getNodeName();
+            var if2 = astNode.getChildren()[0].getChildren()[1].getNodeName();
+            if (symbolTable.getCurNode().lookup(if1) != null
+                && symbolTable.getCurNode().lookup(if2) != null) {
+                _Functions.log("SEMANTIC ANALYSIS - While " + if1 + " " +
+                    astNode.getChildren()[0].getNodeName() + " " + if2);
+            }
+        };
+        semanticAnalyser.analyzeWhileStatement = function (astNode) {
+            //Check if both ends of the statement are in the symbol table
+            _Functions.log("SEMANTIC ANALYSIS - While Statement found.");
+            var while1 = astNode.getChildren()[0].getChildren()[0].getNodeName();
+            var while2 = astNode.getChildren()[0].getChildren()[1].getNodeName();
+            if (symbolTable.getCurNode().lookup(while1) != null
+                && symbolTable.getCurNode().lookup(while2) != null) {
+                _Functions.log("SEMANTIC ANALYSIS - While " +
+                    while1 + " " + astNode.getChildren()[0].getNodeName() + " " + while2);
+            }
+        };
+        semanticAnalyser.analyzeAssignmentStatement = function (astNode) {
+            _Functions.log("SEMANTIC ANALYSIS - Assignment Statement found.");
+            var symbol = astNode.getChildren()[0].getNodeName();
+            var value = astNode.getChildren()[1].getNodeName();
+            var scope = symbolTable.getCurNode().getMap().get(symbol);
+            var dataValue;
+            var dataType;
+            //Cast the value to the corresponding data type.
+            if (digits.test(value)) {
+                dataValue = value;
+            }
+            else if (characters.test(value)) {
+                dataValue = value;
+            }
+            else if (trueRegEx.test(value) || falseRegEx.test(value)) {
+                dataValue = value;
+            }
+            var symbolExists = symbolTable.getCurNode().lookup(symbol);
+            //Check if the symbol is in the table.
+            if (symbolExists == null) {
+                semErr++;
+                throw new Error("SEMANTIC ANALYSIS - Symbol " + symbol + " does not exist in current scope.");
+            }
+            else {
+                var scopeType = symbolExists.getType();
+                if (intRegEx.test(scopeType)) {
+                    dataType = scopeType;
+                }
+                else if (stringRegEx.test(scopeType)) {
+                    dataType = scopeType;
+                }
+                else if (boolRegEx.test(scopeType) || falseRegEx.test(scopeType)) {
+                    dataType = scopeType;
+                }
+                if (symbolTable.getCurNode().checkType(dataValue, dataType)) {
+                    symbolTable.getCurNode().assignment(symbol, dataValue);
+                }
+            }
         };
         //Method to go through the symbol table and find unused ids.
         semanticAnalyser.findUnusedIds = function () {
@@ -1282,6 +1304,7 @@ var mackintosh;
         function symbolTableNode(map) {
             this.hashmap = map;
             this.children = [];
+            this.parent = null;
         }
         symbolTableNode.prototype.setMap = function (map) {
             this.hashmap = map;
@@ -1349,8 +1372,8 @@ var mackintosh;
                 return this.hashmap.get(symbol);
             }
             //If it wasn't found and the parent isn't null check and see if its there.
-            else if (this.parent != null) {
-                this.parent.lookup(symbol);
+            else if (this.parent !== null) {
+                return this.parent.lookup(symbol);
             }
             return null;
         };
@@ -1406,6 +1429,7 @@ var mackintosh;
                 this.curNode = this.curNode.getParentScope();
             }
             else {
+                semErr++;
                 throw new Error("SEMANTIC ANALYSIS - Parent scope does not exist.");
             }
         };

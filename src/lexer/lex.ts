@@ -71,12 +71,21 @@ module mackintosh {
                     if(errCount == 0) {
                         _Functions.log('LEXER - Lex Completed With ' +  errCount + ' Errors and ' + warnCount + ' Warnings');
                         let isParsed = _Parser.parse(tokenStream);
+                        let isSemantic : boolean;
                         if(isParsed) {
-                            _SemanticAnalyzer.semanticAnalysis();
+                            isSemantic = _SemanticAnalyzer.semanticAnalysis();
                         }
 
                         else {
                             _Functions.log("PARSER - Semantic analysis skipped due to parse errors.");
+                        }
+
+                        if(isSemantic) {
+
+                        }
+
+                        else {
+                            _Functions.log("SEMANTIC ANALYSIS - Code generation skipped due to semantic errors.");
                         }
 
                         //Check if this is the end of the program. If not, begin lexing the next program.

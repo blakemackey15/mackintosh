@@ -8,6 +8,7 @@ module mackintosh {
         constructor(map : Map<any, scope>) {
             this.hashmap = map;
             this.children = [];
+            this.parent = null;
         }
 
         public setMap(map : Map<any, scope>) {
@@ -91,8 +92,8 @@ module mackintosh {
             }
 
             //If it wasn't found and the parent isn't null check and see if its there.
-            else if(this.parent != null) {
-                this.parent.lookup(symbol);
+            else if(this.parent !== null) {
+                return this.parent.lookup(symbol);
             }
 
             return null;
@@ -164,6 +165,7 @@ module mackintosh {
             }
 
             else {
+                semErr++;
                 throw new Error("SEMANTIC ANALYSIS - Parent scope does not exist.");
             }
         }
