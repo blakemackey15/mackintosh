@@ -173,56 +173,77 @@ module mackintosh {
             _Functions.log("SEMANTIC ANALYSIS - Assignment Statement found.");
             let symbol = astNode.getChildren()[0].getNodeName();
             let value = astNode.getChildren()[1].getNodeName();
-            let scope = symbolTable.getCurNode().getMap().get(symbol);
-            let dataValue;
-            let dataValue2;
-            let dataType;
-            let dataType2;
-            let secondValue;
+            let curSymbol = symbolTable.getCurNode().lookup(symbol);
+            let expectedDataType;
+            let dataType
 
-            //Cast the value to the corresponding data type.
-            if(digits.test(value)) {
-                dataValue = value as number;
-            }
-
-            else if(characters.test(value)) {
-                if(value.length == 0) {
-                    secondValue = symbolTable.getCurNode().lookup(value);
-                }
-
-                else {
-                    dataValue = value as string;
-                }
-            }
-
-            else if(trueRegEx.test(value) || falseRegEx.test(value)) {
-                dataValue = value as boolean;
-            }
-
-            let symbolExists = symbolTable.getCurNode().lookup(symbol);
-            //Check if the symbol is in the table.
-            if(symbolExists == null) {
-                semErr++;
-                throw new Error("SEMANTIC ANALYSIS - Symbol " + symbol + " does not exist in current scope.");
+            if(symbolTable.getCurNode().lookup(symbol) == null) {
+                throw new Error("SEMANTIC ANALYSIS - Symbol does not exist in symbol table.");
             }
 
             else {
-                let scopeType = symbolExists.getType();
-                if(intRegEx.test(scopeType)) {
-                    dataType = scopeType as number;
-                }
-    
-                else if(stringRegEx.test(scopeType)) {
-                    dataType = scopeType as string;
-                }
-    
-                else if(boolRegEx.test(scopeType) || falseRegEx.test(scopeType)) {
-                    dataType = scopeType as boolean;
+                //Check if the value is an id, int, string, or boolean.
+                if(characters.test(value) && value.length == 1) {
+                    let newSymbol = symbolTable.getCurNode().lookup(value);
+
+                    //Check the type of the two ids and make sure they are assignable.
+                    if(newSymbol.getType() != curSymbol.getType()) {
+                        throw new Error("SEMANTIC ANALYSIS - Type Mismatch: symbol " + symbol + 
+                        " with type " + curSymbol.getType() as string + " cannot be assigned to " 
+                        + value + " with type " + newSymbol.getType() as string)
+                    }
+
+                    else if(newSymbol.getValue() == null) {
+                        semWarn++;
+                        _Functions.log("SEMANTIC ANALYSIS - Symbol " + symbol + 
+                        " is being assigned to symbol " + value + " with no value.");
+                        symbolTable.getCurNode().assignment(symbol, null);
+                    }
+
+                    //Assign the variable.
+                    else {
+                        symbolTable.getCurNode().assignment(symbol, newSymbol.getValue());
+                    }
                 }
 
-                if(symbolTable.getCurNode().checkType(dataValue, dataType)) {
-                    symbolTable.getCurNode().assignment(symbol, dataValue);
+                else if(characters.test(value) && value.length > 1) {
+                    expectedDataType = "sadsadfsadsa";
                 }
+
+                else if(digits.test(value)) {
+                    expectedDataType = 1;
+                }
+
+                else if(trueRegEx.test(value) || falseRegEx.test(value)) {
+                    expectedDataType = true;
+                }
+
+                if(intRegEx.test(curSymbol.getType())) {
+                    dataType = 1;
+                }
+
+                else if(stringRegEx.test(curSymbol.getType())) {
+                    dataType = "xcsadsa"
+                }
+
+                else if(boolRegEx.test(curSymbol.getType())) {
+                    dataType = true;
+                }
+
+                if(this.checkType(expectedDataType, dataType)) {
+                    _Functions.log("SEMANTIC ANALYSIS - Performing assignment " + symbol + value);
+                    symbolTable.getCurNode().assignment(symbol, value);
+                }
+
+            }
+        }
+
+        //Check the type or report type mismatch error.
+        private static checkType(expected : any, actual : any) : boolean {
+            if(typeof expected == typeof actual) {
+                return true
+            } else {
+                throw new Error("SEMANTIC ANALYSIS - Type mismatch error expected " + expected + " but got " + actual);
             }
         }
 

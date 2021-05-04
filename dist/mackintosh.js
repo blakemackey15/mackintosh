@@ -1262,47 +1262,64 @@ var mackintosh;
             _Functions.log("SEMANTIC ANALYSIS - Assignment Statement found.");
             var symbol = astNode.getChildren()[0].getNodeName();
             var value = astNode.getChildren()[1].getNodeName();
-            var scope = symbolTable.getCurNode().getMap().get(symbol);
-            var dataValue;
-            var dataValue2;
+            var curSymbol = symbolTable.getCurNode().lookup(symbol);
+            var expectedDataType;
             var dataType;
-            var dataType2;
-            var secondValue;
-            //Cast the value to the corresponding data type.
-            if (digits.test(value)) {
-                dataValue = value;
-            }
-            else if (characters.test(value)) {
-                if (value.length == 0) {
-                    secondValue = symbolTable.getCurNode().lookup(value);
-                }
-                else {
-                    dataValue = value;
-                }
-            }
-            else if (trueRegEx.test(value) || falseRegEx.test(value)) {
-                dataValue = value;
-            }
-            var symbolExists = symbolTable.getCurNode().lookup(symbol);
-            //Check if the symbol is in the table.
-            if (symbolExists == null) {
-                semErr++;
-                throw new Error("SEMANTIC ANALYSIS - Symbol " + symbol + " does not exist in current scope.");
+            if (symbolTable.getCurNode().lookup(symbol) == null) {
+                throw new Error("SEMANTIC ANALYSIS - Symbol does not exist in symbol table.");
             }
             else {
-                var scopeType = symbolExists.getType();
-                if (intRegEx.test(scopeType)) {
-                    dataType = scopeType;
+                //Check if the value is an id, int, string, or boolean.
+                if (characters.test(value) && value.length == 1) {
+                    var newSymbol = symbolTable.getCurNode().lookup(value);
+                    //Check the type of the two ids and make sure they are assignable.
+                    if (newSymbol.getType() != curSymbol.getType()) {
+                        throw new Error("SEMANTIC ANALYSIS - Type Mismatch: symbol " + symbol +
+                            " with type " + curSymbol.getType() + " cannot be assigned to "
+                            + value + " with type " + newSymbol.getType());
+                    }
+                    else if (newSymbol.getValue() == null) {
+                        semWarn++;
+                        _Functions.log("SEMANTIC ANALYSIS - Symbol " + symbol +
+                            " is being assigned to symbol " + value + " with no value.");
+                        symbolTable.getCurNode().assignment(symbol, null);
+                    }
+                    //Assign the variable.
+                    else {
+                        symbolTable.getCurNode().assignment(symbol, newSymbol.getValue());
+                    }
                 }
-                else if (stringRegEx.test(scopeType)) {
-                    dataType = scopeType;
+                else if (characters.test(value) && value.length > 1) {
+                    expectedDataType = "sadsadfsadsa";
                 }
-                else if (boolRegEx.test(scopeType) || falseRegEx.test(scopeType)) {
-                    dataType = scopeType;
+                else if (digits.test(value)) {
+                    expectedDataType = 1;
                 }
-                if (symbolTable.getCurNode().checkType(dataValue, dataType)) {
-                    symbolTable.getCurNode().assignment(symbol, dataValue);
+                else if (trueRegEx.test(value) || falseRegEx.test(value)) {
+                    expectedDataType = true;
                 }
+                if (intRegEx.test(curSymbol.getType())) {
+                    dataType = 1;
+                }
+                else if (stringRegEx.test(curSymbol.getType())) {
+                    dataType = "xcsadsa";
+                }
+                else if (boolRegEx.test(curSymbol.getType())) {
+                    dataType = true;
+                }
+                if (this.checkType(expectedDataType, dataType)) {
+                    _Functions.log("SEMANTIC ANALYSIS - Performing assignment " + symbol + value);
+                    symbolTable.getCurNode().assignment(symbol, value);
+                }
+            }
+        };
+        //Check the type or report type mismatch error.
+        semanticAnalyser.checkType = function (expected, actual) {
+            if (typeof expected == typeof actual) {
+                return true;
+            }
+            else {
+                throw new Error("SEMANTIC ANALYSIS - Type mismatch error expected " + expected + " but got " + actual);
             }
         };
         //Method to go through the symbol table and find unused ids.

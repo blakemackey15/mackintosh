@@ -86,7 +86,7 @@ module mackintosh {
             }
         }
 
-        public lookup(symbol : any) {
+        public lookup(symbol : any) : scope {
             if(this.hashmap.has(symbol)) {
                 return this.hashmap.get(symbol);
             }
