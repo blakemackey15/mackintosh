@@ -206,16 +206,22 @@ module mackintosh {
                     }
                 }
 
-                else if(characters.test(value) && value.length > 1) {
-                    expectedDataType = "sadsadfsadsa";
+                else if(value === "true" || value === "false") {
+                    expectedDataType = true;
+                }
+
+                else if(quotes.test(value)) {
+                    let i = 2;
+                    while(!quotes.test(astNode.getChildren()[i].getNodeName())) {
+                        value += astNode.getChildren()[i];
+                        i++;
+                    }
+                    value += '"';
+                    expectedDataType = "dsadsa"
                 }
 
                 else if(digits.test(value)) {
                     expectedDataType = 1;
-                }
-
-                else if(trueRegEx.test(value) || falseRegEx.test(value)) {
-                    expectedDataType = true;
                 }
 
                 if(intRegEx.test(curSymbol.getType())) {
@@ -231,7 +237,7 @@ module mackintosh {
                 }
 
                 if(this.checkType(expectedDataType, dataType)) {
-                    _Functions.log("SEMANTIC ANALYSIS - Performing assignment " + symbol + value);
+                    _Functions.log("SEMANTIC ANALYSIS - Performing assignment " + symbol + " " + value);
                     symbolTable.getCurNode().assignment(symbol, value);
                 }
 
@@ -243,7 +249,8 @@ module mackintosh {
             if(typeof expected == typeof actual) {
                 return true
             } else {
-                throw new Error("SEMANTIC ANALYSIS - Type mismatch error expected " + expected + " but got " + actual);
+                throw new Error("SEMANTIC ANALYSIS - Type mismatch error expected " 
+                + typeof expected + " but got " +  typeof actual);
             }
         }
 

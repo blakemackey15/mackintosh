@@ -78,27 +78,6 @@ var mackintosh;
             }
             return null;
         };
-        symbolTableNode.prototype.checkType = function (value, scopeType) {
-            //Change to the correct data type.
-            var dataType;
-            if (digits.test(value)) {
-                dataType = "int";
-            }
-            if (characters.test(value)) {
-                dataType = "string";
-            }
-            if (trueRegEx.test(value) || falseRegEx.test(value)) {
-                dataType = "boolean";
-            }
-            if (scopeType == dataType) {
-                return true;
-            }
-            else {
-                semErr++;
-                throw new Error("SEMANTIC ANALYSIS - Type mismatch, expected "
-                    + scopeType + " but got " + dataType + " instead.");
-            }
-        };
         return symbolTableNode;
     }());
     mackintosh.symbolTableNode = symbolTableNode;

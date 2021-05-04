@@ -98,32 +98,6 @@ module mackintosh {
 
             return null;
         }
-
-        public checkType(value : any, scopeType : any) : boolean {
-            //Change to the correct data type.
-            let dataType;
-            if(digits.test(value)) {
-                dataType = "int";
-            }
-
-            if(characters.test(value)) {
-                dataType = "string";
-            }
-
-            if(trueRegEx.test(value) || falseRegEx.test(value)) {
-                dataType = "boolean";
-            }
-            if(scopeType == dataType) {
-                return true;
-            }
-
-            else {
-                semErr++;
-                throw new Error("SEMANTIC ANALYSIS - Type mismatch, expected " 
-                + scopeType + " but got " + dataType + " instead.");
-            }
-        }
-
     }
 
     //Represent the symbol table tree.
