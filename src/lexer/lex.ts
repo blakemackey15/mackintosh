@@ -16,13 +16,11 @@ module mackintosh {
         
         //inputtedCode : string
         public static lex() { 
-
             //Loop through the length of the inputted string, and check each character.
             let curToken = new token();
             let tokenStream = new Array<string>('');
             tokenStream.pop();
             for(let i = 0; i < program.length; i++) {
-                debugger;
                 tokenFlag = curToken.GenerateToken(program[i], program, i);
 
                 //Update the pointer and remove commented code.

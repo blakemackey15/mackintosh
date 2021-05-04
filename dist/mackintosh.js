@@ -88,7 +88,6 @@ var mackintosh;
         }
         //Begins the compilation of the inputted code.
         index.startCompile = function () {
-            debugger;
             //Set compilation flag to true.
             isCompiling = true;
             _Functions.log('INFO: Beginning Compilation...');
@@ -134,7 +133,6 @@ var mackintosh;
             var tokenStream = new Array('');
             tokenStream.pop();
             for (var i = 0; i < program.length; i++) {
-                debugger;
                 tokenFlag = curToken.GenerateToken(program[i], program, i);
                 //Update the pointer and remove commented code.
                 if (curToken.getIsComment()) {
@@ -268,7 +266,6 @@ var mackintosh;
          * Generates token by checking against the regular expressions generated.
          */
         token.prototype.GenerateToken = function (input, program, counter) {
-            debugger;
             /**
              * Use switch statements to check against each RegEx.
              */
@@ -702,7 +699,6 @@ var mackintosh;
         }
         //Recursive descent parser implimentation.
         parse.parse = function (parseTokens) {
-            debugger;
             var isParsed = false;
             CSTTree = new mackintosh.CST();
             ASTTree = new mackintosh.CST();
@@ -1174,6 +1170,7 @@ var mackintosh;
                 }
             }
             //this.analyzeStatement(astNode.getChildren()[0]);
+            _Functions.log("SEMANTIC ANALYSIS - Closing scope " + scopePointer);
             symbolTable.closeScope();
             //Add check for unused ids.
         };
@@ -1229,8 +1226,13 @@ var mackintosh;
             var if2 = astNode.getChildren()[0].getChildren()[1].getNodeName();
             if (symbolTable.getCurNode().lookup(if1) != null
                 && symbolTable.getCurNode().lookup(if2) != null) {
-                _Functions.log("SEMANTIC ANALYSIS - While " + if1 + " " +
+                _Functions.log("SEMANTIC ANALYSIS - If " + if1 + " " +
                     astNode.getChildren()[0].getNodeName() + " " + if2);
+            }
+            if (astNode.getChildren().length > 1) {
+                for (var i = 1; i < astNode.getChildren().length; i++) {
+                    this.analyzeStatement(astNode.getChildren()[i]);
+                }
             }
         };
         semanticAnalyser.analyzeWhileStatement = function (astNode) {
@@ -1242,6 +1244,11 @@ var mackintosh;
                 && symbolTable.getCurNode().lookup(while2) != null) {
                 _Functions.log("SEMANTIC ANALYSIS - While " +
                     while1 + " " + astNode.getChildren()[0].getNodeName() + " " + while2);
+            }
+            if (astNode.getChildren().length > 1) {
+                for (var i = 1; i < astNode.getChildren().length; i++) {
+                    this.analyzeStatement(astNode.getChildren()[i]);
+                }
             }
         };
         semanticAnalyser.analyzeAssignmentStatement = function (astNode) {
@@ -1427,6 +1434,9 @@ var mackintosh;
             //Move up the tree to parent node.
             if (this.curNode.getParentScope() !== null && this.curNode.getParentScope() !== undefined) {
                 this.curNode = this.curNode.getParentScope();
+            }
+            else if (this.curNode == this.rootNode) {
+                return;
             }
             else {
                 semErr++;

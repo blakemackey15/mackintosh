@@ -20,7 +20,6 @@ var mackintosh;
             var tokenStream = new Array('');
             tokenStream.pop();
             for (var i = 0; i < program.length; i++) {
-                debugger;
                 tokenFlag = curToken.GenerateToken(program[i], program, i);
                 //Update the pointer and remove commented code.
                 if (curToken.getIsComment()) {

@@ -129,6 +129,9 @@ var mackintosh;
             if (this.curNode.getParentScope() !== null && this.curNode.getParentScope() !== undefined) {
                 this.curNode = this.curNode.getParentScope();
             }
+            else if (this.curNode == this.rootNode) {
+                return;
+            }
             else {
                 semErr++;
                 throw new Error("SEMANTIC ANALYSIS - Parent scope does not exist.");

@@ -65,6 +65,7 @@ var mackintosh;
                 }
             }
             //this.analyzeStatement(astNode.getChildren()[0]);
+            _Functions.log("SEMANTIC ANALYSIS - Closing scope " + scopePointer);
             symbolTable.closeScope();
             //Add check for unused ids.
         };
@@ -120,8 +121,13 @@ var mackintosh;
             var if2 = astNode.getChildren()[0].getChildren()[1].getNodeName();
             if (symbolTable.getCurNode().lookup(if1) != null
                 && symbolTable.getCurNode().lookup(if2) != null) {
-                _Functions.log("SEMANTIC ANALYSIS - While " + if1 + " " +
+                _Functions.log("SEMANTIC ANALYSIS - If " + if1 + " " +
                     astNode.getChildren()[0].getNodeName() + " " + if2);
+            }
+            if (astNode.getChildren().length > 1) {
+                for (var i = 1; i < astNode.getChildren().length; i++) {
+                    this.analyzeStatement(astNode.getChildren()[i]);
+                }
             }
         };
         semanticAnalyser.analyzeWhileStatement = function (astNode) {
@@ -133,6 +139,11 @@ var mackintosh;
                 && symbolTable.getCurNode().lookup(while2) != null) {
                 _Functions.log("SEMANTIC ANALYSIS - While " +
                     while1 + " " + astNode.getChildren()[0].getNodeName() + " " + while2);
+            }
+            if (astNode.getChildren().length > 1) {
+                for (var i = 1; i < astNode.getChildren().length; i++) {
+                    this.analyzeStatement(astNode.getChildren()[i]);
+                }
             }
         };
         semanticAnalyser.analyzeAssignmentStatement = function (astNode) {

@@ -164,6 +164,10 @@ module mackintosh {
                 this.curNode = this.curNode.getParentScope();
             }
 
+            else if(this.curNode == this.rootNode) {
+                return;
+            }
+
             else {
                 semErr++;
                 throw new Error("SEMANTIC ANALYSIS - Parent scope does not exist.");
