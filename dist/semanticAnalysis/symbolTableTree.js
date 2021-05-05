@@ -125,7 +125,7 @@ var mackintosh;
                 //Iterate through each key value pair and add them to the tree.
                 var map = node.getMap();
                 map.forEach(function (value, key) {
-                    tableString += key + "            " + value.getValue() +
+                    tableString += key + "            " + value.getType() +
                         "            " + value.getScopePointer() + "\n";
                 });
                 for (var i = 0; i < node.getChildren().length; i++) {

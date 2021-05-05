@@ -244,7 +244,9 @@ module mackintosh {
         private static checkType(expected : any, actual : any) : boolean {
             if(typeof expected == typeof actual) {
                 return true
-            } else {
+            } 
+            
+            else {
                 throw new Error("SEMANTIC ANALYSIS - Type mismatch error expected " 
                 + typeof expected + " but got " +  typeof actual);
             }
