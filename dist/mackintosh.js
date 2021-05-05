@@ -1178,6 +1178,16 @@ var mackintosh;
             //this.analyzeStatement(astNode.getChildren()[0]);
             _Functions.log("SEMANTIC ANALYSIS - Closing scope " + scopePointer);
             symbolTable.closeScope();
+            var unusedIds = symbolTable.getCurNode().getUnusedIds();
+            //Check if there are unused ids.
+            if (unusedIds.length != 0) {
+                _Functions.log("SEMANTIC ANALYSIS - Ids were declared but never used.");
+                _Functions.log("SEMANTIC ANALYSIS - Unused ids in scope " + scopePointer + ": ");
+                for (var i = 0; i < unusedIds.length; i++) {
+                    _Functions.log(unusedIds[i]);
+                    semWarn++;
+                }
+            }
             scopePointer--;
             //Add check for unused ids.
         };
@@ -1325,16 +1335,6 @@ var mackintosh;
                     + typeof expected + " but got " + typeof actual);
             }
         };
-        //Method to go through the symbol table and find unused ids.
-        semanticAnalyser.findUnusedIds = function () {
-            var unusedIds = [];
-            function expand(node, depth) {
-                for (var i = 0; i < node.getChildren().length; i++) {
-                    expand(node.getChildren()[i], depth + 1);
-                }
-            }
-            expand(symbolTable.getRoot(), 0);
-        };
         return semanticAnalyser;
     }());
     mackintosh.semanticAnalyser = semanticAnalyser;
@@ -1375,24 +1375,14 @@ var mackintosh;
                 this.hashmap.set(symbol, value);
             }
         };
-        //Check if the scope has unused identifiers.
-        symbolTableNode.prototype.hasUnusedIds = function () {
-            for (var i = 0; i < this.hashmap.size; i++) {
-                if (!this.hashmap.values()[i].getIsUsed()) {
-                    return true;
-                }
-            }
-            return false;
-        };
         //Get the list of unused identifiers.
         symbolTableNode.prototype.getUnusedIds = function () {
             var unusedIds = [];
-            for (var i = 0; i < this.hashmap.size; i++) {
-                //Check if the symbol has not been used.
-                if (!this.hashmap.values()[i].getIsUsed()) {
-                    unusedIds.push(this.hashmap.keys[i]);
+            this.hashmap.forEach(function (value, key) {
+                if (!value.getIsUsed()) {
+                    unusedIds.push(key);
                 }
-            }
+            });
             //Return the list of unused ids.
             return unusedIds;
         };

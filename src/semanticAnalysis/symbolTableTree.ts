@@ -46,25 +46,15 @@ module mackintosh {
             }
         }
 
-        //Check if the scope has unused identifiers.
-        public hasUnusedIds() : boolean {
-            for(let i = 0; i < this.hashmap.size; i++) {
-                if(!this.hashmap.values()[i].getIsUsed()) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
         //Get the list of unused identifiers.
         public getUnusedIds() : Array<any> {
             let unusedIds = [];
-            for(let i = 0; i < this.hashmap.size; i++) {
-                //Check if the symbol has not been used.
-                if(!this.hashmap.values()[i].getIsUsed()) {
-                    unusedIds.push(this.hashmap.keys[i]);
+            
+            this.hashmap.forEach((value : scope, key : any) => {
+                if(!value.getIsUsed()) {
+                    unusedIds.push(key as string);
                 }
-            }
+            });
 
             //Return the list of unused ids.
             return unusedIds;

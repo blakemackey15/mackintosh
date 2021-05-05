@@ -71,6 +71,19 @@ module mackintosh {
             //this.analyzeStatement(astNode.getChildren()[0]);
             _Functions.log("SEMANTIC ANALYSIS - Closing scope " + scopePointer);
             symbolTable.closeScope();
+            let unusedIds = symbolTable.getCurNode().getUnusedIds();
+
+            //Check if there are unused ids.
+            if(unusedIds.length != 0) {
+                _Functions.log("SEMANTIC ANALYSIS - Ids were declared but never used.");
+                _Functions.log("SEMANTIC ANALYSIS - Unused ids in scope " + scopePointer + ": ");
+
+                for(let i = 0; i < unusedIds.length; i++) {
+                    _Functions.log(unusedIds[i] as string);
+                    semWarn++;
+                }
+            }
+
             scopePointer--;
             //Add check for unused ids.
         }
@@ -250,19 +263,6 @@ module mackintosh {
                 throw new Error("SEMANTIC ANALYSIS - Type mismatch error expected " 
                 + typeof expected + " but got " +  typeof actual);
             }
-        }
-
-        //Method to go through the symbol table and find unused ids.
-        public static findUnusedIds() {
-            let unusedIds = [];
-            function expand(node : symbolTableNode, depth : number) {
-
-                for(let i = 0; i < node.getChildren().length; i++) {
-                    expand(node.getChildren()[i], depth + 1);
-                }
-            }
-
-            expand(symbolTable.getRoot(), 0);
         }
     }
 }

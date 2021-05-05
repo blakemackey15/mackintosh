@@ -34,24 +34,14 @@ var mackintosh;
                 this.hashmap.set(symbol, value);
             }
         };
-        //Check if the scope has unused identifiers.
-        symbolTableNode.prototype.hasUnusedIds = function () {
-            for (var i = 0; i < this.hashmap.size; i++) {
-                if (!this.hashmap.values()[i].getIsUsed()) {
-                    return true;
-                }
-            }
-            return false;
-        };
         //Get the list of unused identifiers.
         symbolTableNode.prototype.getUnusedIds = function () {
             var unusedIds = [];
-            for (var i = 0; i < this.hashmap.size; i++) {
-                //Check if the symbol has not been used.
-                if (!this.hashmap.values()[i].getIsUsed()) {
-                    unusedIds.push(this.hashmap.keys[i]);
+            this.hashmap.forEach(function (value, key) {
+                if (!value.getIsUsed()) {
+                    unusedIds.push(key);
                 }
-            }
+            });
             //Return the list of unused ids.
             return unusedIds;
         };
