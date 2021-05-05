@@ -125,10 +125,8 @@ var mackintosh;
                 _Functions.log("SEMANTIC ANALYSIS - If " + if1 + " " +
                     astNode.getChildren()[0].getNodeName() + " " + if2);
             }
-            if (astNode.getChildren().length > 1) {
-                for (var i = 1; i < astNode.getChildren().length; i++) {
-                    this.analyzeStatement(astNode.getChildren()[i]);
-                }
+            for (var i = 1; i < astNode.getChildren()[0].getChildren().length; i++) {
+                this.analyzeStatement(astNode.getChildren()[0].getChildren()[i]);
             }
         };
         semanticAnalyser.analyzeWhileStatement = function (astNode) {
@@ -141,10 +139,8 @@ var mackintosh;
                 _Functions.log("SEMANTIC ANALYSIS - While " +
                     while1 + " " + astNode.getChildren()[0].getNodeName() + " " + while2);
             }
-            if (astNode.getChildren().length > 1) {
-                for (var i = 1; i < astNode.getChildren().length; i++) {
-                    this.analyzeStatement(astNode.getChildren()[i]);
-                }
+            for (var i = 1; i < astNode.getChildren()[0].getChildren().length; i++) {
+                this.analyzeStatement(astNode.getChildren()[0].getChildren()[i]);
             }
         };
         semanticAnalyser.analyzeAssignmentStatement = function (astNode) {

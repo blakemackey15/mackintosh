@@ -142,10 +142,8 @@ module mackintosh {
                 astNode.getChildren()[0].getNodeName() + " " + if2);
             }
 
-            if(astNode.getChildren().length > 1) {
-                for(let i = 1; i < astNode.getChildren().length; i++) {
-                    this.analyzeStatement(astNode.getChildren()[i]);
-                }
+            for(let i = 1; i < astNode.getChildren()[0].getChildren().length; i++) {
+                    this.analyzeStatement(astNode.getChildren()[0].getChildren()[i]);
             }
             
         }
@@ -162,10 +160,8 @@ module mackintosh {
                 while1 +  " " + astNode.getChildren()[0].getNodeName() + " " + while2);
             }
 
-            if(astNode.getChildren().length > 1) {
-                for(let i = 1; i < astNode.getChildren().length; i++) {
-                    this.analyzeStatement(astNode.getChildren()[i]);
-                }
+            for(let i = 1; i < astNode.getChildren()[0].getChildren().length; i++) {
+                this.analyzeStatement(astNode.getChildren()[0].getChildren()[i]);
             }
         }
 
