@@ -16,13 +16,11 @@ module mackintosh {
         
         //inputtedCode : string
         public static lex() { 
-
             //Loop through the length of the inputted string, and check each character.
             let curToken = new token();
             let tokenStream = new Array<string>('');
             tokenStream.pop();
             for(let i = 0; i < program.length; i++) {
-                debugger;
                 tokenFlag = curToken.GenerateToken(program[i], program, i);
 
                 //Update the pointer and remove commented code.
@@ -70,7 +68,23 @@ module mackintosh {
                 if(program[i] == '$') {
                     if(errCount == 0) {
                         _Functions.log('LEXER - Lex Completed With ' +  errCount + ' Errors and ' + warnCount + ' Warnings');
-                        _Parser.parse(tokenStream);
+                        let isParsed = _Parser.parse(tokenStream);
+                        let isSemantic : boolean;
+                        if(isParsed) {
+                            isSemantic = _SemanticAnalyzer.semanticAnalysis();
+                        }
+
+                        else {
+                            _Functions.log("PARSER - Semantic analysis skipped due to parse errors.");
+                        }
+
+                        if(isSemantic) {
+
+                        }
+
+                        else {
+                            _Functions.log("SEMANTIC ANALYSIS - Code generation skipped due to semantic errors.");
+                        }
 
                         //Check if this is the end of the program. If not, begin lexing the next program.
                         if(typeof program[i] != undefined) {

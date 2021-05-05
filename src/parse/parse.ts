@@ -5,9 +5,11 @@ module mackintosh {
     export class parse {
 
         //Recursive descent parser implimentation.
-        public static parse(parseTokens : Array<string>) {
+        public static parse(parseTokens : Array<string>) : boolean {
             debugger;
+            let isParsed = false;
             CSTTree = new CST();
+            ASTTree = new CST();
             tokenPointer = 0;
             _Functions.log("\n");
             _Functions.log("\n");
@@ -28,19 +30,35 @@ module mackintosh {
                     parseWarnCount + " warnings");
                     //Prints the CST if there are no more errors.
                     if(parseErrCount <= 0) {
+                        isParsed = true;
                         _Functions.log("\n");
                         _Functions.log("\n");
                         _Functions.log("PARSER - Program " + (programCount - 1) + " CST:");
                         _Functions.log(CSTTree.toString());
+                        _Functions.log("\n");
+                        _Functions.log("\n");
+                        _Functions.log("PARSER - Program " + (programCount - 1) + " AST:")
+                        _Functions.log(ASTTree.toString());
+                    }
+
+                    else {
+                        isParsed = false;
+                        _Functions.log("\n");
+                        _Functions.log("\n");
+                        _Functions.log("PARSER - CST and AST not displayed due to parse errors.");
+                        
                     }
                 }
 
                 catch (error){
+                    _Functions.log(error);
                     _Functions.log("PARSER - Error caused parse to end.");
                     parseErrCount++;
                 }
 
             }
+
+            return isParsed;
         }
 
         //Match function.
@@ -58,6 +76,12 @@ module mackintosh {
                 CSTTree.addNode(parseToken, "leaf");
                 tokenPointer++;
                 isMatch = false;
+
+                //Add AST Node.
+                if(isASTNode) {
+                    ASTTree.addNode(parseToken, "leaf");
+                }
+                isASTNode = false;
             }
 
             else {
@@ -93,6 +117,7 @@ module mackintosh {
         public static parseBlock(parseTokens : Array<string>) {
             _Functions.log("PARSER - parseBlock()");
             CSTTree.addNode("Block", "branch");
+            ASTTree.addNode("Block", "branch");
             this.parseOpenBrace(parseTokens);
             this.parseStatementList(parseTokens);
             this.parseCloseBrace(parseTokens);
@@ -141,7 +166,8 @@ module mackintosh {
                 }
 
                 else {
-                    _Functions.log("PARSER ERROR - Expected beginning of statement tokens (if, print, while, {}, assignment statement, boolean, int, string)");
+                    _Functions.log("PARSER ERROR - Expected beginning of statement tokens" 
+                    + "(if, print, while, {}, assignment statement, boolean, int, string)");
                     parseErrCount++;
                     break;
                 }
@@ -156,51 +182,60 @@ module mackintosh {
         public static parsePrintStatement(parseTokens : Array<string>) {
             _Functions.log("PARSER - parsePrintStatement()");
             CSTTree.addNode("PrintStatement", "branch");
+            ASTTree.addNode("PrintStatement", "branch");
             this.parsePrint(parseTokens);
             this.parseParen(parseTokens);
             this.parseExpr(parseTokens);
             this.parseParen(parseTokens);
             CSTTree.climbTree();
+            ASTTree.climbTree();
         }
 
         //Expected tokens: id = exprx
         public static parseAssignmentStatement(parseTokens : Array<string>) {
             _Functions.log("PARSER - parseAssignmentStatement()");
             CSTTree.addNode("AssignmentStatement", "branch");
+            ASTTree.addNode("AssignmentStatement", "branch");
             this.parseId(parseTokens);
             this.parseAssignmentOp(parseTokens);
             this.parseExpr(parseTokens);
             CSTTree.climbTree();
+            ASTTree.climbTree();
         }
 
         //Expected tokens: type id
         public static parseVarDecl(parseTokens : Array<string>) {
             _Functions.log("PARSER - parseVarDecl()");
             CSTTree.addNode("VarDecl", "branch");
+            ASTTree.addNode("VarDecl", "branch");
             this.parseType(parseTokens);
             this.parseId(parseTokens);
             CSTTree.climbTree();
+            ASTTree.climbTree();
         }
 
         //Expected tokens: while boolexpr block
         public static parseWhileStatement(parseTokens : Array<string>) {
             _Functions.log("PARSER - parseWhileStatement()");
             CSTTree.addNode("WhileStatement", "branch");
+            ASTTree.addNode("WhileStatement", "branch");
             this.parseWhile(parseTokens);
             this.parseBoolExpr(parseTokens);
             this.parseBlock(parseTokens);
             CSTTree.climbTree();
-
+            ASTTree.climbTree();
         }
 
         //Expected tokens: if boolexpr block
         public static parseIfStatement(parseTokens : Array<string>) {
             _Functions.log("PARSER - parseIfStatement()");
             CSTTree.addNode("IfStatement", "branch");
+            ASTTree.addNode("WhileStatement", "branch");
             this.parseIf(parseTokens);
             this.parseBoolExpr(parseTokens);
             this.parseBlock(parseTokens);
             CSTTree.climbTree();
+            ASTTree.climbTree();
         }
 
         //Expected tokens: intexpr, stringexpr, boolexpr, id
@@ -268,7 +303,6 @@ module mackintosh {
             this.parseCharList(parseTokens);
             this.parseQuotes(parseTokens);
             CSTTree.climbTree();
-
         }
 
         //Expected tokens: ( expr boolop expr)
@@ -279,6 +313,16 @@ module mackintosh {
             //If match parenthesis = true: (expr boolop expr)
             if(parseTokens[tokenPointer] == "(" || parseTokens[tokenPointer] == ")") {
                 this.parseParen(parseTokens);
+
+                //Add AST node depending on if it is checking isEqual or isNotEqual.
+                if(parseTokens[tokenPointer + 1] == "==") {
+                    ASTTree.addNode("isEqual", "branch");
+                }
+            
+                else if (parseTokens[tokenPointer + 1] == "!=") {
+                    ASTTree.addNode("isNotEqual", "branch");
+                }
+
                 this.parseExpr(parseTokens);
                 this.parseBoolOp(parseTokens);
                 this.parseExpr(parseTokens);
@@ -330,11 +374,13 @@ module mackintosh {
 
         //Expected tokens: int, string, boolean
         public static parseType(parseTokens : Array<string>) {
+            isASTNode = true;
             this.match(["int", "string", "boolean"], parseTokens[tokenPointer]);
         }
 
         //Expected tokens: a-z
         public static parseChar(parseTokens : Array<string>) {
+            isASTNode = true;
             this.match(["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k",
             "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", 
             "y", "z"], parseTokens[tokenPointer]);
@@ -347,6 +393,7 @@ module mackintosh {
 
         //Expected tokens: 0-9
         public static parseDigit(parseTokens : Array<string>) {
+            isASTNode = true;
             this.match(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"], parseTokens[tokenPointer]);
         }
 
@@ -357,6 +404,7 @@ module mackintosh {
 
         //Expected tokens: false, true
         public static parseBoolVal(parseTokens : Array<string>) {
+            isASTNode = true;
             this.match(["false", "true"], parseTokens[tokenPointer]);
         }
 
@@ -374,6 +422,7 @@ module mackintosh {
         }
 
         public static parseQuotes(parseTokens : Array<string>) {
+            isASTNode = true;
             this.match(['"', '"'], parseTokens[tokenPointer]);
         }
 

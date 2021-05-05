@@ -3,6 +3,7 @@
     "esModuleInterop": true,
     "target": "es5",
     "sourceMap": true,
+    "downlevelIteration": true,
     "outDir": "dist",
   },
   "lib": ["es2017"]

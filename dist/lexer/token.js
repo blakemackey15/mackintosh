@@ -60,7 +60,6 @@ var mackintosh;
          * Generates token by checking against the regular expressions generated.
          */
         token.prototype.GenerateToken = function (input, program, counter) {
-            debugger;
             /**
              * Use switch statements to check against each RegEx.
              */
@@ -107,8 +106,8 @@ var mackintosh;
                         switch (boolOperator.test(input)) {
                             case true:
                                 this.setTokenValue(input);
-                                this.setTokenCode("BOOLEAN CHECK EQUAL" + input);
-                                this.isToken;
+                                this.setTokenCode("BOOLEAN CHECK EQUAL " + input);
+                                this.isToken = true;
                                 this.index = counter;
                                 this.setBoolOp(true);
                                 break;

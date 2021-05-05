@@ -20,7 +20,6 @@ var mackintosh;
             var tokenStream = new Array('');
             tokenStream.pop();
             for (var i = 0; i < program.length; i++) {
-                debugger;
                 tokenFlag = curToken.GenerateToken(program[i], program, i);
                 //Update the pointer and remove commented code.
                 if (curToken.getIsComment()) {
@@ -61,7 +60,19 @@ var mackintosh;
                 if (program[i] == '$') {
                     if (errCount == 0) {
                         _Functions.log('LEXER - Lex Completed With ' + errCount + ' Errors and ' + warnCount + ' Warnings');
-                        _Parser.parse(tokenStream);
+                        var isParsed = _Parser.parse(tokenStream);
+                        var isSemantic = void 0;
+                        if (isParsed) {
+                            isSemantic = _SemanticAnalyzer.semanticAnalysis();
+                        }
+                        else {
+                            _Functions.log("PARSER - Semantic analysis skipped due to parse errors.");
+                        }
+                        if (isSemantic) {
+                        }
+                        else {
+                            _Functions.log("SEMANTIC ANALYSIS - Code generation skipped due to semantic errors.");
+                        }
                         //Check if this is the end of the program. If not, begin lexing the next program.
                         if (typeof program[i] != undefined) {
                             _Functions.log('\n');
