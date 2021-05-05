@@ -6,6 +6,7 @@ module mackintosh {
 
         //Recursive descent parser implimentation.
         public static parse(parseTokens : Array<string>) : boolean {
+            debugger;
             let isParsed = false;
             CSTTree = new CST();
             ASTTree = new CST();
@@ -333,7 +334,6 @@ module mackintosh {
                 this.parseBoolVal(parseTokens);
             }
             CSTTree.climbTree();
-            ASTTree.climbTree();
         }
 
         //Expected tokens: char

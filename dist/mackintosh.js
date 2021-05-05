@@ -699,6 +699,7 @@ var mackintosh;
         }
         //Recursive descent parser implimentation.
         parse.parse = function (parseTokens) {
+            debugger;
             var isParsed = false;
             CSTTree = new mackintosh.CST();
             ASTTree = new mackintosh.CST();
@@ -978,7 +979,6 @@ var mackintosh;
                 this.parseBoolVal(parseTokens);
             }
             CSTTree.climbTree();
-            ASTTree.climbTree();
         };
         //Expected tokens: char
         parse.parseId = function (parseTokens) {
@@ -1295,7 +1295,7 @@ var mackintosh;
                 else if (quotes.test(value)) {
                     var i = 2;
                     while (!quotes.test(astNode.getChildren()[i].getNodeName())) {
-                        value += astNode.getChildren()[i];
+                        value += astNode.getChildren()[i].getNodeName();
                         i++;
                     }
                     value += '"';

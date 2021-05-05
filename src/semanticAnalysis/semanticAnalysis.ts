@@ -213,7 +213,7 @@ module mackintosh {
                 else if(quotes.test(value)) {
                     let i = 2;
                     while(!quotes.test(astNode.getChildren()[i].getNodeName())) {
-                        value += astNode.getChildren()[i];
+                        value += astNode.getChildren()[i].getNodeName();
                         i++;
                     }
                     value += '"';
