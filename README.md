@@ -30,4 +30,4 @@ TypeScript and gulp setup: https://www.typescriptlang.org/docs/handbook/gulp.htm
 
 # Grading
 
-At the time of the due date, all current changes will be merged into main. Project development will take place on a corresponding branch.
+At the time of the due date, all current changes will be merged into main. Project development will take place on a corresponding branch. Please pull from main when it is time to grade.
