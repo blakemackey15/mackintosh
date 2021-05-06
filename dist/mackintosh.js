@@ -27,6 +27,7 @@ var _Parser = mackintosh.parse;
 var _Token = mackintosh.token;
 var _Functions = mackintosh.compilerFunctions;
 var _SemanticAnalyzer = mackintosh.semanticAnalyser;
+var _CodeGenerator = mackintosh.codeGenerator;
 var symbolTable = new mackintosh.symbolTableTree;
 //Lex errors.
 var errCount = 0;
@@ -77,6 +78,9 @@ var isASTNode = false;
 var scopePointer = 0;
 var semErr = 0;
 var semWarn = 0;
+//Code gen 
+var genErr = 0;
+var genWarn = 0;
 /*
 References: Here is a list of the resources I referenced while developing this project.
 https://regex101.com/ - Useful tool I used to test my regular expressions for my tokens.
@@ -110,6 +114,73 @@ var mackintosh;
         return index;
     }());
     mackintosh.index = index;
+})(mackintosh || (mackintosh = {}));
+var mackintosh;
+(function (mackintosh) {
+    var codeGenerator = /** @class */ (function () {
+        function codeGenerator() {
+        }
+        codeGenerator.codeGeneration = function () {
+            var isGen = false;
+            genErr = 0;
+            genWarn = 0;
+            _Functions.log("\n");
+            _Functions.log("\n");
+            _Functions.log("CODE GENERATOR - Beginning Code Generation " + (programCount - 1));
+            try {
+            }
+            catch (error) {
+                _Functions.log(error);
+                _Functions.log("CODE GENERATOR - Code Generation ended due to error.");
+            }
+            return isGen;
+        };
+        return codeGenerator;
+    }());
+    mackintosh.codeGenerator = codeGenerator;
+})(mackintosh || (mackintosh = {}));
+var mackintosh;
+(function (mackintosh) {
+    var executableImage = /** @class */ (function () {
+        function executableImage() {
+            this.IMAGE_SIZE = 256;
+            this.executableImage = new Array(this.IMAGE_SIZE);
+            this.stackPointer = 0;
+            this.heapPointer = this.executableImage.length - 1;
+            //Initialize the executable image to be filled with 00.
+            for (var i = 0; i < this.executableImage.length; i++) {
+                this.executableImage[i] == "00";
+            }
+        }
+        executableImage.prototype.updateStackPointer = function (stackPointer) {
+            this.stackPointer = stackPointer;
+        };
+        executableImage.prototype.getStackPointer = function () {
+            return this.stackPointer;
+        };
+        executableImage.prototype.updateHeapPointer = function (heapPointer) {
+            this.heapPointer = heapPointer;
+        };
+        executableImage.prototype.getHeapPointer = function () {
+            return this.heapPointer;
+        };
+        executableImage.prototype.addToStack = function () {
+            this.stackPointer++;
+        };
+        executableImage.prototype.addToHeap = function () {
+            this.heapPointer--;
+        };
+        executableImage.prototype.addCode = function () {
+        };
+        executableImage.prototype.checkOverflow = function () {
+            if (this.stackPointer >= this.heapPointer) {
+                genErr++;
+                throw new Error("CODE GENERATOR - Stack Heap Collision - Program is too long.");
+            }
+        };
+        return executableImage;
+    }());
+    mackintosh.executableImage = executableImage;
 })(mackintosh || (mackintosh = {}));
 var mackintosh;
 (function (mackintosh) {
