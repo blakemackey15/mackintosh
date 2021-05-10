@@ -6,7 +6,6 @@ var mackintosh;
         }
         //Recursive descent parser implimentation.
         parse.parse = function (parseTokens) {
-            debugger;
             var isParsed = false;
             CSTTree = new mackintosh.CST();
             ASTTree = new mackintosh.CST();

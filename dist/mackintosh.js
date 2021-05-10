@@ -699,7 +699,6 @@ var mackintosh;
         }
         //Recursive descent parser implimentation.
         parse.parse = function (parseTokens) {
-            debugger;
             var isParsed = false;
             CSTTree = new mackintosh.CST();
             ASTTree = new mackintosh.CST();
@@ -1116,7 +1115,6 @@ var mackintosh;
         function semanticAnalyser() {
         }
         semanticAnalyser.semanticAnalysis = function () {
-            debugger;
             scopePointer = 0;
             symbolTable = new mackintosh.symbolTableTree();
             semErr = 0;

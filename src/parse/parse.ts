@@ -6,7 +6,6 @@ module mackintosh {
 
         //Recursive descent parser implimentation.
         public static parse(parseTokens : Array<string>) : boolean {
-            debugger;
             let isParsed = false;
             CSTTree = new CST();
             ASTTree = new CST();

@@ -5,7 +5,6 @@ var mackintosh;
         function semanticAnalyser() {
         }
         semanticAnalyser.semanticAnalysis = function () {
-            debugger;
             scopePointer = 0;
             symbolTable = new mackintosh.symbolTableTree();
             semErr = 0;
