@@ -4,16 +4,14 @@ https://regex101.com/ - Useful tool I used to test my regular expressions for my
 */
 var mackintosh;
 (function (mackintosh) {
-    var index = /** @class */ (function () {
-        function index() {
-        }
+    class index {
         //Begins the compilation of the inputted code.
-        index.startCompile = function () {
+        static startCompile() {
             //Set compilation flag to true.
             isCompiling = true;
             _Functions.log('INFO: Beginning Compilation...');
             //Get source code from text area input.
-            var code = document.getElementById("inputCode").value;
+            let code = document.getElementById("inputCode").value;
             //code = mackintosh.compilerFunctions.trim(code);
             _Lexer.populateProgram(code);
             _Lexer.lex();
@@ -23,13 +21,12 @@ var mackintosh;
                 warnCount++;
             }
             return isCompiling;
-        };
-        index.endCompile = function () {
+        }
+        static endCompile() {
             isCompiling == false;
             return isCompiling;
-        };
-        return index;
-    }());
+        }
+    }
     mackintosh.index = index;
 })(mackintosh || (mackintosh = {}));
 //# sourceMappingURL=index.js.map

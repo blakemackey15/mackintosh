@@ -1,44 +1,42 @@
 var mackintosh;
 (function (mackintosh) {
-    var lex = /** @class */ (function () {
-        function lex() {
-        }
+    class lex {
         //Populate program array.
-        lex.populateProgram = function (input) {
+        static populateProgram(input) {
             //Clear program if it is already populated.
             program = [];
             _Functions.log('LEXER - Lexing Program ' + programCount);
             //Push characters in string to the program array.
-            for (var i = 0; i < input.length; i++) {
+            for (let i = 0; i < input.length; i++) {
                 program.push(input.charAt(i));
             }
-        };
+        }
         //inputtedCode : string
-        lex.lex = function () {
+        static lex() {
             //Loop through the length of the inputted string, and check each character.
-            var curToken = new mackintosh.token();
-            var tokenStream = new Array('');
+            let curToken = new mackintosh.token();
+            let tokenStream = new Array('');
             tokenStream.pop();
-            for (var i = 0; i < program.length; i++) {
+            for (let i = 0; i < program.length; i++) {
                 tokenFlag = curToken.GenerateToken(program[i], program, i);
                 //Update the pointer and remove commented code.
                 if (curToken.getIsComment()) {
-                    var end = curToken.updateIndex();
+                    let end = curToken.updateIndex();
                     program.slice(i, end);
                     i = end;
                     curToken.setIsComment(false);
                 }
                 //Update the pointer after finding boolop.
                 if (curToken.getBoolOp()) {
-                    var end2 = curToken.updateIndex();
+                    let end2 = curToken.updateIndex();
                     program.slice(i, end2);
                     i = end2;
                     curToken.setBoolOp(false);
                 }
                 //Update the pointer after a keyword is found.
-                for (var j = 0; j < keywords.length; j++) {
+                for (let j = 0; j < keywords.length; j++) {
                     if (curToken.getTokenValue().toLowerCase() === keywords[j]) {
-                        var end3 = curToken.updateIndex();
+                        let end3 = curToken.updateIndex();
                         program.slice(i, end3);
                         i = end3;
                     }
@@ -60,8 +58,8 @@ var mackintosh;
                 if (program[i] == '$') {
                     if (errCount == 0) {
                         _Functions.log('LEXER - Lex Completed With ' + errCount + ' Errors and ' + warnCount + ' Warnings');
-                        var isParsed = _Parser.parse(tokenStream);
-                        var isSemantic = void 0;
+                        let isParsed = _Parser.parse(tokenStream);
+                        let isSemantic;
                         if (isParsed) {
                             isSemantic = _SemanticAnalyzer.semanticAnalysis();
                         }
@@ -86,9 +84,8 @@ var mackintosh;
                     }
                 }
             }
-        };
-        return lex;
-    }());
+        }
+    }
     mackintosh.lex = lex;
 })(mackintosh || (mackintosh = {}));
 //# sourceMappingURL=lex.js.map

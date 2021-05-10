@@ -11,55 +11,55 @@ Identifiers:
 */
 var mackintosh;
 (function (mackintosh) {
-    var token = /** @class */ (function () {
-        function token() {
+    class token {
+        constructor() {
             this.tokenCode = "";
             this.tokenValue = "";
             this.isKeyword = false;
             this.quoteCount = 0;
             this.isBoolOp = false;
         }
-        token.prototype.setTokenCode = function (code) {
+        setTokenCode(code) {
             this.tokenCode = code;
-        };
-        token.prototype.getTokenCode = function () {
+        }
+        getTokenCode() {
             return this.tokenCode;
-        };
-        token.prototype.setTokenValue = function (value) {
+        }
+        setTokenValue(value) {
             this.tokenValue = value;
-        };
-        token.prototype.getTokenValue = function () {
+        }
+        getTokenValue() {
             return this.tokenValue;
-        };
+        }
         //Updates program array index if a comment is found.
-        token.prototype.updateIndex = function () {
+        updateIndex() {
             return this.index;
-        };
-        token.prototype.setIsToken = function (isToken) {
+        }
+        setIsToken(isToken) {
             this.isToken = isToken;
-        };
-        token.prototype.setBoolOp = function (isBoolOp) {
+        }
+        setBoolOp(isBoolOp) {
             this.isBoolOp = isBoolOp;
-        };
-        token.prototype.getBoolOp = function () {
+        }
+        getBoolOp() {
             return this.isBoolOp;
-        };
-        token.prototype.setIsComment = function (isComment) {
+        }
+        setIsComment(isComment) {
             this.isComment = isComment;
-        };
-        token.prototype.getIsComment = function () {
+        }
+        getIsComment() {
             return this.isComment;
-        };
-        token.prototype.setTokenType = function (tokenType) {
+        }
+        setTokenType(tokenType) {
             this.tokenType = tokenType;
-        };
-        token.prototype.getTokenType = function () {
+        }
+        getTokenType() {
             return this.tokenType;
-        };
+        }
         /**
          * Generates token by checking against the regular expressions generated.
          */
-        token.prototype.GenerateToken = function (input, program, counter) {
+        GenerateToken(input, program, counter) {
             /**
              * Use switch statements to check against each RegEx.
              */
@@ -160,9 +160,9 @@ var mackintosh;
             }
             switch (characters.test(input)) {
                 case true:
-                    var saveChar = new Array('');
-                    var loops = 0;
-                    var isntKey = false;
+                    let saveChar = new Array('');
+                    let loops = 0;
+                    let isntKey = false;
                     saveChar.pop();
                     saveChar.push(input);
                     //Checks if the next element in the array is undefined. If this isn't here the program gets stuck in an
@@ -344,7 +344,7 @@ var mackintosh;
             switch (openComments.test(input)) {
                 case true:
                     this.isToken = true;
-                    var comment = new Array("");
+                    let comment = new Array("");
                     this.setTokenCode("");
                     comment.pop();
                     comment.push(program[counter]);
@@ -352,7 +352,7 @@ var mackintosh;
                     comment.push(program[counter]);
                     counter++;
                     //This is kind of a dumb fix but it works.
-                    var closeComment = false;
+                    let closeComment = false;
                     this.setIsComment(true);
                     while (closeComment == false) {
                         comment.push(program[counter]);
@@ -383,9 +383,8 @@ var mackintosh;
                 this.setTokenCode("ERROR - INVALID TOKEN " + input);
             }
             return this.isToken;
-        };
-        return token;
-    }());
+        }
+    }
     mackintosh.token = token;
 })(mackintosh || (mackintosh = {}));
 //# sourceMappingURL=token.js.map
