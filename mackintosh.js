@@ -699,6 +699,7 @@ var mackintosh;
         }
         //Recursive descent parser implimentation.
         parse.parse = function (parseTokens) {
+            debugger;
             var isParsed = false;
             CSTTree = new mackintosh.CST();
             ASTTree = new mackintosh.CST();
@@ -911,11 +912,11 @@ var mackintosh;
                 }
             }
             //String check.
-            if (quotes.test(parseTokens[tokenPointer])) {
+            else if (quotes.test(parseTokens[tokenPointer])) {
                 this.parseStringExpr(parseTokens);
             }
             //This handles if its an id.
-            if (characters.test(parseTokens[tokenPointer])) {
+            else if (characters.test(parseTokens[tokenPointer])) {
                 if (parseTokens[tokenPointer].length > 1) {
                     if (trueRegEx.test(parseTokens[tokenPointer]) || falseRegEx.test(parseTokens[tokenPointer])) {
                         this.parseBoolExpr(parseTokens);
@@ -1223,14 +1224,48 @@ var mackintosh;
         semanticAnalyser.analyzePrintStatement = function (astNode) {
             _Functions.log("SEMANTIC ANALYSIS - Print Statement found.");
             var symbol = astNode.getChildren()[0].getNodeName();
-            //Check if the symbol to be printed is in the symbol table.
-            if (symbolTable.getCurNode().lookup(symbol) != null) {
-                _Functions.log(symbolTable.getCurNode().lookup(symbol));
-                _Functions.log("SEMANTIC ANALYSIS - Print " + symbol);
+            var isSymbol;
+            var printVal;
+            //Check if the value in print is a symbol or just a literal.
+            if (characters.test(symbol) && symbol.length == 1) {
+                isSymbol = true;
             }
+            else if (symbol === "true" || symbol === "false") {
+                isSymbol = false;
+                printVal = symbol;
+            }
+            else if (digits.test(symbol)) {
+                isSymbol = false;
+                printVal = symbol;
+            }
+            else if (quotes.test(symbol)) {
+                isSymbol = false;
+                var i = 1;
+                while (!quotes.test(astNode.getChildren()[i].getNodeName())) {
+                    printVal += astNode.getChildren()[i].getNodeName();
+                    i++;
+                }
+                printVal += '"';
+            }
+            if (isSymbol == true) {
+                //Check if the symbol to be printed is in the symbol table.
+                if (symbolTable.getCurNode().lookup(symbol) != null) {
+                    _Functions.log("SEMANTIC ANALYSIS - Print " + symbol);
+                }
+                else {
+                    semErr++;
+                    throw new Error("SEMANTIC ANALYSIS - Symbol " + symbol + " does not exist in symbol table.");
+                }
+            }
+            //If the value is not a symbol see if its valid to be printed. Else, throw an error.
             else {
-                semErr++;
-                throw new Error("SEMANTIC ANALYSIS - Symbol " + symbol + " does not exist in symbol table");
+                if (printVal != undefined) {
+                    _Functions.log("SEMANTIC ANALYSIS - Print " + printVal);
+                }
+                else {
+                    semErr++;
+                    throw new Error("SEMANTIC ANALYSIS - Value " + printVal + " cannot be printed.");
+                }
             }
         };
         semanticAnalyser.analyzeIfStatement = function (astNode) {

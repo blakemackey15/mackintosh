@@ -111,14 +111,48 @@ var mackintosh;
         static analyzePrintStatement(astNode) {
             _Functions.log("SEMANTIC ANALYSIS - Print Statement found.");
             let symbol = astNode.getChildren()[0].getNodeName();
-            //Check if the symbol to be printed is in the symbol table.
-            if (symbolTable.getCurNode().lookup(symbol) != null) {
-                _Functions.log(symbolTable.getCurNode().lookup(symbol));
-                _Functions.log("SEMANTIC ANALYSIS - Print " + symbol);
+            let isSymbol;
+            let printVal;
+            //Check if the value in print is a symbol or just a literal.
+            if (characters.test(symbol) && symbol.length == 1) {
+                isSymbol = true;
             }
+            else if (symbol === "true" || symbol === "false") {
+                isSymbol = false;
+                printVal = symbol;
+            }
+            else if (digits.test(symbol)) {
+                isSymbol = false;
+                printVal = symbol;
+            }
+            else if (quotes.test(symbol)) {
+                isSymbol = false;
+                let i = 1;
+                while (!quotes.test(astNode.getChildren()[i].getNodeName())) {
+                    printVal += astNode.getChildren()[i].getNodeName();
+                    i++;
+                }
+                printVal += '"';
+            }
+            if (isSymbol == true) {
+                //Check if the symbol to be printed is in the symbol table.
+                if (symbolTable.getCurNode().lookup(symbol) != null) {
+                    _Functions.log("SEMANTIC ANALYSIS - Print " + symbol);
+                }
+                else {
+                    semErr++;
+                    throw new Error("SEMANTIC ANALYSIS - Symbol " + symbol + " does not exist in symbol table.");
+                }
+            }
+            //If the value is not a symbol see if its valid to be printed. Else, throw an error.
             else {
-                semErr++;
-                throw new Error("SEMANTIC ANALYSIS - Symbol " + symbol + " does not exist in symbol table");
+                if (printVal != undefined) {
+                    _Functions.log("SEMANTIC ANALYSIS - Print " + printVal);
+                }
+                else {
+                    semErr++;
+                    throw new Error("SEMANTIC ANALYSIS - Value " + printVal + " cannot be printed.");
+                }
             }
         }
         static analyzeIfStatement(astNode) {

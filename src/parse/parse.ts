@@ -6,6 +6,7 @@ module mackintosh {
 
         //Recursive descent parser implimentation.
         public static parse(parseTokens : Array<string>) : boolean {
+            debugger;
             let isParsed = false;
             CSTTree = new CST();
             ASTTree = new CST();
@@ -252,12 +253,12 @@ module mackintosh {
             }
 
             //String check.
-            if(quotes.test(parseTokens[tokenPointer])) {
+            else if(quotes.test(parseTokens[tokenPointer])) {
                 this.parseStringExpr(parseTokens);
             }
 
             //This handles if its an id.
-            if(characters.test(parseTokens[tokenPointer])) {
+            else if(characters.test(parseTokens[tokenPointer])) {
                 if(parseTokens[tokenPointer].length > 1) {
                     if(trueRegEx.test(parseTokens[tokenPointer]) || falseRegEx.test(parseTokens[tokenPointer])) {
                         this.parseBoolExpr(parseTokens);
