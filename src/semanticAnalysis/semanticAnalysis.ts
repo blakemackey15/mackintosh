@@ -3,6 +3,7 @@ module mackintosh {
     //TypeScript Hashmap interface source: https://github.com/TylorS/typed-hashmap
     export class semanticAnalyser {
         public static semanticAnalysis() : boolean {
+            debugger;
             scopePointer = 0;
             symbolTable = new symbolTableTree();
             semErr = 0;
@@ -290,7 +291,7 @@ module mackintosh {
                     symbolTable.getCurNode().assignment(symbol, value);
                 }
 
-            }
+        }
         }
 
         //Check the type or report type mismatch error.
