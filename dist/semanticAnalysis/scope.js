@@ -1,39 +1,38 @@
 var mackintosh;
 (function (mackintosh) {
     //Represents the values in the hash map.
-    var scope = /** @class */ (function () {
-        function scope(value, type, scopePointer) {
+    class scope {
+        constructor(value, type, scopePointer) {
             this.isUsed = false;
             this.value = value;
             this.scopePointer = scopePointer;
             this.type = type;
         }
-        scope.prototype.setIsUsed = function (isUsed) {
+        setIsUsed(isUsed) {
             this.isUsed = isUsed;
-        };
-        scope.prototype.getIsUsed = function () {
+        }
+        getIsUsed() {
             return this.isUsed;
-        };
-        scope.prototype.getValue = function () {
+        }
+        getValue() {
             return this.value;
-        };
-        scope.prototype.setValue = function (value) {
+        }
+        setValue(value) {
             this.value = value;
-        };
-        scope.prototype.getType = function () {
+        }
+        getType() {
             return this.type;
-        };
-        scope.prototype.setType = function (type) {
+        }
+        setType(type) {
             this.type = type;
-        };
-        scope.prototype.getScopePointer = function () {
+        }
+        getScopePointer() {
             return this.scopePointer;
-        };
-        scope.prototype.setScopePointer = function (scopePointer) {
+        }
+        setScopePointer(scopePointer) {
             this.scopePointer = scopePointer;
-        };
-        return scope;
-    }());
+        }
+    }
     mackintosh.scope = scope;
 })(mackintosh || (mackintosh = {}));
 //# sourceMappingURL=scope.js.map

@@ -22,6 +22,11 @@ tsc
 If changes were made to files in the mackintosh module, be sure to run the command:
 tsc --module none --target es5 --outFile dist/mackintosh.js
 
+If you run the command:
+npm start
+
+Both the tsc and tsc --module none --target es5 --outFile dist/mackintosh.js commands will be run.
+
 This command will update the mackintosh.js module to include your changes. Once the project is compiled, the index.html file can be opened in the browser.
 
 # Code Refrences

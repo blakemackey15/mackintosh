@@ -1,31 +1,31 @@
 var mackintosh;
 (function (mackintosh) {
     //Represents a node in the symbol table.
-    var symbolTableNode = /** @class */ (function () {
-        function symbolTableNode(map) {
+    class symbolTableNode {
+        constructor(map) {
             this.hashmap = map;
             this.children = [];
             this.parent = null;
         }
-        symbolTableNode.prototype.setMap = function (map) {
+        setMap(map) {
             this.hashmap = map;
-        };
-        symbolTableNode.prototype.getMap = function () {
+        }
+        getMap() {
             return this.hashmap;
-        };
-        symbolTableNode.prototype.setParentScope = function (parent) {
+        }
+        setParentScope(parent) {
             this.parent = parent;
-        };
-        symbolTableNode.prototype.getParentScope = function () {
+        }
+        getParentScope() {
             return this.parent;
-        };
-        symbolTableNode.prototype.getChildren = function () {
+        }
+        getChildren() {
             return this.children;
-        };
-        symbolTableNode.prototype.addChild = function (child) {
+        }
+        addChild(child) {
             this.children.push(child);
-        };
-        symbolTableNode.prototype.addSymbol = function (symbol, value) {
+        }
+        addSymbol(symbol, value) {
             if (this.hashmap.has(symbol)) {
                 semErr++;
                 throw new Error("SEMANTIC ANALYSIS - Id has already been declared in this scope.");
@@ -33,32 +33,32 @@ var mackintosh;
             else {
                 this.hashmap.set(symbol, value);
             }
-        };
+        }
         //Get the list of unused identifiers.
-        symbolTableNode.prototype.getUnusedIds = function () {
-            var unusedIds = [];
-            this.hashmap.forEach(function (value, key) {
+        getUnusedIds() {
+            let unusedIds = [];
+            this.hashmap.forEach((value, key) => {
                 if (!value.getIsUsed()) {
                     unusedIds.push(key);
                 }
             });
             //Return the list of unused ids.
             return unusedIds;
-        };
-        symbolTableNode.prototype.assignment = function (symbol, value) {
-            var newScope = this.lookup(symbol);
+        }
+        assignment(symbol, value) {
+            let newScope = this.lookup(symbol);
             if (newScope == null) {
                 semErr++;
                 throw new Error("SEMANTIC ANALYSIS - Id " + symbol + " has not been identified in symbol table.");
             }
             else {
-                var type = newScope.getType();
+                let type = newScope.getType();
                 newScope.setValue(value);
                 newScope.setIsUsed(true);
                 this.hashmap.set(symbol, newScope);
             }
-        };
-        symbolTableNode.prototype.lookup = function (symbol) {
+        }
+        lookup(symbol) {
             if (this.hashmap.has(symbol)) {
                 return this.hashmap.get(symbol);
             }
@@ -67,23 +67,22 @@ var mackintosh;
                 return this.parent.lookup(symbol);
             }
             return null;
-        };
-        return symbolTableNode;
-    }());
+        }
+    }
     mackintosh.symbolTableNode = symbolTableNode;
     //Represent the symbol table tree.
-    var symbolTableTree = /** @class */ (function () {
-        function symbolTableTree() {
+    class symbolTableTree {
+        constructor() {
             this.rootNode = null;
         }
-        symbolTableTree.prototype.getRoot = function () {
+        getRoot() {
             return this.rootNode;
-        };
-        symbolTableTree.prototype.getCurNode = function () {
+        }
+        getCurNode() {
             return this.curNode;
-        };
-        symbolTableTree.prototype.addNode = function (map) {
-            var node = new symbolTableNode(map);
+        }
+        addNode(map) {
+            let node = new symbolTableNode(map);
             if (this.rootNode == null) {
                 this.rootNode = node;
             }
@@ -92,8 +91,8 @@ var mackintosh;
                 this.curNode.addChild(node);
             }
             this.curNode = node;
-        };
-        symbolTableTree.prototype.closeScope = function () {
+        }
+        closeScope() {
             //Move up the tree to parent node.
             if (this.curNode.getParentScope() !== null && this.curNode.getParentScope() !== undefined) {
                 this.curNode = this.curNode.getParentScope();
@@ -105,28 +104,27 @@ var mackintosh;
                 semErr++;
                 throw new Error("SEMANTIC ANALYSIS - Parent scope does not exist.");
             }
-        };
-        symbolTableTree.prototype.toString = function () {
-            var tableString = "";
+        }
+        toString() {
+            let tableString = "";
             function expand(node, depth) {
-                for (var i = 0; i < depth; i++) {
+                for (let i = 0; i < depth; i++) {
                     //tableString += "Scope " + i + "\n";
                 }
                 //Iterate through each key value pair and add them to the tree.
-                var map = node.getMap();
-                map.forEach(function (value, key) {
+                let map = node.getMap();
+                map.forEach((value, key) => {
                     tableString += key + "            " + value.getType() +
                         "            " + value.getScopePointer() + "\n";
                 });
-                for (var i = 0; i < node.getChildren().length; i++) {
+                for (let i = 0; i < node.getChildren().length; i++) {
                     expand(node.getChildren()[i], depth + 1);
                 }
             }
             expand(this.rootNode, 0);
             return tableString;
-        };
-        return symbolTableTree;
-    }());
+        }
+    }
     mackintosh.symbolTableTree = symbolTableTree;
 })(mackintosh || (mackintosh = {}));
 //# sourceMappingURL=symbolTableTree.js.map

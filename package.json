@@ -4,7 +4,7 @@
   "description": "",
   "main": "/dist/app.js",
   "scripts": {
-    "start": "tsc && tsc --module none --target es5 --outFile dist/mackintosh.js",
+    "start": "tsc && tsc --module none --target es5 --outFile mackintosh.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

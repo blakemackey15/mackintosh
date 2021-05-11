@@ -2,47 +2,46 @@ var mackintosh;
 (function (mackintosh) {
     //Code reference: JavaScript tree demo: https://www.labouseur.com/projects/jsTreeDemo/treeDemo.js
     //Class to represent a node in the tree.
-    var CSTNode = /** @class */ (function () {
-        function CSTNode(nodeName) {
+    class CSTNode {
+        constructor(nodeName) {
             this.nodeName = nodeName;
             this.children = [];
         }
-        CSTNode.prototype.setNodeName = function (nodeName) {
+        setNodeName(nodeName) {
             this.nodeName = nodeName;
-        };
-        CSTNode.prototype.getNodeName = function () {
+        }
+        getNodeName() {
             return this.nodeName;
-        };
-        CSTNode.prototype.getChildren = function () {
+        }
+        getChildren() {
             return this.children;
-        };
-        CSTNode.prototype.addChildren = function (child) {
+        }
+        addChildren(child) {
             this.children.push(child);
-        };
-        CSTNode.prototype.getParent = function () {
+        }
+        getParent() {
             return this.parent;
-        };
-        CSTNode.prototype.setParent = function (parNode) {
+        }
+        setParent(parNode) {
             this.parent = parNode;
-        };
-        return CSTNode;
-    }());
+        }
+    }
     mackintosh.CSTNode = CSTNode;
     //Class to represent CST.
-    var CST = /** @class */ (function () {
-        function CST() {
+    class CST {
+        constructor() {
             this.rootNode = null;
         }
-        CST.prototype.getRoot = function () {
+        getRoot() {
             return this.rootNode;
-        };
-        CST.prototype.getCurNode = function () {
+        }
+        getCurNode() {
             return this.curNode;
-        };
+        }
         //Kind represents if the node is a leaf or a branch node.
-        CST.prototype.addNode = function (nodeName, kind) {
+        addNode(nodeName, kind) {
             //Create a node object. Has a name, child nodes, parent nodes, and if its a leaf or branch node.
-            var node = new CSTNode(nodeName);
+            let node = new CSTNode(nodeName);
             //Check if theres a root node. If not, make the current node the root node.
             if (this.rootNode == null) {
                 this.rootNode = node;
@@ -57,8 +56,8 @@ var mackintosh;
             if (kind == "branch") {
                 this.curNode = node;
             }
-        };
-        CST.prototype.climbTree = function () {
+        }
+        climbTree() {
             //Move up the tree to the parent node if it exists.
             if (this.curNode.getParent() !== null && this.curNode.getParent().getNodeName() !== undefined) {
                 this.curNode = this.curNode.getParent();
@@ -66,13 +65,13 @@ var mackintosh;
             else {
                 _Functions.log("CST ERROR - Parent node does not exist.");
             }
-        };
-        CST.prototype.toString = function () {
-            var treeString = "";
+        }
+        toString() {
+            let treeString = "";
             //Handles the expansion of nodes using recursion.
             function expand(node, depth) {
                 //Format to show the depth of the tree when displaying.
-                for (var i = 0; i < depth; i++) {
+                for (let i = 0; i < depth; i++) {
                     treeString += "-";
                 }
                 //Check if the node is a leaf node. Then add the node and skip to new line.
@@ -82,7 +81,7 @@ var mackintosh;
                 //Get and display the children.
                 else {
                     treeString += "<" + node.getNodeName() + "> \n";
-                    for (var i = 0; i < node.getChildren().length; i++) {
+                    for (let i = 0; i < node.getChildren().length; i++) {
                         expand(node.getChildren()[i], depth + 1);
                     }
                 }
@@ -90,9 +89,8 @@ var mackintosh;
             //Call and expand from the root node.
             expand(this.rootNode, 0);
             return treeString;
-        };
-        return CST;
-    }());
+        }
+    }
     mackintosh.CST = CST;
 })(mackintosh || (mackintosh = {}));
 //# sourceMappingURL=CST.js.map
