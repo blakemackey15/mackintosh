@@ -770,7 +770,6 @@ var mackintosh;
         }
         //Recursive descent parser implimentation.
         parse.parse = function (parseTokens) {
-            debugger;
             var isParsed = false;
             CSTTree = new mackintosh.CST();
             ASTTree = new mackintosh.CST();
@@ -1187,6 +1186,7 @@ var mackintosh;
         function semanticAnalyser() {
         }
         semanticAnalyser.semanticAnalysis = function () {
+            debugger;
             scopePointer = 0;
             symbolTable = new mackintosh.symbolTableTree();
             semErr = 0;
@@ -1375,6 +1375,7 @@ var mackintosh;
             var curSymbol = symbolTable.getCurNode().lookup(symbol);
             var expectedDataType;
             var dataType;
+            var assigned = false;
             if (symbolTable.getCurNode().lookup(symbol) == null) {
                 throw new Error("SEMANTIC ANALYSIS - Symbol does not exist in symbol table.");
             }
@@ -1396,7 +1397,10 @@ var mackintosh;
                     }
                     //Assign the variable.
                     else {
+                        _Functions.log("SEMANTIC ANALYSIS - Performing Assignment " + symbol
+                            + " " + newSymbol.getValue());
                         symbolTable.getCurNode().assignment(symbol, newSymbol.getValue());
+                        assigned = true;
                     }
                 }
                 else if (value === "true" || value === "false") {
@@ -1414,18 +1418,20 @@ var mackintosh;
                 else if (digits.test(value)) {
                     expectedDataType = 1;
                 }
-                if (intRegEx.test(curSymbol.getType())) {
-                    dataType = 1;
-                }
-                else if (stringRegEx.test(curSymbol.getType())) {
-                    dataType = "xcsadsa";
-                }
-                else if (boolRegEx.test(curSymbol.getType())) {
-                    dataType = true;
-                }
-                if (this.checkType(expectedDataType, dataType)) {
-                    _Functions.log("SEMANTIC ANALYSIS - Performing assignment " + symbol + " " + value);
-                    symbolTable.getCurNode().assignment(symbol, value);
+                if (!assigned) {
+                    if (intRegEx.test(curSymbol.getType())) {
+                        dataType = 1;
+                    }
+                    else if (stringRegEx.test(curSymbol.getType())) {
+                        dataType = "xcsadsa";
+                    }
+                    else if (boolRegEx.test(curSymbol.getType())) {
+                        dataType = true;
+                    }
+                    if (this.checkType(expectedDataType, dataType)) {
+                        _Functions.log("SEMANTIC ANALYSIS - Performing assignment " + symbol + " " + value);
+                        symbolTable.getCurNode().assignment(symbol, value);
+                    }
                 }
             }
         };

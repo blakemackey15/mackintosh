@@ -225,7 +225,8 @@ module mackintosh {
             let value = astNode.getChildren()[1].getNodeName();
             let curSymbol = symbolTable.getCurNode().lookup(symbol);
             let expectedDataType;
-            let dataType
+            let dataType;
+            let assigned : boolean = false;
 
             if(symbolTable.getCurNode().lookup(symbol) == null) {
                 throw new Error("SEMANTIC ANALYSIS - Symbol does not exist in symbol table.");
@@ -252,7 +253,10 @@ module mackintosh {
 
                     //Assign the variable.
                     else {
+                        _Functions.log("SEMANTIC ANALYSIS - Performing Assignment " + symbol 
+                        + " " + newSymbol.getValue() as string);
                         symbolTable.getCurNode().assignment(symbol, newSymbol.getValue());
+                        assigned = true;
                     }
                 }
 
@@ -274,24 +278,25 @@ module mackintosh {
                     expectedDataType = 1;
                 }
 
-                if(intRegEx.test(curSymbol.getType())) {
-                    dataType = 1;
+                if(!assigned) {
+                    if(intRegEx.test(curSymbol.getType())) {
+                        dataType = 1;
+                    }
+    
+                    else if(stringRegEx.test(curSymbol.getType())) {
+                        dataType = "xcsadsa"
+                    }
+    
+                    else if(boolRegEx.test(curSymbol.getType())) {
+                        dataType = true;
+                    }
+    
+                    if(this.checkType(expectedDataType, dataType)) {
+                        _Functions.log("SEMANTIC ANALYSIS - Performing assignment " + symbol + " " + value);
+                        symbolTable.getCurNode().assignment(symbol, value);
+                    }
                 }
-
-                else if(stringRegEx.test(curSymbol.getType())) {
-                    dataType = "xcsadsa"
-                }
-
-                else if(boolRegEx.test(curSymbol.getType())) {
-                    dataType = true;
-                }
-
-                if(this.checkType(expectedDataType, dataType)) {
-                    _Functions.log("SEMANTIC ANALYSIS - Performing assignment " + symbol + " " + value);
-                    symbolTable.getCurNode().assignment(symbol, value);
-                }
-
-        }
+            }
         }
 
         //Check the type or report type mismatch error.

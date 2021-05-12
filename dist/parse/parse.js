@@ -4,7 +4,6 @@ var mackintosh;
     class parse {
         //Recursive descent parser implimentation.
         static parse(parseTokens) {
-            debugger;
             let isParsed = false;
             CSTTree = new mackintosh.CST();
             ASTTree = new mackintosh.CST();

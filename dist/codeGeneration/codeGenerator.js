@@ -1,10 +1,8 @@
 var mackintosh;
 (function (mackintosh) {
-    var codeGenerator = /** @class */ (function () {
-        function codeGenerator() {
-        }
-        codeGenerator.codeGeneration = function () {
-            var isGen = false;
+    class codeGenerator {
+        static codeGeneration() {
+            let isGen = false;
             genErr = 0;
             genWarn = 0;
             _Functions.log("\n");
@@ -17,9 +15,8 @@ var mackintosh;
                 _Functions.log("CODE GENERATOR - Code Generation ended due to error.");
             }
             return isGen;
-        };
-        return codeGenerator;
-    }());
+        }
+    }
     mackintosh.codeGenerator = codeGenerator;
 })(mackintosh || (mackintosh = {}));
 //# sourceMappingURL=codeGenerator.js.map

@@ -1,44 +1,43 @@
 var mackintosh;
 (function (mackintosh) {
-    var executableImage = /** @class */ (function () {
-        function executableImage() {
+    class executableImage {
+        constructor() {
             this.IMAGE_SIZE = 256;
             this.executableImage = new Array(this.IMAGE_SIZE);
             this.stackPointer = 0;
             this.heapPointer = this.executableImage.length - 1;
             //Initialize the executable image to be filled with 00.
-            for (var i = 0; i < this.executableImage.length; i++) {
+            for (let i = 0; i < this.executableImage.length; i++) {
                 this.executableImage[i] == "00";
             }
         }
-        executableImage.prototype.updateStackPointer = function (stackPointer) {
+        updateStackPointer(stackPointer) {
             this.stackPointer = stackPointer;
-        };
-        executableImage.prototype.getStackPointer = function () {
+        }
+        getStackPointer() {
             return this.stackPointer;
-        };
-        executableImage.prototype.updateHeapPointer = function (heapPointer) {
+        }
+        updateHeapPointer(heapPointer) {
             this.heapPointer = heapPointer;
-        };
-        executableImage.prototype.getHeapPointer = function () {
+        }
+        getHeapPointer() {
             return this.heapPointer;
-        };
-        executableImage.prototype.addToStack = function () {
+        }
+        addToStack() {
             this.stackPointer++;
-        };
-        executableImage.prototype.addToHeap = function () {
+        }
+        addToHeap() {
             this.heapPointer--;
-        };
-        executableImage.prototype.addCode = function () {
-        };
-        executableImage.prototype.checkOverflow = function () {
+        }
+        addCode() {
+        }
+        checkOverflow() {
             if (this.stackPointer >= this.heapPointer) {
                 genErr++;
                 throw new Error("CODE GENERATOR - Stack Heap Collision - Program is too long.");
             }
-        };
-        return executableImage;
-    }());
+        }
+    }
     mackintosh.executableImage = executableImage;
 })(mackintosh || (mackintosh = {}));
 //# sourceMappingURL=executableImage.js.map
