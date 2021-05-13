@@ -184,6 +184,36 @@ var mackintosh;
 })(mackintosh || (mackintosh = {}));
 var mackintosh;
 (function (mackintosh) {
+    var jumpTable = /** @class */ (function () {
+        function jumpTable() {
+        }
+        return jumpTable;
+    }());
+    mackintosh.jumpTable = jumpTable;
+    var jumpTableEntry = /** @class */ (function () {
+        function jumpTableEntry() {
+        }
+        return jumpTableEntry;
+    }());
+    mackintosh.jumpTableEntry = jumpTableEntry;
+})(mackintosh || (mackintosh = {}));
+var mackintosh;
+(function (mackintosh) {
+    var staticTable = /** @class */ (function () {
+        function staticTable() {
+        }
+        return staticTable;
+    }());
+    mackintosh.staticTable = staticTable;
+    var staticTableEntry = /** @class */ (function () {
+        function staticTableEntry() {
+        }
+        return staticTableEntry;
+    }());
+    mackintosh.staticTableEntry = staticTableEntry;
+})(mackintosh || (mackintosh = {}));
+var mackintosh;
+(function (mackintosh) {
     var lex = /** @class */ (function () {
         function lex() {
         }

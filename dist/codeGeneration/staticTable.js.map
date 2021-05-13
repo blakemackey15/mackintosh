@@ -1,1 +1,1 @@
-{"version":3,"file":"staticTable.js","sourceRoot":"","sources":["../../src/codeGeneration/staticTable.ts"],"names":[],"mappings":""}
+{"version":3,"file":"staticTable.js","sourceRoot":"","sources":["../../src/codeGeneration/staticTable.ts"],"names":[],"mappings":"AAAA,IAAO,UAAU,CAQhB;AARD,WAAO,UAAU;IACb,MAAa,WAAW;KAEvB;IAFY,sBAAW,cAEvB,CAAA;IAED,MAAa,gBAAgB;KAE5B;IAFY,2BAAgB,mBAE5B,CAAA;AACL,CAAC,EARM,UAAU,KAAV,UAAU,QAQhB"}
