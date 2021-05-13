@@ -21,33 +21,77 @@ var mackintosh;
             return isGen;
         }
         //Create methods for the 6502a op codes.
-        static ldaConst(btye1) {
+        //Load the accumulator with a constant.
+        static ldaConst(data) {
+            _executableImage.addToStack("A9");
+            _executableImage.addToStack(data);
         }
-        static ldaMem(btye1, byte2) {
+        //Load the accumulator from memory.
+        static ldaMem(data1, data2) {
+            _executableImage.addToStack("AD");
+            _executableImage.addToStack(data1);
+            _executableImage.addToStack(data2);
         }
-        static sta(byte1, byte2) {
+        //Store from the accumulator.
+        static sta(data1, data2) {
+            _executableImage.addToStack("8D");
+            _executableImage.addToStack(data1);
+            _executableImage.addToStack(data2);
         }
-        static adc(byte1, byte2) {
+        //Add with carry.
+        static adc(data1, data2) {
+            _executableImage.addToStack("6D");
+            _executableImage.addToStack(data1);
+            _executableImage.addToStack(data2);
         }
-        static ldxConst(byte1) {
+        //Load the x register with a constant.
+        static ldxConst(data) {
+            _executableImage.addToStack("A2");
+            _executableImage.addToStack(data);
         }
-        static ldxMem(byte1, byte2) {
+        //Load the x register from memory.
+        static ldxMem(data1, data2) {
+            _executableImage.addToStack("AE");
+            _executableImage.addToStack(data1);
+            _executableImage.addToStack(data2);
         }
-        static ldyConst(byte1) {
+        //Load the y register with a constant.
+        static ldyConst(data) {
+            _executableImage.addToStack("A0");
+            _executableImage.addToStack(data);
         }
-        static ldyMem(byte1, byte2) {
+        //Load the y register from memory.
+        static ldyMem(data1, data2) {
+            _executableImage.addToStack("AC");
+            _executableImage.addToStack(data1);
+            _executableImage.addToStack(data2);
         }
         static noOp() {
+            _executableImage.addToStack("EA");
         }
         static break() {
+            _executableImage.addToStack("00");
         }
-        static cpx(byte1, byte2) {
+        //Compare a byte in mem to the x register.
+        static cpx(data1, data2) {
+            _executableImage.addToStack("EC");
+            _executableImage.addToStack(data1);
+            _executableImage.addToStack(data2);
         }
-        static bne(byte1, byte2) {
+        //Branch not equal.
+        static bne(data1, data2) {
+            _executableImage.addToStack("D0");
+            _executableImage.addToStack(data1);
+            _executableImage.addToStack(data2);
         }
-        static inc(byte1, byte2) {
+        //Increment.
+        static inc(data1, data2) {
+            _executableImage.addToStack("EE");
+            _executableImage.addToStack(data1);
+            _executableImage.addToStack(data2);
         }
         static system() {
+            _executableImage.addToStack("FF");
         }
         static leftPad(data, length) {
             let temp = "" + data;

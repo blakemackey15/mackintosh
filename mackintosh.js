@@ -144,33 +144,77 @@ var mackintosh;
             return isGen;
         };
         //Create methods for the 6502a op codes.
-        codeGenerator.ldaConst = function (btye1) {
+        //Load the accumulator with a constant.
+        codeGenerator.ldaConst = function (data) {
+            _executableImage.addToStack("A9");
+            _executableImage.addToStack(data);
         };
-        codeGenerator.ldaMem = function (btye1, byte2) {
+        //Load the accumulator from memory.
+        codeGenerator.ldaMem = function (data1, data2) {
+            _executableImage.addToStack("AD");
+            _executableImage.addToStack(data1);
+            _executableImage.addToStack(data2);
         };
-        codeGenerator.sta = function (byte1, byte2) {
+        //Store from the accumulator.
+        codeGenerator.sta = function (data1, data2) {
+            _executableImage.addToStack("8D");
+            _executableImage.addToStack(data1);
+            _executableImage.addToStack(data2);
         };
-        codeGenerator.adc = function (byte1, byte2) {
+        //Add with carry.
+        codeGenerator.adc = function (data1, data2) {
+            _executableImage.addToStack("6D");
+            _executableImage.addToStack(data1);
+            _executableImage.addToStack(data2);
         };
-        codeGenerator.ldxConst = function (byte1) {
+        //Load the x register with a constant.
+        codeGenerator.ldxConst = function (data) {
+            _executableImage.addToStack("A2");
+            _executableImage.addToStack(data);
         };
-        codeGenerator.ldxMem = function (byte1, byte2) {
+        //Load the x register from memory.
+        codeGenerator.ldxMem = function (data1, data2) {
+            _executableImage.addToStack("AE");
+            _executableImage.addToStack(data1);
+            _executableImage.addToStack(data2);
         };
-        codeGenerator.ldyConst = function (byte1) {
+        //Load the y register with a constant.
+        codeGenerator.ldyConst = function (data) {
+            _executableImage.addToStack("A0");
+            _executableImage.addToStack(data);
         };
-        codeGenerator.ldyMem = function (byte1, byte2) {
+        //Load the y register from memory.
+        codeGenerator.ldyMem = function (data1, data2) {
+            _executableImage.addToStack("AC");
+            _executableImage.addToStack(data1);
+            _executableImage.addToStack(data2);
         };
         codeGenerator.noOp = function () {
+            _executableImage.addToStack("EA");
         };
         codeGenerator.break = function () {
+            _executableImage.addToStack("00");
         };
-        codeGenerator.cpx = function (byte1, byte2) {
+        //Compare a byte in mem to the x register.
+        codeGenerator.cpx = function (data1, data2) {
+            _executableImage.addToStack("EC");
+            _executableImage.addToStack(data1);
+            _executableImage.addToStack(data2);
         };
-        codeGenerator.bne = function (byte1, byte2) {
+        //Branch not equal.
+        codeGenerator.bne = function (data1, data2) {
+            _executableImage.addToStack("D0");
+            _executableImage.addToStack(data1);
+            _executableImage.addToStack(data2);
         };
-        codeGenerator.inc = function (byte1, byte2) {
+        //Increment.
+        codeGenerator.inc = function (data1, data2) {
+            _executableImage.addToStack("EE");
+            _executableImage.addToStack(data1);
+            _executableImage.addToStack(data2);
         };
         codeGenerator.system = function () {
+            _executableImage.addToStack("FF");
         };
         codeGenerator.leftPad = function (data, length) {
             var temp = "" + data;
