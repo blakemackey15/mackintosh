@@ -5,14 +5,16 @@ module mackintosh {
     Since both of these tables share common elements, if they implement this interface they will have these properties.
 
      */
-    export interface codeGenTable<E> {
-        tableEntries : Array<E>;
+    export interface codeGenTable<Entry> {
+        tableEntries : Array<Entry>;
         curTemp : number;
-        TempIdHex : number;
+        //Used to match the format for temp ids per table.
+        tempIdMatch : RegExp;
 
-        addEntry(entry : E) : E;
+
+        addEntry(entry : Entry) : Entry;
         getNextTemp() : string;
         backpatch(table : executableImage) : void;
-        getByTemp(tempId : string) : E;
+        getByTemp(tempId : string) : Entry;
     }
 }

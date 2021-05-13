@@ -65,6 +65,10 @@ var scopePointer : number = 0;
 var semErr : number = 0; 
 var semWarn : number = 0;
 
-//Code gen 
+//Code gen globals
 var genErr : number = 0;
 var genWarn : number = 0;
+var _executableImage = new mackintosh.executableImage;
+var _staticTable = new mackintosh.staticTable;
+var _jumpTable = new mackintosh.jumpTable;
+var curScope : number = 0;

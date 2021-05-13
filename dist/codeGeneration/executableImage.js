@@ -23,13 +23,25 @@ var mackintosh;
         getHeapPointer() {
             return this.heapPointer;
         }
-        addToStack() {
+        addToStack(data) {
+            this.addCode(data, this.stackPointer);
             this.stackPointer++;
+            return this.stackPointer;
         }
-        addToHeap() {
+        addToHeap(data) {
+            this.addCode(data, this.heapPointer);
             this.heapPointer--;
+            return this.heapPointer;
         }
-        addCode() {
+        addCode(data, pointer) {
+            //Check if the pointer is pointing to a valid space in the executable image.
+            if (pointer >= this.IMAGE_SIZE || pointer < 0) {
+                throw new Error("CODE GENERATOR - Invalid position " + pointer + " in executable image.");
+            }
+            //Check for collision in stack and heap.
+            this.checkOverflow();
+            this.executableImage[pointer] = data;
+            return pointer;
         }
         checkOverflow() {
             if (this.stackPointer >= this.heapPointer) {

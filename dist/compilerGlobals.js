@@ -59,7 +59,11 @@ var isASTNode = false;
 var scopePointer = 0;
 var semErr = 0;
 var semWarn = 0;
-//Code gen 
+//Code gen globals
 var genErr = 0;
 var genWarn = 0;
+var _executableImage = new mackintosh.executableImage;
+var _staticTable = new mackintosh.staticTable;
+var _jumpTable = new mackintosh.jumpTable;
+var curScope = 0;
 //# sourceMappingURL=compilerGlobals.js.map

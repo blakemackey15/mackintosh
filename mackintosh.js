@@ -78,9 +78,13 @@ var isASTNode = false;
 var scopePointer = 0;
 var semErr = 0;
 var semWarn = 0;
-//Code gen 
+//Code gen globals
 var genErr = 0;
 var genWarn = 0;
+var _executableImage = new mackintosh.executableImage;
+var _staticTable = new mackintosh.staticTable;
+var _jumpTable = new mackintosh.jumpTable;
+var curScope = 0;
 /*
 References: Here is a list of the resources I referenced while developing this project.
 https://regex101.com/ - Useful tool I used to test my regular expressions for my tokens.
@@ -124,6 +128,10 @@ var mackintosh;
             var isGen = false;
             genErr = 0;
             genWarn = 0;
+            curScope = 0;
+            _executableImage = new mackintosh.executableImage();
+            _jumpTable = new mackintosh.jumpTable();
+            _staticTable = new mackintosh.staticTable();
             _Functions.log("\n");
             _Functions.log("\n");
             _Functions.log("CODE GENERATOR - Beginning Code Generation " + (programCount - 1));
@@ -134,6 +142,41 @@ var mackintosh;
                 _Functions.log("CODE GENERATOR - Code Generation ended due to error.");
             }
             return isGen;
+        };
+        //Create methods for the 6502a op codes.
+        codeGenerator.ldaConst = function (btye1) {
+        };
+        codeGenerator.ldaMem = function (btye1, byte2) {
+        };
+        codeGenerator.sta = function (byte1, byte2) {
+        };
+        codeGenerator.adc = function (byte1, byte2) {
+        };
+        codeGenerator.ldxConst = function (byte1) {
+        };
+        codeGenerator.ldxMem = function (byte1, byte2) {
+        };
+        codeGenerator.ldyConst = function (byte1) {
+        };
+        codeGenerator.ldyMem = function (byte1, byte2) {
+        };
+        codeGenerator.noOp = function () {
+        };
+        codeGenerator.break = function () {
+        };
+        codeGenerator.cpx = function (byte1, byte2) {
+        };
+        codeGenerator.bne = function (byte1, byte2) {
+        };
+        codeGenerator.inc = function (byte1, byte2) {
+        };
+        codeGenerator.system = function () {
+        };
+        codeGenerator.leftPad = function (data, length) {
+            var temp = "" + data;
+            while (temp.length < length) {
+                temp = '0' + temp;
+            }
         };
         return codeGenerator;
     }());
@@ -164,13 +207,25 @@ var mackintosh;
         executableImage.prototype.getHeapPointer = function () {
             return this.heapPointer;
         };
-        executableImage.prototype.addToStack = function () {
+        executableImage.prototype.addToStack = function (data) {
+            this.addCode(data, this.stackPointer);
             this.stackPointer++;
+            return this.stackPointer;
         };
-        executableImage.prototype.addToHeap = function () {
+        executableImage.prototype.addToHeap = function (data) {
+            this.addCode(data, this.heapPointer);
             this.heapPointer--;
+            return this.heapPointer;
         };
-        executableImage.prototype.addCode = function () {
+        executableImage.prototype.addCode = function (data, pointer) {
+            //Check if the pointer is pointing to a valid space in the executable image.
+            if (pointer >= this.IMAGE_SIZE || pointer < 0) {
+                throw new Error("CODE GENERATOR - Invalid position " + pointer + " in executable image.");
+            }
+            //Check for collision in stack and heap.
+            this.checkOverflow();
+            this.executableImage[pointer] = data;
+            return pointer;
         };
         executableImage.prototype.checkOverflow = function () {
             if (this.stackPointer >= this.heapPointer) {
@@ -199,15 +254,83 @@ var mackintosh;
 })(mackintosh || (mackintosh = {}));
 var mackintosh;
 (function (mackintosh) {
+    //Represents the static table and implements the codeGenTable interface.
     var staticTable = /** @class */ (function () {
         function staticTable() {
+            this.tableEntries = new Array();
+            this.curTemp = 0;
+            this.curOffset = 0;
+            this.tempIdMatch = /^(T[0-9])/;
         }
+        staticTable.prototype.getCurTemp = function () {
+            return this.curTemp;
+        };
+        staticTable.prototype.setCurTemp = function (curTemp) {
+            this.curTemp = curTemp;
+        };
+        staticTable.prototype.getCurOffset = function () {
+            return this.curOffset;
+        };
+        staticTable.prototype.setCurOffset = function (curOffset) {
+            this.curOffset = curOffset;
+        };
+        //Add an entry to the static table.
+        staticTable.prototype.addEntry = function (entry) {
+            this.tableEntries.push(entry);
+            return entry;
+        };
+        staticTable.prototype.getNextTemp = function () {
+            return "T" + this.curTemp++;
+        };
+        staticTable.prototype.getNextOffset = function () {
+            return this.curOffset++;
+        };
+        staticTable.prototype.getByTemp = function (tempId) {
+            for (var i = 0; i < this.tableEntries.length; i++) {
+                //Search for the entry that matches the temp id.
+                if (this.tableEntries[i].getTemp() === tempId) {
+                    return this.tableEntries[i];
+                }
+            }
+            //If we get here, that means there was no match.
+            return null;
+        };
+        staticTable.prototype.backpatch = function (executableImage) {
+            for (var i = 0; i < this.tableEntries.length; i++) {
+                if (this.tempIdMatch.test(executableImage[i])) {
+                }
+            }
+        };
         return staticTable;
     }());
     mackintosh.staticTable = staticTable;
     var staticTableEntry = /** @class */ (function () {
         function staticTableEntry() {
         }
+        staticTableEntry.prototype.getTemp = function () {
+            return this.temp;
+        };
+        staticTableEntry.prototype.setTemp = function (temp) {
+            this.temp = temp;
+        };
+        staticTableEntry.prototype.getId = function () {
+            return this.id;
+        };
+        staticTableEntry.prototype.setId = function (id) {
+            this.id = id;
+        };
+        staticTableEntry.prototype.getOffset = function () {
+            return this.offset;
+        };
+        staticTableEntry.prototype.setOffset = function (offset) {
+            this.offset = offset;
+        };
+        staticTableEntry.prototype.getCurScope = function () {
+            return this.curScope;
+        };
+        staticTableEntry.prototype.setCurScope = function (curScope) {
+            this.curScope = curScope;
+        };
         return staticTableEntry;
     }());
     mackintosh.staticTableEntry = staticTableEntry;

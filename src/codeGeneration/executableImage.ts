@@ -33,16 +33,28 @@ module mackintosh {
             return this.heapPointer;
         }
 
-        public addToStack() {
+        public addToStack(data : string) {
+            this.addCode(data, this.stackPointer);
             this.stackPointer++;
+            return this.stackPointer;
         }
 
-        public addToHeap() {
+        public addToHeap(data : string) {
+            this.addCode(data, this.heapPointer);
             this.heapPointer--;
+            return this.heapPointer;
         }
 
-        public addCode() {
-            
+        public addCode(data : string, pointer : number) : number {
+            //Check if the pointer is pointing to a valid space in the executable image.
+            if(pointer >= this.IMAGE_SIZE || pointer < 0) {
+                throw new Error("CODE GENERATOR - Invalid position " + pointer + " in executable image.");
+            }
+
+            //Check for collision in stack and heap.
+            this.checkOverflow();
+            this.executableImage[pointer] = data;
+            return pointer;
         }
 
         public checkOverflow() {
