@@ -1,3 +1,5 @@
+import e from "express";
+
 module mackintosh {
     //Represents the static table and implements the codeGenTable interface.
     export class staticTable implements codeGenTable<staticTableEntry> {
@@ -43,6 +45,25 @@ module mackintosh {
             return this.curOffset++;
         }
 
+        //Search for the entry by scope and var.
+        public getByVarAndScope(varId : string, curScope : scope)  {
+            for(let i = this.tableEntries.length - 1; i >= 0; i--) {
+                //Check if both the scope and var are in the table.
+                if(this.tableEntries[i].getId() == varId) {
+                    if(this.tableEntries[i].getCurScope().getScopePointer() == scope.getScopePointer()) {
+
+                    }
+
+                    else {
+                        
+                    }
+                }
+            }
+
+            //If we get here, then its not there.
+            return null;
+        }
+
         public getByTemp(tempId : string) : staticTableEntry {
             for(let i = 0; i < this.tableEntries.length; i++) {
                 //Search for the entry that matches the temp id.
@@ -69,7 +90,7 @@ module mackintosh {
         private temp : string;
         private id : string;
         private offset : number;
-        private curScope : number;
+        private curScope : scope;
 
         constructor() {
 
@@ -103,7 +124,7 @@ module mackintosh {
             return this.curScope;
         }
 
-        public setCurScope(curScope : number) {
+        public setCurScope(curScope : scope) {
             this.curScope = curScope;
         }
     }

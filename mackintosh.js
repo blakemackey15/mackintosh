@@ -143,6 +143,24 @@ var mackintosh;
             }
             return isGen;
         };
+        codeGenerator.genBlock = function () {
+        };
+        codeGenerator.genStatement = function () {
+        };
+        codeGenerator.genVarDecl = function () {
+        };
+        codeGenerator.genAssignmentStatement = function () {
+        };
+        codeGenerator.genIdAssignmentStatement = function () {
+        };
+        codeGenerator.genBoolExpr = function () {
+        };
+        codeGenerator.genWhileStatement = function () {
+        };
+        codeGenerator.genIfStatement = function () {
+        };
+        codeGenerator.genPrintStatement = function () {
+        };
         //Create methods for the 6502a op codes.
         //Load the accumulator with a constant.
         codeGenerator.ldaConst = function (data) {

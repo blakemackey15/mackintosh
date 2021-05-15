@@ -21,6 +21,42 @@ module mackintosh {
             return isGen;
         }
 
+        public static genBlock() {
+
+        }
+
+        public static genStatement() {
+
+        }
+
+        public static genVarDecl() {
+
+        }
+
+        public static genAssignmentStatement() {
+
+        }
+
+        public static genIdAssignmentStatement() {
+
+        }
+
+        public static genBoolExpr() {
+            
+        }
+
+        public static genWhileStatement() {
+
+        }
+
+        public static genIfStatement() {
+
+        }
+
+        public static genPrintStatement() {
+
+        }
+
         //Create methods for the 6502a op codes.
         //Load the accumulator with a constant.
         public static ldaConst(data : string) {

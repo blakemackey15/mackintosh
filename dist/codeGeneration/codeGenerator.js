@@ -8,7 +8,7 @@ var mackintosh;
             curScope = 0;
             _executableImage = new mackintosh.executableImage();
             _jumpTable = new mackintosh.jumpTable();
-            _staticTable = new mackintosh.staticTable();
+            _staticTable = new staticTable();
             _Functions.log("\n");
             _Functions.log("\n");
             _Functions.log("CODE GENERATOR - Beginning Code Generation " + (programCount - 1));
@@ -19,6 +19,24 @@ var mackintosh;
                 _Functions.log("CODE GENERATOR - Code Generation ended due to error.");
             }
             return isGen;
+        }
+        static genBlock() {
+        }
+        static genStatement() {
+        }
+        static genVarDecl() {
+        }
+        static genAssignmentStatement() {
+        }
+        static genIdAssignmentStatement() {
+        }
+        static genBoolExpr() {
+        }
+        static genWhileStatement() {
+        }
+        static genIfStatement() {
+        }
+        static genPrintStatement() {
         }
         //Create methods for the 6502a op codes.
         //Load the accumulator with a constant.

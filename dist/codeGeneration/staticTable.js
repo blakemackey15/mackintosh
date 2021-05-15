@@ -31,6 +31,20 @@ var mackintosh;
         getNextOffset() {
             return this.curOffset++;
         }
+        //Search for the entry by scope and var.
+        getByVarAndScope(varId, curScope) {
+            for (let i = this.tableEntries.length - 1; i >= 0; i--) {
+                //Check if both the scope and var are in the table.
+                if (this.tableEntries[i].getId() == varId) {
+                    if (this.tableEntries[i].getCurScope().getScopePointer() == scope.getScopePointer()) {
+                    }
+                    else {
+                    }
+                }
+            }
+            //If we get here, then its not there.
+            return null;
+        }
         getByTemp(tempId) {
             for (let i = 0; i < this.tableEntries.length; i++) {
                 //Search for the entry that matches the temp id.
