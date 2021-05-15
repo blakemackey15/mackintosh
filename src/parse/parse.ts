@@ -61,7 +61,7 @@ module mackintosh {
         }
 
         //Match function.
-        public static match(expectedTokens : Array<string>, parseToken : string) {
+        public static match(expectedTokens : Array<string>, parseToken : string, isString : boolean) {
             //Check if the token is in a the expected token array.
             for(let i = 0; i < expectedTokens.length; i++) {
                 if(expectedTokens[i] == parseToken) {
@@ -70,10 +70,21 @@ module mackintosh {
 
             }
 
+            if(isString) {
+                for(let i = 0; i < expectedTokens.length; i++) {
+                    if(expectedTokens[i] == parseToken.charAt(i)) {
+                        isMatch = true;
+                    }
+                }
+            }
+
             if(isMatch) {
                 _Functions.log("PARSER - Token Matched! " + parseToken);
                 CSTTree.addNode(parseToken, "leaf");
-                tokenPointer++;
+                //Don't increment the token pointer if its a string, its already where it needs to be.
+                if(!isString) {
+                    tokenPointer++;
+                }
                 isMatch = false;
 
                 //Add AST Node.
@@ -102,7 +113,7 @@ module mackintosh {
 
             //Check for EOP at the end of program.
             if(parseTokens[tokenPointer] == "$") {
-                this.match(["$"], parseTokens[tokenPointer]);
+                this.match(["$"], parseTokens[tokenPointer], false);
                 _Functions.log("PARSER - Program successfully parsed.");
             }
 
@@ -353,15 +364,17 @@ module mackintosh {
             }
 
             else if(characters.test(parseTokens[tokenPointer])) {
-                let string : string;
+                let string : string = "";
 
                 //Builds string until there is a quote.
                 while(!quotes.test(parseTokens[tokenPointer])){
-                    this.parseChar(parseTokens);
+                    //this.parseChar(parseTokens);
                     string += parseTokens[tokenPointer];
+                    tokenPointer++;
                 }
 
                 _Functions.log("PARSER - String: " + string);
+                this.parseString(parseTokens, string);
             }
 
             else {
@@ -374,7 +387,7 @@ module mackintosh {
         //Expected tokens: int, string, boolean
         public static parseType(parseTokens : Array<string>) {
             isASTNode = true;
-            this.match(["int", "string", "boolean"], parseTokens[tokenPointer]);
+            this.match(["int", "string", "boolean"], parseTokens[tokenPointer], false);
         }
 
         //Expected tokens: a-z
@@ -382,67 +395,74 @@ module mackintosh {
             isASTNode = true;
             this.match(["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k",
             "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", 
-            "y", "z"], parseTokens[tokenPointer]);
+            "y", "z"], parseTokens[tokenPointer], false);
+        }
+
+        public static parseString(parseTokens : Array<string>, string : string) {
+            isASTNode = true;
+            this.match(["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k",
+            "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", 
+            "y", "z"], string, true);
         }
 
         //Expected tokens: space
         public static parseSpace(parseTokens : Array<string>) {
-            this.match([" "], parseTokens[tokenPointer]);
+            this.match([" "], parseTokens[tokenPointer], false);
         }
 
         //Expected tokens: 0-9
         public static parseDigit(parseTokens : Array<string>) {
             isASTNode = true;
-            this.match(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"], parseTokens[tokenPointer]);
+            this.match(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"], parseTokens[tokenPointer], false);
         }
 
         //Expected tokens: ==, !=
         public static parseBoolOp(parseTokens : Array<string>) {
-            this.match(["==", "!="], parseTokens[tokenPointer]);
+            this.match(["==", "!="], parseTokens[tokenPointer], false);
         }
 
         //Expected tokens: false, true
         public static parseBoolVal(parseTokens : Array<string>) {
             isASTNode = true;
-            this.match(["false", "true"], parseTokens[tokenPointer]);
+            this.match(["false", "true"], parseTokens[tokenPointer], false);
         }
 
         //Expected tokens: +
         public static parseIntOp(parseTokens : Array<string>) {
-            this.match(["+"], parseTokens[tokenPointer]);
+            this.match(["+"], parseTokens[tokenPointer], false);
         }
 
         public static parseParen(parseTokens : Array<string>) {
-            this.match(["(", ")"], parseTokens[tokenPointer]);
+            this.match(["(", ")"], parseTokens[tokenPointer], false);
         }
 
         public static parseAssignmentOp(parseTokens : Array<string>) {
-            this.match(["="], parseTokens[tokenPointer]);
+            this.match(["="], parseTokens[tokenPointer], false);
         }
 
         public static parseQuotes(parseTokens : Array<string>) {
             isASTNode = true;
-            this.match(['"', '"'], parseTokens[tokenPointer]);
+            this.match(['"', '"'], parseTokens[tokenPointer], false);
         }
 
         public static parseIf(parseTokens : Array<string>) {
-            this.match(["if"], parseTokens[tokenPointer]);
+            this.match(["if"], parseTokens[tokenPointer], false);
         }
 
         public static parseWhile(parseTokens : Array<string>) {
-            this.match(["while"], parseTokens[tokenPointer]);
+            this.match(["while"], parseTokens[tokenPointer], false);
         }
 
         public static parsePrint(parseTokens : Array<string>) {
-            this.match(["print"], parseTokens[tokenPointer]);
+            this.match(["print"], parseTokens[tokenPointer], false);
         }
 
         public static parseOpenBrace(parseTokens : Array<string>) {
-            this.match(["{"], parseTokens[tokenPointer]);
+            this.match(["{"], parseTokens[tokenPointer], false);
         }
 
         public static parseCloseBrace(parseTokens : Array<string>) {
-            this.match(["}"], parseTokens[tokenPointer]);
+            this.match(["}"], parseTokens[tokenPointer], false);
         }
 
     }
