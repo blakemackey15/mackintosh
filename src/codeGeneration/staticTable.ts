@@ -3,14 +3,12 @@ module mackintosh {
     export class staticTable implements codeGenTable<staticTableEntry> {
         public tableEntries : Array<staticTableEntry>;
         public curTemp : number;
-        public tempIdMatch : RegExp;
         public curOffset : number;
 
         constructor() {
             this.tableEntries = new Array<staticTableEntry>();
             this.curTemp = 0;
             this.curOffset = 0;
-            this.tempIdMatch = /^(T[0-9])/;
         }
 
         public getCurTemp() : number {
@@ -79,7 +77,7 @@ module mackintosh {
         public getByTemp(tempId : string) : staticTableEntry {
             for(let i = 0; i < this.tableEntries.length; i++) {
                 //Search for the entry that matches the temp id.
-                if(this.tableEntries[i].getTemp() === tempId) {
+                if(this.tableEntries[i].getTemp() == tempId) {
                     return this.tableEntries[i];
                 }
             }
@@ -91,8 +89,7 @@ module mackintosh {
         public backpatch(executableImage : executableImage) {
             //Go back and replace all of the temp data points with the correct data.
             for(let i = 0; i < this.tableEntries.length; i++) {
-
-                if(this.tempIdMatch.test(executableImage[i])) {
+                if(tempIdMatch.test(executableImage[i])) {
                     let entry = this.getByTemp(executableImage[i]);
                     executableImage.addCode(codeGenerator.leftPad(
                         (entry.getOffset() + executableImage.getStackPointer() + 1).toString(16), 2), i);

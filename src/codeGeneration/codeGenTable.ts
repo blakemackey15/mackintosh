@@ -8,9 +8,6 @@ module mackintosh {
     export interface codeGenTable<Entry> {
         tableEntries : Array<Entry>;
         curTemp : number;
-        //Used to match the format for temp ids per table.
-        tempIdMatch : RegExp;
-
 
         addEntry(entry : Entry) : Entry;
         getNextTemp() : string;

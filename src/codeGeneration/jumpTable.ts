@@ -1,5 +1,45 @@
 module mackintosh {
-    export class jumpTable {
+    export class jumpTable implements codeGenTable<jumpTableEntry>{
+        public tableEntries : Array<jumpTableEntry>;
+        public curTemp : number;
+
+        constructor() {
+            this.tableEntries = new Array<jumpTableEntry>();
+            this.curTemp = 0;
+        }
+
+        public getCurTemp() : number {
+            return this.curTemp;
+        }
+
+        public addEntry(newEntry : jumpTableEntry) : jumpTableEntry {
+            this.tableEntries.push(newEntry);
+            return newEntry;
+        }
+
+        public getNextTemp() : string {
+            return "T" + this.curTemp++;
+        }
+
+        public getByTemp(tempId : string) : jumpTableEntry {
+            for(let i = 0; i < this.tableEntries.length; i++) {
+                if(this.tableEntries[i].getTemp() == tempId) {
+                    return this.tableEntries[i];
+                }
+            }
+
+            return null;
+        }
+
+        public backpatch(executableImage : executableImage) {
+            for(let i = 0; i < this.tableEntries.length; i++) {
+                if(tempIdMatch.test(executableImage[i])) {
+                    let entry = this.getByTemp(executableImage[i]);
+                    executableImage.addCode(codeGenerator.leftPad(entry.getDistance().toString(16), 2), i);
+                }
+            }
+        }
+
 
     }
 
@@ -12,7 +52,7 @@ module mackintosh {
             this.distance = distance;
         }
 
-        public getTemp() {
+        public getTemp() : string {
             return this.temp;
         }
 
@@ -20,7 +60,7 @@ module mackintosh {
             this.temp = temp;
         }
 
-        public getDistance() {
+        public getDistance() : number {
             return this.distance;
         }
 
@@ -28,4 +68,4 @@ module mackintosh {
             this.distance = distance;
         }
     }
-}
+} 

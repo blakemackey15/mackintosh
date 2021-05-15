@@ -6,7 +6,6 @@ var mackintosh;
             this.tableEntries = new Array();
             this.curTemp = 0;
             this.curOffset = 0;
-            this.tempIdMatch = /^(T[0-9])/;
         }
         getCurTemp() {
             return this.curTemp;
@@ -61,7 +60,7 @@ var mackintosh;
         getByTemp(tempId) {
             for (let i = 0; i < this.tableEntries.length; i++) {
                 //Search for the entry that matches the temp id.
-                if (this.tableEntries[i].getTemp() === tempId) {
+                if (this.tableEntries[i].getTemp() == tempId) {
                     return this.tableEntries[i];
                 }
             }
@@ -71,7 +70,7 @@ var mackintosh;
         backpatch(executableImage) {
             //Go back and replace all of the temp data points with the correct data.
             for (let i = 0; i < this.tableEntries.length; i++) {
-                if (this.tempIdMatch.test(executableImage[i])) {
+                if (tempIdMatch.test(executableImage[i])) {
                     let entry = this.getByTemp(executableImage[i]);
                     executableImage.addCode(mackintosh.codeGenerator.leftPad((entry.getOffset() + executableImage.getStackPointer() + 1).toString(16), 2), i);
                     executableImage.addCode('00', i + 1);

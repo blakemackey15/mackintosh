@@ -85,6 +85,7 @@ var _executableImage = new mackintosh.executableImage;
 var _staticTable = new mackintosh.staticTable;
 var _jumpTable = new mackintosh.jumpTable;
 var curScope = 0;
+var tempIdMatch = new RegExp('/^(J[0-9])/');
 /*
 References: Here is a list of the resources I referenced while developing this project.
 https://regex101.com/ - Useful tool I used to test my regular expressions for my tokens.
@@ -304,7 +305,35 @@ var mackintosh;
 (function (mackintosh) {
     var jumpTable = /** @class */ (function () {
         function jumpTable() {
+            this.tableEntries = new Array();
+            this.curTemp = 0;
         }
+        jumpTable.prototype.getCurTemp = function () {
+            return this.curTemp;
+        };
+        jumpTable.prototype.addEntry = function (newEntry) {
+            this.tableEntries.push(newEntry);
+            return newEntry;
+        };
+        jumpTable.prototype.getNextTemp = function () {
+            return "T" + this.curTemp++;
+        };
+        jumpTable.prototype.getByTemp = function (tempId) {
+            for (var i = 0; i < this.tableEntries.length; i++) {
+                if (this.tableEntries[i].getTemp() == tempId) {
+                    return this.tableEntries[i];
+                }
+            }
+            return null;
+        };
+        jumpTable.prototype.backpatch = function (executableImage) {
+            for (var i = 0; i < this.tableEntries.length; i++) {
+                if (tempIdMatch.test(executableImage[i])) {
+                    var entry = this.getByTemp(executableImage[i]);
+                    executableImage.addCode(mackintosh.codeGenerator.leftPad(entry.getDistance().toString(16), 2), i);
+                }
+            }
+        };
         return jumpTable;
     }());
     mackintosh.jumpTable = jumpTable;
@@ -337,7 +366,6 @@ var mackintosh;
             this.tableEntries = new Array();
             this.curTemp = 0;
             this.curOffset = 0;
-            this.tempIdMatch = /^(T[0-9])/;
         }
         staticTable.prototype.getCurTemp = function () {
             return this.curTemp;
@@ -392,7 +420,7 @@ var mackintosh;
         staticTable.prototype.getByTemp = function (tempId) {
             for (var i = 0; i < this.tableEntries.length; i++) {
                 //Search for the entry that matches the temp id.
-                if (this.tableEntries[i].getTemp() === tempId) {
+                if (this.tableEntries[i].getTemp() == tempId) {
                     return this.tableEntries[i];
                 }
             }
@@ -402,7 +430,7 @@ var mackintosh;
         staticTable.prototype.backpatch = function (executableImage) {
             //Go back and replace all of the temp data points with the correct data.
             for (var i = 0; i < this.tableEntries.length; i++) {
-                if (this.tempIdMatch.test(executableImage[i])) {
+                if (tempIdMatch.test(executableImage[i])) {
                     var entry = this.getByTemp(executableImage[i]);
                     executableImage.addCode(mackintosh.codeGenerator.leftPad((entry.getOffset() + executableImage.getStackPointer() + 1).toString(16), 2), i);
                     executableImage.addCode('00', i + 1);
