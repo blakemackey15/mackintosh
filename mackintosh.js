@@ -239,6 +239,7 @@ var mackintosh;
             while (temp.length < length) {
                 temp = '0' + temp;
             }
+            return temp;
         };
         return codeGenerator;
     }());
@@ -352,9 +353,22 @@ var mackintosh;
             for (var i = this.tableEntries.length - 1; i >= 0; i--) {
                 //Check if both the scope and var are in the table.
                 if (this.tableEntries[i].getId() == varId) {
-                    if (this.tableEntries[i].getCurScope().getScopePointer() == curScope.getScopePointer()) {
+                    var expectedScope = this.tableEntries[i].getCurScope().getScopePointer();
+                    var actualScope = curScope.getMap().get(varId).getScopePointer();
+                    if (expectedScope == actualScope) {
+                        return this.tableEntries[i];
                     }
                     else {
+                        var parent_1 = curScope.getParentScope();
+                        while (parent_1 != null) {
+                            //Reassign the expected scope pointer to the parent's scope pointer.
+                            expectedScope = parent_1.getMap().get(varId).getScopePointer();
+                            if (expectedScope == actualScope) {
+                                return this.tableEntries[i];
+                            }
+                            //Go up to the next parent.
+                            parent_1 = parent_1.getParentScope();
+                        }
                     }
                 }
             }
@@ -372,8 +386,12 @@ var mackintosh;
             return null;
         };
         staticTable.prototype.backpatch = function (executableImage) {
+            //Go back and replace all of the temp data points with the correct data.
             for (var i = 0; i < this.tableEntries.length; i++) {
                 if (this.tempIdMatch.test(executableImage[i])) {
+                    var entry = this.getByTemp(executableImage[i]);
+                    executableImage.addCode(mackintosh.codeGenerator.leftPad((entry.getOffset() + executableImage.getStackPointer() + 1).toString(16), 2), i);
+                    executableImage.addCode('00', i + 1);
                 }
             }
         };

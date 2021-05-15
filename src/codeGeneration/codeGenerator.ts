@@ -146,9 +146,12 @@ module mackintosh {
 
         public static leftPad(data : string, length : number) {
             let temp = "" + data;
+
             while(temp.length < length) {
                 temp = '0' + temp;
             }
+
+            return temp;
         }
 
     }

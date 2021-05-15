@@ -116,6 +116,7 @@ var mackintosh;
             while (temp.length < length) {
                 temp = '0' + temp;
             }
+            return temp;
         }
     }
     mackintosh.codeGenerator = codeGenerator;

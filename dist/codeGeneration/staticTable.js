@@ -36,9 +36,22 @@ var mackintosh;
             for (let i = this.tableEntries.length - 1; i >= 0; i--) {
                 //Check if both the scope and var are in the table.
                 if (this.tableEntries[i].getId() == varId) {
-                    if (this.tableEntries[i].getCurScope().getScopePointer() == curScope.getScopePointer()) {
+                    let expectedScope = this.tableEntries[i].getCurScope().getScopePointer();
+                    let actualScope = curScope.getMap().get(varId).getScopePointer();
+                    if (expectedScope == actualScope) {
+                        return this.tableEntries[i];
                     }
                     else {
+                        let parent = curScope.getParentScope();
+                        while (parent != null) {
+                            //Reassign the expected scope pointer to the parent's scope pointer.
+                            expectedScope = parent.getMap().get(varId).getScopePointer();
+                            if (expectedScope == actualScope) {
+                                return this.tableEntries[i];
+                            }
+                            //Go up to the next parent.
+                            parent = parent.getParentScope();
+                        }
                     }
                 }
             }
@@ -56,8 +69,12 @@ var mackintosh;
             return null;
         }
         backpatch(executableImage) {
+            //Go back and replace all of the temp data points with the correct data.
             for (let i = 0; i < this.tableEntries.length; i++) {
                 if (this.tempIdMatch.test(executableImage[i])) {
+                    let entry = this.getByTemp(executableImage[i]);
+                    executableImage.addCode(mackintosh.codeGenerator.leftPad((entry.getOffset() + executableImage.getStackPointer() + 1).toString(16), 2), i);
+                    executableImage.addCode('00', i + 1);
                 }
             }
         }
