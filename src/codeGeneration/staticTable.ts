@@ -91,7 +91,7 @@ module mackintosh {
         public backpatch(executableImage : executableImage) {
             //Go back and replace all of the temp data points with the correct data.
             for(let i = 0; i < this.tableEntries.length; i++) {
-                
+
                 if(this.tempIdMatch.test(executableImage[i])) {
                     let entry = this.getByTemp(executableImage[i]);
                     executableImage.addCode(codeGenerator.leftPad(
@@ -103,6 +103,7 @@ module mackintosh {
 
     }
 
+    //Represents an entry in the static table.
     export class staticTableEntry {
         private temp : string;
         private id : string;

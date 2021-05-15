@@ -80,6 +80,7 @@ var mackintosh;
         }
     }
     mackintosh.staticTable = staticTable;
+    //Represents an entry in the static table.
     class staticTableEntry {
         constructor() {
         }

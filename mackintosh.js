@@ -309,8 +309,22 @@ var mackintosh;
     }());
     mackintosh.jumpTable = jumpTable;
     var jumpTableEntry = /** @class */ (function () {
-        function jumpTableEntry() {
+        function jumpTableEntry(temp, distance) {
+            this.temp = temp;
+            this.distance = distance;
         }
+        jumpTableEntry.prototype.getTemp = function () {
+            return this.temp;
+        };
+        jumpTableEntry.prototype.setTemp = function (temp) {
+            this.temp = temp;
+        };
+        jumpTableEntry.prototype.getDistance = function () {
+            return this.distance;
+        };
+        jumpTableEntry.prototype.setDistance = function (distance) {
+            this.distance = distance;
+        };
         return jumpTableEntry;
     }());
     mackintosh.jumpTableEntry = jumpTableEntry;
@@ -398,6 +412,7 @@ var mackintosh;
         return staticTable;
     }());
     mackintosh.staticTable = staticTable;
+    //Represents an entry in the static table.
     var staticTableEntry = /** @class */ (function () {
         function staticTableEntry() {
         }
