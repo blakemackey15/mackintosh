@@ -8,7 +8,7 @@ var mackintosh;
             curScope = 0;
             _executableImage = new mackintosh.executableImage();
             _jumpTable = new mackintosh.jumpTable();
-            _staticTable = new staticTable();
+            _staticTable = new mackintosh.staticTable();
             _Functions.log("\n");
             _Functions.log("\n");
             _Functions.log("CODE GENERATOR - Beginning Code Generation " + (programCount - 1));

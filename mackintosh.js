@@ -347,6 +347,20 @@ var mackintosh;
         staticTable.prototype.getNextOffset = function () {
             return this.curOffset++;
         };
+        //Search for the entry by scope and var.
+        staticTable.prototype.getByVarAndScope = function (varId, curScope) {
+            for (var i = this.tableEntries.length - 1; i >= 0; i--) {
+                //Check if both the scope and var are in the table.
+                if (this.tableEntries[i].getId() == varId) {
+                    if (this.tableEntries[i].getCurScope().getScopePointer() == curScope.getScopePointer()) {
+                    }
+                    else {
+                    }
+                }
+            }
+            //If we get here, then its not there.
+            return null;
+        };
         staticTable.prototype.getByTemp = function (tempId) {
             for (var i = 0; i < this.tableEntries.length; i++) {
                 //Search for the entry that matches the temp id.

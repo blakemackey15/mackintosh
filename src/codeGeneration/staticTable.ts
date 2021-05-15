@@ -1,5 +1,3 @@
-import e from "express";
-
 module mackintosh {
     //Represents the static table and implements the codeGenTable interface.
     export class staticTable implements codeGenTable<staticTableEntry> {
@@ -50,7 +48,7 @@ module mackintosh {
             for(let i = this.tableEntries.length - 1; i >= 0; i--) {
                 //Check if both the scope and var are in the table.
                 if(this.tableEntries[i].getId() == varId) {
-                    if(this.tableEntries[i].getCurScope().getScopePointer() == scope.getScopePointer()) {
+                    if(this.tableEntries[i].getCurScope().getScopePointer() == curScope.getScopePointer()) {
 
                     }
 
