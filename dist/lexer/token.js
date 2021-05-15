@@ -81,6 +81,10 @@ var mackintosh;
                     this.setTokenCode("");
                     this.setTokenValue("");
                     this.isToken = true;
+                    if (this.quoteCount != 0) {
+                        this.setTokenCode("SPACE");
+                        this.setTokenValue(" ");
+                    }
                     break;
             }
             switch (digits.test(input)) {
