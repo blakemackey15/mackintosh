@@ -137,6 +137,12 @@ var mackintosh;
             _Functions.log("\n");
             _Functions.log("CODE GENERATOR - Beginning Code Generation " + (programCount - 1));
             try {
+                this.genBlock(ASTTree.getRoot());
+                this.break();
+                //Once recursion ends, pass the executable image to be backpatched.
+                _jumpTable.backpatch(_executableImage);
+                _staticTable.backpatch(_executableImage);
+                _Functions.log("CODE GENERATOR - Completed Code Generation " + (programCount - 1));
             }
             catch (error) {
                 _Functions.log(error);
@@ -144,23 +150,49 @@ var mackintosh;
             }
             return isGen;
         };
-        codeGenerator.genBlock = function () {
+        codeGenerator.genBlock = function (astNode) {
+            curScope++;
+            _Functions.log("CODE GENERATOR - Block found, generating code for scope " + curScope);
+            //Use good old recursion to travel through the ast and generate code.
+            if (astNode.getChildren().length != 0) {
+                for (var i = 0; i < astNode.getChildren().length; i++) {
+                    this.genStatement(astNode.getChildren()[i]);
+                }
+            }
+            _Functions.log("CODE GENERATOR - Generated code for scope " + curScope);
         };
-        codeGenerator.genStatement = function () {
+        codeGenerator.genStatement = function (astNode) {
+            var nodeVal = astNode.getNodeName();
+            //Find out what type of node it is and generate code for it.
+            if (nodeVal === "Block") {
+                this.genBlock(astNode);
+            }
+            if (nodeVal === "VarDecl") {
+                this.genVarDecl(astNode);
+            }
+            if (nodeVal === "PrintStatement") {
+                this.genPrintStatement(astNode);
+            }
+            if (nodeVal === "IfStatement") {
+                this.genIfStatement(astNode);
+            }
+            if (nodeVal === "WhileStatement") {
+                this.genWhileStatement(astNode);
+            }
         };
-        codeGenerator.genVarDecl = function () {
+        codeGenerator.genVarDecl = function (astNode) {
         };
-        codeGenerator.genAssignmentStatement = function () {
+        codeGenerator.genAssignmentStatement = function (astNode) {
         };
-        codeGenerator.genIdAssignmentStatement = function () {
+        codeGenerator.genIdAssignmentStatement = function (astNode) {
         };
-        codeGenerator.genBoolExpr = function () {
+        codeGenerator.genBoolExpr = function (astNode) {
         };
-        codeGenerator.genWhileStatement = function () {
+        codeGenerator.genWhileStatement = function (astNode) {
         };
-        codeGenerator.genIfStatement = function () {
+        codeGenerator.genIfStatement = function (astNode) {
         };
-        codeGenerator.genPrintStatement = function () {
+        codeGenerator.genPrintStatement = function (astNode) {
         };
         //Create methods for the 6502a op codes.
         //Load the accumulator with a constant.
@@ -297,12 +329,25 @@ var mackintosh;
                 throw new Error("CODE GENERATOR - Stack Heap Collision - Program is too long.");
             }
         };
+        executableImage.prototype.displayCode = function () {
+            var code = "";
+            //Traverse through the executable image and print out the generated code.
+            for (var i = 0; i < this.IMAGE_SIZE; i++) {
+                //Improves readability by adding a new line.
+                if (i % 8 == 0 && i != 0) {
+                    code += "\n";
+                }
+                code += this.executableImage[i] + " ";
+            }
+            return code;
+        };
         return executableImage;
     }());
     mackintosh.executableImage = executableImage;
 })(mackintosh || (mackintosh = {}));
 var mackintosh;
 (function (mackintosh) {
+    //Represents the jump table.
     var jumpTable = /** @class */ (function () {
         function jumpTable() {
             this.tableEntries = new Array();
@@ -318,14 +363,17 @@ var mackintosh;
         jumpTable.prototype.getNextTemp = function () {
             return "T" + this.curTemp++;
         };
+        //Get a value by it's temp id.
         jumpTable.prototype.getByTemp = function (tempId) {
             for (var i = 0; i < this.tableEntries.length; i++) {
                 if (this.tableEntries[i].getTemp() == tempId) {
                     return this.tableEntries[i];
                 }
             }
+            //If we get here, its not in the table.
             return null;
         };
+        //Go back and replace temps with the correct code.
         jumpTable.prototype.backpatch = function (executableImage) {
             for (var i = 0; i < this.tableEntries.length; i++) {
                 if (tempIdMatch.test(executableImage[i])) {
@@ -337,6 +385,7 @@ var mackintosh;
         return jumpTable;
     }());
     mackintosh.jumpTable = jumpTable;
+    //Represents a single entry in the jump table.
     var jumpTableEntry = /** @class */ (function () {
         function jumpTableEntry(temp, distance) {
             this.temp = temp;
@@ -417,6 +466,7 @@ var mackintosh;
             //If we get here, then its not there.
             return null;
         };
+        //Get by temp id.
         staticTable.prototype.getByTemp = function (tempId) {
             for (var i = 0; i < this.tableEntries.length; i++) {
                 //Search for the entry that matches the temp id.

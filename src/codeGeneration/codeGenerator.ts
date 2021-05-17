@@ -13,7 +13,13 @@ module mackintosh {
             _Functions.log("CODE GENERATOR - Beginning Code Generation " + (programCount - 1));
 
             try {
-                
+                this.genBlock(ASTTree.getRoot());
+                this.break();
+                //Once recursion ends, pass the executable image to be backpatched.
+                _jumpTable.backpatch(_executableImage);
+                _staticTable.backpatch(_executableImage);
+                _Functions.log("CODE GENERATOR - Completed Code Generation " + (programCount - 1));
+
             } catch (error) {
                 _Functions.log(error);
                 _Functions.log("CODE GENERATOR - Code Generation ended due to error.");
@@ -21,39 +27,67 @@ module mackintosh {
             return isGen;
         }
 
-        public static genBlock() {
+        public static genBlock(astNode : CSTNode) {
+            curScope++;
+            _Functions.log("CODE GENERATOR - Block found, generating code for scope " + curScope);
+            //Use good old recursion to travel through the ast and generate code.
+            if(astNode.getChildren().length != 0) {
+                for(let i = 0; i < astNode.getChildren().length; i++) {
+                    this.genStatement(astNode.getChildren()[i]);
+                }
+            }
+            _Functions.log("CODE GENERATOR - Generated code for scope " + curScope);
+        }
+
+        public static genStatement(astNode : CSTNode) {
+            let nodeVal = astNode.getNodeName();
+            //Find out what type of node it is and generate code for it.
+            if(nodeVal === "Block") {
+                this.genBlock(astNode);
+            }
+
+            if(nodeVal === "VarDecl") {
+                this.genVarDecl(astNode);
+            }
+
+            if(nodeVal === "PrintStatement") {
+                this.genPrintStatement(astNode);
+            }
+
+            if(nodeVal === "IfStatement") {
+                this.genIfStatement(astNode);
+            }
+
+            if(nodeVal === "WhileStatement") {
+                this.genWhileStatement(astNode);
+            }
+        }
+
+        public static genVarDecl(astNode : CSTNode) {
 
         }
 
-        public static genStatement() {
+        public static genAssignmentStatement(astNode : CSTNode) {
 
         }
 
-        public static genVarDecl() {
+        public static genIdAssignmentStatement(astNode : CSTNode) {
 
         }
 
-        public static genAssignmentStatement() {
-
-        }
-
-        public static genIdAssignmentStatement() {
-
-        }
-
-        public static genBoolExpr() {
+        public static genBoolExpr(astNode : CSTNode) {
             
         }
 
-        public static genWhileStatement() {
+        public static genWhileStatement(astNode : CSTNode) {
 
         }
 
-        public static genIfStatement() {
+        public static genIfStatement(astNode : CSTNode) {
 
         }
 
-        public static genPrintStatement() {
+        public static genPrintStatement(astNode : CSTNode) {
 
         }
 

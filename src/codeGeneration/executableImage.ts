@@ -33,13 +33,13 @@ module mackintosh {
             return this.heapPointer;
         }
 
-        public addToStack(data : string) {
+        public addToStack(data : string) : number {
             this.addCode(data, this.stackPointer);
             this.stackPointer++;
             return this.stackPointer;
         }
 
-        public addToHeap(data : string) {
+        public addToHeap(data : string) : number {
             this.addCode(data, this.heapPointer);
             this.heapPointer--;
             return this.heapPointer;
@@ -62,6 +62,20 @@ module mackintosh {
                 genErr++;
                 throw new Error("CODE GENERATOR - Stack Heap Collision - Program is too long.");
             }
+        }
+
+        public displayCode() : string {
+            let code = "";
+            //Traverse through the executable image and print out the generated code.
+            for(let i = 0; i < this.IMAGE_SIZE; i++) {
+                //Improves readability by adding a new line.
+                if(i % 8 == 0 && i != 0) {
+                    code += "\n";
+                }
+                code += this.executableImage[i] + " ";
+            }
+
+            return code;
         }
     }
 }

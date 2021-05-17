@@ -74,6 +74,7 @@ module mackintosh {
             return null;
         }
 
+        //Get by temp id.
         public getByTemp(tempId : string) : staticTableEntry {
             for(let i = 0; i < this.tableEntries.length; i++) {
                 //Search for the entry that matches the temp id.
@@ -111,7 +112,7 @@ module mackintosh {
 
         }
 
-        public getTemp() {
+        public getTemp() : string {
             return this.temp;
         }
 
@@ -119,7 +120,7 @@ module mackintosh {
             this.temp = temp;
         }
 
-        public getId() {
+        public getId() : string {
             return this.id;
         }
 
@@ -127,7 +128,7 @@ module mackintosh {
             this.id = id;
         }
 
-        public getOffset() {
+        public getOffset() : number {
             return this.offset;
         }
 
@@ -135,7 +136,7 @@ module mackintosh {
             this.offset = offset;
         }
 
-        public getCurScope() {
+        public getCurScope() : scope {
             return this.curScope;
         }
 

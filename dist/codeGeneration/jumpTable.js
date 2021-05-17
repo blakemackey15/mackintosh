@@ -1,5 +1,6 @@
 var mackintosh;
 (function (mackintosh) {
+    //Represents the jump table.
     class jumpTable {
         constructor() {
             this.tableEntries = new Array();
@@ -15,14 +16,17 @@ var mackintosh;
         getNextTemp() {
             return "T" + this.curTemp++;
         }
+        //Get a value by it's temp id.
         getByTemp(tempId) {
             for (let i = 0; i < this.tableEntries.length; i++) {
                 if (this.tableEntries[i].getTemp() == tempId) {
                     return this.tableEntries[i];
                 }
             }
+            //If we get here, its not in the table.
             return null;
         }
+        //Go back and replace temps with the correct code.
         backpatch(executableImage) {
             for (let i = 0; i < this.tableEntries.length; i++) {
                 if (tempIdMatch.test(executableImage[i])) {
@@ -33,6 +37,7 @@ var mackintosh;
         }
     }
     mackintosh.jumpTable = jumpTable;
+    //Represents a single entry in the jump table.
     class jumpTableEntry {
         constructor(temp, distance) {
             this.temp = temp;

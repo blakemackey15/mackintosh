@@ -57,6 +57,7 @@ var mackintosh;
             //If we get here, then its not there.
             return null;
         }
+        //Get by temp id.
         getByTemp(tempId) {
             for (let i = 0; i < this.tableEntries.length; i++) {
                 //Search for the entry that matches the temp id.

@@ -13,6 +13,12 @@ var mackintosh;
             _Functions.log("\n");
             _Functions.log("CODE GENERATOR - Beginning Code Generation " + (programCount - 1));
             try {
+                this.genBlock(ASTTree.getRoot());
+                this.break();
+                //Once recursion ends, pass the executable image to be backpatched.
+                _jumpTable.backpatch(_executableImage);
+                _staticTable.backpatch(_executableImage);
+                _Functions.log("CODE GENERATOR - Completed Code Generation " + (programCount - 1));
             }
             catch (error) {
                 _Functions.log(error);
@@ -20,23 +26,49 @@ var mackintosh;
             }
             return isGen;
         }
-        static genBlock() {
+        static genBlock(astNode) {
+            curScope++;
+            _Functions.log("CODE GENERATOR - Block found, generating code for scope " + curScope);
+            //Use good old recursion to travel through the ast and generate code.
+            if (astNode.getChildren().length != 0) {
+                for (let i = 0; i < astNode.getChildren().length; i++) {
+                    this.genStatement(astNode.getChildren()[i]);
+                }
+            }
+            _Functions.log("CODE GENERATOR - Generated code for scope " + curScope);
         }
-        static genStatement() {
+        static genStatement(astNode) {
+            let nodeVal = astNode.getNodeName();
+            //Find out what type of node it is and generate code for it.
+            if (nodeVal === "Block") {
+                this.genBlock(astNode);
+            }
+            if (nodeVal === "VarDecl") {
+                this.genVarDecl(astNode);
+            }
+            if (nodeVal === "PrintStatement") {
+                this.genPrintStatement(astNode);
+            }
+            if (nodeVal === "IfStatement") {
+                this.genIfStatement(astNode);
+            }
+            if (nodeVal === "WhileStatement") {
+                this.genWhileStatement(astNode);
+            }
         }
-        static genVarDecl() {
+        static genVarDecl(astNode) {
         }
-        static genAssignmentStatement() {
+        static genAssignmentStatement(astNode) {
         }
-        static genIdAssignmentStatement() {
+        static genIdAssignmentStatement(astNode) {
         }
-        static genBoolExpr() {
+        static genBoolExpr(astNode) {
         }
-        static genWhileStatement() {
+        static genWhileStatement(astNode) {
         }
-        static genIfStatement() {
+        static genIfStatement(astNode) {
         }
-        static genPrintStatement() {
+        static genPrintStatement(astNode) {
         }
         //Create methods for the 6502a op codes.
         //Load the accumulator with a constant.

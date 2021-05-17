@@ -1,4 +1,5 @@
 module mackintosh {
+    //Represents the jump table.
     export class jumpTable implements codeGenTable<jumpTableEntry>{
         public tableEntries : Array<jumpTableEntry>;
         public curTemp : number;
@@ -21,6 +22,7 @@ module mackintosh {
             return "T" + this.curTemp++;
         }
 
+        //Get a value by it's temp id.
         public getByTemp(tempId : string) : jumpTableEntry {
             for(let i = 0; i < this.tableEntries.length; i++) {
                 if(this.tableEntries[i].getTemp() == tempId) {
@@ -28,9 +30,11 @@ module mackintosh {
                 }
             }
 
+            //If we get here, its not in the table.
             return null;
         }
 
+        //Go back and replace temps with the correct code.
         public backpatch(executableImage : executableImage) {
             for(let i = 0; i < this.tableEntries.length; i++) {
                 if(tempIdMatch.test(executableImage[i])) {
@@ -43,6 +47,7 @@ module mackintosh {
 
     }
 
+    //Represents a single entry in the jump table.
     export class jumpTableEntry {
         private temp : string;
         private distance : number;

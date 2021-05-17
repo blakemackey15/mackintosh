@@ -49,6 +49,18 @@ var mackintosh;
                 throw new Error("CODE GENERATOR - Stack Heap Collision - Program is too long.");
             }
         }
+        displayCode() {
+            let code = "";
+            //Traverse through the executable image and print out the generated code.
+            for (let i = 0; i < this.IMAGE_SIZE; i++) {
+                //Improves readability by adding a new line.
+                if (i % 8 == 0 && i != 0) {
+                    code += "\n";
+                }
+                code += this.executableImage[i] + " ";
+            }
+            return code;
+        }
     }
     mackintosh.executableImage = executableImage;
 })(mackintosh || (mackintosh = {}));
