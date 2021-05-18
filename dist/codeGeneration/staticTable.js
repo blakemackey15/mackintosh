@@ -82,7 +82,11 @@ var mackintosh;
     mackintosh.staticTable = staticTable;
     //Represents an entry in the static table.
     class staticTableEntry {
-        constructor() {
+        constructor(temp, id, offset, curScope) {
+            this.temp = temp;
+            this.id = id;
+            this.offset = offset;
+            this.curScope = curScope;
         }
         getTemp() {
             return this.temp;

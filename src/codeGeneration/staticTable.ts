@@ -108,8 +108,11 @@ module mackintosh {
         private offset : number;
         private curScope : scope;
 
-        constructor() {
-
+        constructor(temp : string, id : string, offset : number, curScope : scope) {
+            this.temp = temp;
+            this.id = id;
+            this.offset = offset;
+            this.curScope = curScope;
         }
 
         public getTemp() : string {

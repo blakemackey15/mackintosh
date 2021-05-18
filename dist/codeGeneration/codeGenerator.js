@@ -57,8 +57,62 @@ var mackintosh;
             }
         }
         static genVarDecl(astNode) {
+            let type = astNode.getChildren()[0].getNodeName();
+            let id = astNode.getChildren()[1].getNodeName();
+            //Check what type of node this is to generate the correct code.
+            if (type === "int") {
+                this.genIntVarDecl(astNode, id);
+            }
+            else if (type === "string") {
+                this.genStringVarDecl(astNode, id);
+            }
+            else if (type === "boolean") {
+                this.genBoolVarDecl(astNode, id);
+            }
+        }
+        static genIntVarDecl(astNode, id) {
+            _Functions.log("CODE GENERATOR - Int Var Decl Found.");
+            //Initialze to 0.
+            this.ldaConst("00");
+            let temp = _staticTable.getNextTemp();
+            let node = symbolTable.getNode(curScope, id);
+            let scope = node.getMap().get(id);
+            //Add the entry to the static table, and then store the temp data.
+            let newEntry = new mackintosh.staticTableEntry(temp, id, _staticTable.getNextOffset(), scope);
+            _staticTable.addEntry(newEntry);
+            this.sta(temp, "XX");
+            _Functions.log("CODE GENERATOR - Generated code for Int Var Decl.");
+        }
+        static genStringVarDecl(astNode, id) {
+            _Functions.log("CODE GENERATOR - String Var Decl Found.");
+            _Functions.log("CODE GENERATOR - Generated code for String Var Decl.");
+        }
+        static genBoolVarDecl(astNode, id) {
+            _Functions.log("CODE GENERATOR - Bool Var Decl Found.");
+            _Functions.log("CODE GENERATOR - Generated code for Bool Var Decl.");
         }
         static genAssignmentStatement(astNode) {
+            let id = astNode.getChildren()[0].getNodeName();
+            let value = astNode.getChildren()[1].getNodeName();
+            let node = symbolTable.getNode(curScope, id);
+            let scope = node.getMap().get(id);
+            //TODO : handle assigning a variable to another variable.
+            //Check what data type it is to perform the correct assingment.
+            if (scope.getType() === "int") {
+                this.genIntAssignmentStatement(id, value);
+            }
+            else if (scope.getType() === "string") {
+                this.genStringAssignmentStatement(id, value);
+            }
+            else if (scope.getType() === "boolean") {
+                this.genBoolAssignmentStatement(id, value);
+            }
+        }
+        static genIntAssignmentStatement(id, value) {
+        }
+        static genStringAssignmentStatement(id, value) {
+        }
+        static genBoolAssignmentStatement(id, value) {
         }
         static genIdAssignmentStatement(astNode) {
         }

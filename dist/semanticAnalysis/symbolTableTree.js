@@ -81,6 +81,24 @@ var mackintosh;
         getCurNode() {
             return this.curNode;
         }
+        getNode(curScope, id) {
+            //Traverse symbol table to get the correct entry.
+            function expand(node, depth) {
+                for (let i = 0; i < node.getChildren().length; i++) {
+                    let map = node.getChildren()[i].getMap();
+                    let scope = map.get(id);
+                    let scopePointer = scope.getScopePointer();
+                    if (scopePointer = curScope) {
+                        return node.getChildren()[i];
+                    }
+                    else {
+                        expand(node.getChildren()[i], depth + 1);
+                    }
+                }
+            }
+            let node = expand(this.rootNode, 0);
+            return node;
+        }
         addNode(map) {
             let node = new symbolTableNode(map);
             if (this.rootNode == null) {
@@ -108,9 +126,6 @@ var mackintosh;
         toString() {
             let tableString = "";
             function expand(node, depth) {
-                for (let i = 0; i < depth; i++) {
-                    //tableString += "Scope " + i + "\n";
-                }
                 //Iterate through each key value pair and add them to the tree.
                 let map = node.getMap();
                 map.forEach((value, key) => {

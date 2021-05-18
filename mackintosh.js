@@ -181,8 +181,62 @@ var mackintosh;
             }
         };
         codeGenerator.genVarDecl = function (astNode) {
+            var type = astNode.getChildren()[0].getNodeName();
+            var id = astNode.getChildren()[1].getNodeName();
+            //Check what type of node this is to generate the correct code.
+            if (type === "int") {
+                this.genIntVarDecl(astNode, id);
+            }
+            else if (type === "string") {
+                this.genStringVarDecl(astNode, id);
+            }
+            else if (type === "boolean") {
+                this.genBoolVarDecl(astNode, id);
+            }
+        };
+        codeGenerator.genIntVarDecl = function (astNode, id) {
+            _Functions.log("CODE GENERATOR - Int Var Decl Found.");
+            //Initialze to 0.
+            this.ldaConst("00");
+            var temp = _staticTable.getNextTemp();
+            var node = symbolTable.getNode(curScope, id);
+            var scope = node.getMap().get(id);
+            //Add the entry to the static table, and then store the temp data.
+            var newEntry = new mackintosh.staticTableEntry(temp, id, _staticTable.getNextOffset(), scope);
+            _staticTable.addEntry(newEntry);
+            this.sta(temp, "XX");
+            _Functions.log("CODE GENERATOR - Generated code for Int Var Decl.");
+        };
+        codeGenerator.genStringVarDecl = function (astNode, id) {
+            _Functions.log("CODE GENERATOR - String Var Decl Found.");
+            _Functions.log("CODE GENERATOR - Generated code for String Var Decl.");
+        };
+        codeGenerator.genBoolVarDecl = function (astNode, id) {
+            _Functions.log("CODE GENERATOR - Bool Var Decl Found.");
+            _Functions.log("CODE GENERATOR - Generated code for Bool Var Decl.");
         };
         codeGenerator.genAssignmentStatement = function (astNode) {
+            var id = astNode.getChildren()[0].getNodeName();
+            var value = astNode.getChildren()[1].getNodeName();
+            var node = symbolTable.getNode(curScope, id);
+            var scope = node.getMap().get(id);
+            //TODO : handle assigning a variable to another variable.
+            //Check what data type it is to perform the correct assingment.
+            if (scope.getType() === "int") {
+                this.genIntAssignmentStatement(id, value);
+            }
+            else if (scope.getType() === "string") {
+                this.genStringAssignmentStatement(id, value);
+            }
+            else if (scope.getType() === "boolean") {
+                this.genBoolAssignmentStatement(id, value);
+            }
+        };
+        codeGenerator.genIntAssignmentStatement = function (id, value) {
+        };
+        codeGenerator.genStringAssignmentStatement = function (id, value) {
+        };
+        codeGenerator.genBoolAssignmentStatement = function (id, value) {
         };
         codeGenerator.genIdAssignmentStatement = function (astNode) {
         };
@@ -492,7 +546,11 @@ var mackintosh;
     mackintosh.staticTable = staticTable;
     //Represents an entry in the static table.
     var staticTableEntry = /** @class */ (function () {
-        function staticTableEntry() {
+        function staticTableEntry(temp, id, offset, curScope) {
+            this.temp = temp;
+            this.id = id;
+            this.offset = offset;
+            this.curScope = curScope;
         }
         staticTableEntry.prototype.getTemp = function () {
             return this.temp;
@@ -1895,6 +1953,24 @@ var mackintosh;
         symbolTableTree.prototype.getCurNode = function () {
             return this.curNode;
         };
+        symbolTableTree.prototype.getNode = function (curScope, id) {
+            //Traverse symbol table to get the correct entry.
+            function expand(node, depth) {
+                for (var i = 0; i < node.getChildren().length; i++) {
+                    var map = node.getChildren()[i].getMap();
+                    var scope_1 = map.get(id);
+                    var scopePointer_1 = scope_1.getScopePointer();
+                    if (scopePointer_1 = curScope) {
+                        return node.getChildren()[i];
+                    }
+                    else {
+                        expand(node.getChildren()[i], depth + 1);
+                    }
+                }
+            }
+            var node = expand(this.rootNode, 0);
+            return node;
+        };
         symbolTableTree.prototype.addNode = function (map) {
             var node = new symbolTableNode(map);
             if (this.rootNode == null) {
@@ -1922,9 +1998,6 @@ var mackintosh;
         symbolTableTree.prototype.toString = function () {
             var tableString = "";
             function expand(node, depth) {
-                for (var i = 0; i < depth; i++) {
-                    //tableString += "Scope " + i + "\n";
-                }
                 //Iterate through each key value pair and add them to the tree.
                 var map = node.getMap();
                 map.forEach(function (value, key) {
