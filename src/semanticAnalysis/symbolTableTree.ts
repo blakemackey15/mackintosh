@@ -72,6 +72,7 @@ module mackintosh {
                 let type = newScope.getType();
                 newScope.setValue(value);
                 newScope.setIsUsed(true);
+                newScope.setType(type);
                 this.hashmap.set(symbol, newScope);
             }
         }

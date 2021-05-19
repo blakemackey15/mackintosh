@@ -3,6 +3,7 @@ var mackintosh;
     //Perform code generation.
     class codeGenerator {
         static codeGeneration() {
+            debugger;
             let isGen = false;
             genErr = 0;
             genWarn = 0;
@@ -14,16 +15,28 @@ var mackintosh;
             _Functions.log("\n");
             _Functions.log("CODE GENERATOR - Beginning Code Generation " + (programCount - 1));
             try {
+                //_Functions.log(_executableImage.displayCode());
+                _executableImage.initTable();
                 this.genBlock(ASTTree.getRoot());
                 this.break();
                 //Once recursion ends, pass the executable image to be backpatched.
-                _jumpTable.backpatch(_executableImage);
-                _staticTable.backpatch(_executableImage);
-                _Functions.log("CODE GENERATOR - Completed Code Generation " + (programCount - 1));
-                _Functions.log("\n");
-                _Functions.log("\n");
-                _Functions.log(_executableImage.displayCode());
-                isGen = true;
+                if (genErr == 0) {
+                    _jumpTable.backpatch(_executableImage);
+                    _staticTable.backpatch(_executableImage);
+                    _Functions.log("\n");
+                    _Functions.log("\n");
+                    _Functions.log("CODE GENERATOR - Completed Code Generation " + (programCount - 1));
+                    _Functions.log("\n");
+                    _Functions.log("\n");
+                    _Functions.log(_executableImage.displayCode());
+                    isGen = true;
+                }
+                else {
+                    isGen = false;
+                    _Functions.log("\n");
+                    _Functions.log("\n");
+                    _Functions.log("CODE GENERATOR - Generated code not displayed due to error.");
+                }
             }
             catch (error) {
                 _Functions.log(error);

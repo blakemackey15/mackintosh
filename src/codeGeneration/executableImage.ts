@@ -10,10 +10,14 @@ module mackintosh {
             this.executableImage = new Array<string>(this.IMAGE_SIZE);
             this.stackPointer = 0;
             this.heapPointer = this.executableImage.length - 1;
+        }
 
+        public initTable() {
             //Initialize the executable image to be filled with 00.
-            for(let i = 0; i < this.executableImage.length; i++) {
-                this.executableImage[i] == "00";
+            for(let i = 0; i < this.IMAGE_SIZE; i++) {
+                if(this.executableImage[i] === null || this.executableImage[i] === undefined) {
+                    this.executableImage[i] = "00";
+                }
             }
         }
 
@@ -48,6 +52,7 @@ module mackintosh {
         public addCode(data : string, pointer : number) : number {
             //Check if the pointer is pointing to a valid space in the executable image.
             if(pointer >= this.IMAGE_SIZE || pointer < 0) {
+                genErr++;
                 throw new Error("CODE GENERATOR - Invalid position " + pointer + " in executable image.");
             }
 

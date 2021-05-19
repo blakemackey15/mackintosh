@@ -127,6 +127,7 @@ var mackintosh;
         function codeGenerator() {
         }
         codeGenerator.codeGeneration = function () {
+            debugger;
             var isGen = false;
             genErr = 0;
             genWarn = 0;
@@ -138,16 +139,28 @@ var mackintosh;
             _Functions.log("\n");
             _Functions.log("CODE GENERATOR - Beginning Code Generation " + (programCount - 1));
             try {
+                //_Functions.log(_executableImage.displayCode());
+                _executableImage.initTable();
                 this.genBlock(ASTTree.getRoot());
                 this.break();
                 //Once recursion ends, pass the executable image to be backpatched.
-                _jumpTable.backpatch(_executableImage);
-                _staticTable.backpatch(_executableImage);
-                _Functions.log("CODE GENERATOR - Completed Code Generation " + (programCount - 1));
-                _Functions.log("\n");
-                _Functions.log("\n");
-                _Functions.log(_executableImage.displayCode());
-                isGen = true;
+                if (genErr == 0) {
+                    _jumpTable.backpatch(_executableImage);
+                    _staticTable.backpatch(_executableImage);
+                    _Functions.log("\n");
+                    _Functions.log("\n");
+                    _Functions.log("CODE GENERATOR - Completed Code Generation " + (programCount - 1));
+                    _Functions.log("\n");
+                    _Functions.log("\n");
+                    _Functions.log(_executableImage.displayCode());
+                    isGen = true;
+                }
+                else {
+                    isGen = false;
+                    _Functions.log("\n");
+                    _Functions.log("\n");
+                    _Functions.log("CODE GENERATOR - Generated code not displayed due to error.");
+                }
             }
             catch (error) {
                 _Functions.log(error);
@@ -371,11 +384,15 @@ var mackintosh;
             this.executableImage = new Array(this.IMAGE_SIZE);
             this.stackPointer = 0;
             this.heapPointer = this.executableImage.length - 1;
-            //Initialize the executable image to be filled with 00.
-            for (var i = 0; i < this.executableImage.length; i++) {
-                this.executableImage[i] == "00";
-            }
         }
+        executableImage.prototype.initTable = function () {
+            //Initialize the executable image to be filled with 00.
+            for (var i = 0; i < this.IMAGE_SIZE; i++) {
+                if (this.executableImage[i] === null || this.executableImage[i] === undefined) {
+                    this.executableImage[i] = "00";
+                }
+            }
+        };
         executableImage.prototype.updateStackPointer = function (stackPointer) {
             this.stackPointer = stackPointer;
         };
@@ -401,6 +418,7 @@ var mackintosh;
         executableImage.prototype.addCode = function (data, pointer) {
             //Check if the pointer is pointing to a valid space in the executable image.
             if (pointer >= this.IMAGE_SIZE || pointer < 0) {
+                genErr++;
                 throw new Error("CODE GENERATOR - Invalid position " + pointer + " in executable image.");
             }
             //Check for collision in stack and heap.
@@ -1992,6 +2010,7 @@ var mackintosh;
                 var type = newScope.getType();
                 newScope.setValue(value);
                 newScope.setIsUsed(true);
+                newScope.setType(type);
                 this.hashmap.set(symbol, newScope);
             }
         };
