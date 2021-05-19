@@ -57,6 +57,27 @@ module mackintosh {
             return pointer;
         }
 
+        public addStringHelper(string : string) : string {
+            let pos;
+            if(string.length <= 0) {
+                pos = this.addToHeap("00");
+            }
+            //Null terminate the string.
+            this.addToHeap("00");
+            for(let i = string.length - 1; i >= 0; i--) {
+                //Get the hexidecimal representation of each character in the string.
+                //Then add it to the heap.
+                let toHex = string.charCodeAt(i).toString(16);
+                pos = this.addToHeap(toHex);
+            }
+
+            return pos;
+        }
+
+        public addString(string : string) : string {
+            return this.addStringHelper(string);
+        }
+
         public checkOverflow() {
             if(this.stackPointer >= this.heapPointer) {
                 genErr++;

@@ -122,6 +122,7 @@ var mackintosh;
 })(mackintosh || (mackintosh = {}));
 var mackintosh;
 (function (mackintosh) {
+    //Perform code generation.
     var codeGenerator = /** @class */ (function () {
         function codeGenerator() {
         }
@@ -209,6 +210,10 @@ var mackintosh;
         };
         codeGenerator.genStringVarDecl = function (astNode, id) {
             _Functions.log("CODE GENERATOR - String Var Decl Found.");
+            var tempId = _staticTable.getNextTemp();
+            var node = symbolTable.getNode(curScope, id);
+            var scope = node.getMap().get(id);
+            _staticTable.addEntry(new mackintosh.staticTableEntry(tempId, id, _staticTable.getNextOffset(), scope));
             _Functions.log("CODE GENERATOR - Generated code for String Var Decl.");
         };
         codeGenerator.genBoolVarDecl = function (astNode, id) {
@@ -223,22 +228,44 @@ var mackintosh;
             //TODO : handle assigning a variable to another variable.
             //Check what data type it is to perform the correct assingment.
             if (scope.getType() === "int") {
-                this.genIntAssignmentStatement(id, value);
+                this.genIntAssignmentStatement(astNode, id, value, node);
             }
             else if (scope.getType() === "string") {
-                this.genStringAssignmentStatement(id, value);
+                this.genStringAssignmentStatement(astNode, id, value, node);
             }
             else if (scope.getType() === "boolean") {
-                this.genBoolAssignmentStatement(id, value);
+                this.genBoolAssignmentStatement(astNode, id, value, node);
             }
         };
-        codeGenerator.genIntAssignmentStatement = function (id, value) {
+        codeGenerator.genIntAssignmentStatement = function (astNode, id, value, node) {
+            this.genIntExpr(astNode, node.getMap().get(id));
+            var staticTableEntry = _staticTable.getByVarAndScope(id, node);
+            this.sta(staticTableEntry.getTemp(), "XX");
+            _Functions.log("CODE GENERATOR - Generated code for int assignment.");
         };
-        codeGenerator.genStringAssignmentStatement = function (id, value) {
+        codeGenerator.genStringAssignmentStatement = function (astNode, id, value, node) {
+            //Add the string to the heap, load the accumulator, and then store in memory.
+            var pos = _executableImage.addString(value);
+            this.ldaConst(this.leftPad(pos, 2));
+            var staticTableEntry = _staticTable.getByVarAndScope(id, node);
+            this.sta(staticTableEntry.getTemp(), "XX");
+            _Functions.log("CODE GENERATOR - Generated code for string assignment statement.");
         };
-        codeGenerator.genBoolAssignmentStatement = function (id, value) {
+        codeGenerator.genBoolAssignmentStatement = function (astNode, id, value, node) {
+            _Functions.log("CODE GENERATOR - Generated code for boolean assignment statement.");
         };
-        codeGenerator.genIdAssignmentStatement = function (astNode) {
+        codeGenerator.genIdAssignmentStatement = function (astNode, id, value, node) {
+            //Find the value in static table, load the accumulator.
+            var valueEntry = _staticTable.getByVarAndScope(value, node);
+            this.ldaMem(valueEntry.getTemp(), "XX");
+            //Find the id in static table, load the accumulator.
+            var staticTableEntry = _staticTable.getByVarAndScope(id, node);
+            this.sta(staticTableEntry.getTemp(), "XX");
+            _Functions.log("CODE GENERATOR - Generated code for ids assignment statement.");
+        };
+        codeGenerator.genIntExpr = function (astNode, scope) {
+        };
+        codeGenerator.genStringExpr = function (astNode) {
         };
         codeGenerator.genBoolExpr = function (astNode) {
         };
@@ -376,6 +403,24 @@ var mackintosh;
             this.checkOverflow();
             this.executableImage[pointer] = data;
             return pointer;
+        };
+        executableImage.prototype.addStringHelper = function (string) {
+            var pos;
+            if (string.length <= 0) {
+                pos = this.addToHeap("00");
+            }
+            //Null terminate the string.
+            this.addToHeap("00");
+            for (var i = string.length - 1; i >= 0; i--) {
+                //Get the hexidecimal representation of each character in the string.
+                //Then add it to the heap.
+                var toHex = string.charCodeAt(i).toString(16);
+                pos = this.addToHeap(toHex);
+            }
+            return pos;
+        };
+        executableImage.prototype.addString = function (string) {
+            return this.addStringHelper(string);
         };
         executableImage.prototype.checkOverflow = function () {
             if (this.stackPointer >= this.heapPointer) {

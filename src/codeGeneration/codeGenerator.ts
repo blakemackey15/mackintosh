@@ -1,4 +1,5 @@
 module mackintosh {
+    //Perform code generation.
     export class codeGenerator {
         public static codeGeneration() : boolean {
             let isGen = false;
@@ -97,6 +98,10 @@ module mackintosh {
 
         public static genStringVarDecl(astNode : CSTNode, id : string) {
             _Functions.log("CODE GENERATOR - String Var Decl Found.");
+            let tempId = _staticTable.getNextTemp();
+            let node = symbolTable.getNode(curScope, id);
+            let scope = node.getMap().get(id);
+            _staticTable.addEntry(new staticTableEntry(tempId, id, _staticTable.getNextOffset(), scope));
             _Functions.log("CODE GENERATOR - Generated code for String Var Decl.");
         }
 
@@ -114,31 +119,53 @@ module mackintosh {
             //TODO : handle assigning a variable to another variable.
             //Check what data type it is to perform the correct assingment.
             if(scope.getType() === "int") {
-                this.genIntAssignmentStatement(id, value)
+                this.genIntAssignmentStatement(astNode, id, value, node)
             }
 
             else if(scope.getType() === "string") {
-                this.genStringAssignmentStatement(id, value);
+                this.genStringAssignmentStatement(astNode, id, value, node);
             }
 
             else if(scope.getType() === "boolean") {
-                this.genBoolAssignmentStatement(id, value);
+                this.genBoolAssignmentStatement(astNode, id, value, node);
             }
         }
 
-        public static genIntAssignmentStatement(id : string, value : string) {
+        public static genIntAssignmentStatement(astNode : CSTNode, id : string, value : string, node : symbolTableNode) {
+            this.genIntExpr(astNode, node.getMap().get(id));
+            let staticTableEntry = _staticTable.getByVarAndScope(id, node);
+            this.sta(staticTableEntry.getTemp(), "XX");
+            _Functions.log("CODE GENERATOR - Generated code for int assignment.");
+        }
+
+        public static genStringAssignmentStatement(astNode : CSTNode, id : string, value : string, node : symbolTableNode) {
+            //Add the string to the heap, load the accumulator, and then store in memory.
+            let pos = _executableImage.addString(value);
+            this.ldaConst(this.leftPad(pos, 2));
+            let staticTableEntry = _staticTable.getByVarAndScope(id, node);
+            this.sta(staticTableEntry.getTemp(), "XX");
+            _Functions.log("CODE GENERATOR - Generated code for string assignment statement.");
+        }
+
+        public static genBoolAssignmentStatement(astNode : CSTNode, id : string, value : string, node : symbolTableNode) {
+            _Functions.log("CODE GENERATOR - Generated code for boolean assignment statement.");
+        }
+
+        public static genIdAssignmentStatement(astNode : CSTNode, id : string, value : string, node : symbolTableNode) {
+            //Find the value in static table, load the accumulator.
+            let valueEntry = _staticTable.getByVarAndScope(value, node);
+            this.ldaMem(valueEntry.getTemp(), "XX");
+            //Find the id in static table, load the accumulator.
+            let staticTableEntry = _staticTable.getByVarAndScope(id, node);
+            this.sta(staticTableEntry.getTemp(), "XX");
+            _Functions.log("CODE GENERATOR - Generated code for ids assignment statement.");
+        }
+
+        public static genIntExpr(astNode : CSTNode, scope : scope) {
 
         }
 
-        public static genStringAssignmentStatement(id : string, value : string) {
-
-        }
-
-        public static genBoolAssignmentStatement(id : string, value : string) {
-
-        }
-
-        public static genIdAssignmentStatement(astNode : CSTNode) {
+        public static genStringExpr(astNode : CSTNode) {
 
         }
 
