@@ -2019,24 +2019,6 @@ var mackintosh;
         symbolTableTree.prototype.getCurNode = function () {
             return this.curNode;
         };
-        symbolTableTree.prototype.getNode = function (curScope, id) {
-            //Traverse symbol table to get the correct entry.
-            function expand(node, depth) {
-                for (var i = 0; i < node.getChildren().length; i++) {
-                    var map = node.getChildren()[i].getMap();
-                    var scope_1 = map.get(id);
-                    var scopePointer_1 = scope_1.getScopePointer();
-                    if (scopePointer_1 = curScope) {
-                        return node.getChildren()[i];
-                    }
-                    else {
-                        expand(node.getChildren()[i], depth + 1);
-                    }
-                }
-            }
-            var node = expand(this.rootNode, 0);
-            return node;
-        };
         symbolTableTree.prototype.addNode = function (map) {
             var node = new symbolTableNode(map);
             if (this.rootNode == null) {
@@ -2076,6 +2058,22 @@ var mackintosh;
             }
             expand(this.rootNode, 0);
             return tableString;
+        };
+        symbolTableTree.prototype.getNode = function (curScope, id) {
+            var foundNode;
+            function expand(node, depth, id, curScope) {
+                var map = node.getMap();
+                map.forEach(function (value, key) {
+                    if (curScope == value.getScopePointer()) {
+                        foundNode = node;
+                    }
+                });
+                for (var i = 0; i < node.getChildren().length; i++) {
+                    expand(node.getChildren()[i], depth + 1, id, curScope);
+                }
+            }
+            expand(this.rootNode, 0, id, curScope);
+            return foundNode;
         };
         return symbolTableTree;
     }());

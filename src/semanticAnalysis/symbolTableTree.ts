@@ -99,34 +99,12 @@ module mackintosh {
             this.rootNode = null;
         }
 
-        public getRoot() {
+        public getRoot() : symbolTableNode {
             return this.rootNode;
         }
 
-        public getCurNode() {
+        public getCurNode() : symbolTableNode {
             return this.curNode;
-        }
-
-        public getNode(curScope : number, id : string) : symbolTableNode {
-            //Traverse symbol table to get the correct entry.
-            function expand(node : symbolTableNode, depth : number) : symbolTableNode {
-                for(let i = 0; i < node.getChildren().length; i++) {
-                    let map = node.getChildren()[i].getMap();
-                    let scope = map.get(id);
-                    let scopePointer = scope.getScopePointer();
-
-                    if(scopePointer = curScope) {
-                        return node.getChildren()[i];
-                    }
-
-                    else {
-                        expand(node.getChildren()[i], depth + 1);
-                    }
-                }
-            }
-
-            let node = expand(this.rootNode, 0);
-            return node;
         }
 
         public addNode(map : Map<any, scope>) {
@@ -160,7 +138,7 @@ module mackintosh {
             }
         }
 
-        public toString() {
+        public toString() : string {
             let tableString = "";
 
             function expand(node : symbolTableNode, depth : number) {
@@ -178,5 +156,25 @@ module mackintosh {
             expand(this.rootNode, 0);
             return tableString;
         }
+
+        public getNode(curScope : number, id : string) : symbolTableNode {
+            let foundNode : symbolTableNode
+            function expand(node : symbolTableNode, depth : number, id : string, curScope : number)  {
+                let map = node.getMap();
+                map.forEach((value : scope, key : any) => {
+                    if(curScope == value.getScopePointer() as number) {
+                        foundNode = node;
+                    }
+                });
+
+                for(let i = 0; i < node.getChildren().length; i++) {
+                    expand(node.getChildren()[i], depth + 1, id, curScope);
+                }
+            }
+
+            expand(this.rootNode, 0, id, curScope);
+            return foundNode;
+        }
+
     }
 }
