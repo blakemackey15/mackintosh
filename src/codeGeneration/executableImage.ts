@@ -85,6 +85,24 @@ module mackintosh {
             }
         }
 
+        //Search the heap for a string.
+        public searchHeap(data : string) : number {
+            let string = "";
+            for(let i = this.IMAGE_SIZE - 1; i >= this.heapPointer; i++) {
+                if(this.executableImage[i] == "00") {
+                    if(string == data) {
+                        return i;
+                    }
+                }
+
+                else {
+                    string = String.fromCharCode(parseInt(this.executableImage[i], 16)) + string;
+                }
+            }
+
+            return null;
+        }
+
         public displayCode() : string {
             let code = "";
             //Traverse through the executable image and print out the generated code.

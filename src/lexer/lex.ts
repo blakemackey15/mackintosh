@@ -70,6 +70,7 @@ module mackintosh {
                         _Functions.log('LEXER - Lex Completed With ' +  errCount + ' Errors and ' + warnCount + ' Warnings');
                         let isParsed = _Parser.parse(tokenStream);
                         let isSemantic : boolean;
+                        let isGen : boolean;
                         if(isParsed) {
                             isSemantic = _SemanticAnalyzer.semanticAnalysis();
                         }
@@ -79,7 +80,7 @@ module mackintosh {
                         }
 
                         if(isSemantic) {
-
+                            isGen = _CodeGenerator.codeGeneration();
                         }
 
                         else {

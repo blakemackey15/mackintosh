@@ -144,6 +144,10 @@ var mackintosh;
                 _jumpTable.backpatch(_executableImage);
                 _staticTable.backpatch(_executableImage);
                 _Functions.log("CODE GENERATOR - Completed Code Generation " + (programCount - 1));
+                _Functions.log("\n");
+                _Functions.log("\n");
+                _Functions.log(_executableImage.displayCode());
+                isGen = true;
             }
             catch (error) {
                 _Functions.log(error);
@@ -428,6 +432,21 @@ var mackintosh;
                 throw new Error("CODE GENERATOR - Stack Heap Collision - Program is too long.");
             }
         };
+        //Search the heap for a string.
+        executableImage.prototype.searchHeap = function (data) {
+            var string = "";
+            for (var i = this.IMAGE_SIZE - 1; i >= this.heapPointer; i++) {
+                if (this.executableImage[i] == "00") {
+                    if (string == data) {
+                        return i;
+                    }
+                }
+                else {
+                    string = String.fromCharCode(parseInt(this.executableImage[i], 16)) + string;
+                }
+            }
+            return null;
+        };
         executableImage.prototype.displayCode = function () {
             var code = "";
             //Traverse through the executable image and print out the generated code.
@@ -689,6 +708,7 @@ var mackintosh;
                         _Functions.log('LEXER - Lex Completed With ' + errCount + ' Errors and ' + warnCount + ' Warnings');
                         var isParsed = _Parser.parse(tokenStream);
                         var isSemantic = void 0;
+                        var isGen = void 0;
                         if (isParsed) {
                             isSemantic = _SemanticAnalyzer.semanticAnalysis();
                         }
@@ -696,6 +716,7 @@ var mackintosh;
                             _Functions.log("PARSER - Semantic analysis skipped due to parse errors.");
                         }
                         if (isSemantic) {
+                            isGen = _CodeGenerator.codeGeneration();
                         }
                         else {
                             _Functions.log("SEMANTIC ANALYSIS - Code generation skipped due to semantic errors.");

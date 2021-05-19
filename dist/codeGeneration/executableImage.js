@@ -67,6 +67,21 @@ var mackintosh;
                 throw new Error("CODE GENERATOR - Stack Heap Collision - Program is too long.");
             }
         }
+        //Search the heap for a string.
+        searchHeap(data) {
+            let string = "";
+            for (let i = this.IMAGE_SIZE - 1; i >= this.heapPointer; i++) {
+                if (this.executableImage[i] == "00") {
+                    if (string == data) {
+                        return i;
+                    }
+                }
+                else {
+                    string = String.fromCharCode(parseInt(this.executableImage[i], 16)) + string;
+                }
+            }
+            return null;
+        }
         displayCode() {
             let code = "";
             //Traverse through the executable image and print out the generated code.

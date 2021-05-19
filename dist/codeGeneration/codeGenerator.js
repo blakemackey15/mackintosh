@@ -20,6 +20,10 @@ var mackintosh;
                 _jumpTable.backpatch(_executableImage);
                 _staticTable.backpatch(_executableImage);
                 _Functions.log("CODE GENERATOR - Completed Code Generation " + (programCount - 1));
+                _Functions.log("\n");
+                _Functions.log("\n");
+                _Functions.log(_executableImage.displayCode());
+                isGen = true;
             }
             catch (error) {
                 _Functions.log(error);
