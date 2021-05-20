@@ -158,9 +158,9 @@ module mackintosh {
             return tableString;
         }
 
-        public getNode(curScope : number, id : string) : symbolTableNode {
+        public getNode(curScope : number) : symbolTableNode {
             let foundNode : symbolTableNode
-            function expand(node : symbolTableNode, depth : number, id : string, curScope : number)  {
+            function expand(node : symbolTableNode, depth : number, curScope : number)  {
                 let map = node.getMap();
                 map.forEach((value : scope, key : any) => {
                     if(curScope == value.getScopePointer() as number) {
@@ -169,11 +169,11 @@ module mackintosh {
                 });
 
                 for(let i = 0; i < node.getChildren().length; i++) {
-                    expand(node.getChildren()[i], depth + 1, id, curScope);
+                    expand(node.getChildren()[i], depth + 1, curScope);
                 }
             }
 
-            expand(this.rootNode, 0, id, curScope);
+            expand(this.rootNode, 0, curScope);
             return foundNode;
         }
 

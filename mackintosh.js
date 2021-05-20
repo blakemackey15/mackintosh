@@ -217,7 +217,7 @@ var mackintosh;
             //Initialze to 0.
             this.ldaConst("00");
             var temp = _staticTable.getNextTemp();
-            var node = symbolTable.getNode(curScope, id);
+            var node = symbolTable.getNode(curScope);
             var scope = node.getMap().get(id);
             //Add the entry to the static table, and then store the temp data.
             var newEntry = new mackintosh.staticTableEntry(temp, id, _staticTable.getNextOffset(), scope);
@@ -228,7 +228,7 @@ var mackintosh;
         codeGenerator.genStringVarDecl = function (astNode, id) {
             _Functions.log("CODE GENERATOR - String Var Decl Found.");
             var tempId = _staticTable.getNextTemp();
-            var node = symbolTable.getNode(curScope, id);
+            var node = symbolTable.getNode(curScope);
             var scope = node.getMap().get(id);
             _staticTable.addEntry(new mackintosh.staticTableEntry(tempId, id, _staticTable.getNextOffset(), scope));
             _Functions.log("CODE GENERATOR - Generated code for String Var Decl.");
@@ -240,10 +240,14 @@ var mackintosh;
         codeGenerator.genAssignmentStatement = function (astNode) {
             var id = astNode.getChildren()[0].getNodeName();
             var value = astNode.getChildren()[1].getNodeName();
-            var node = symbolTable.getNode(curScope, id);
+            var node = symbolTable.getNode(curScope);
             var scope = node.getMap().get(id);
-            //TODO : handle assigning a variable to another variable.
+            var isId = node.lookup(value);
             //Check what data type it is to perform the correct assingment.
+            //isId is not null or undefined so that means the value id exists in the symbol table.
+            if (isId != null || isId != undefined) {
+                this.genIdAssignmentStatement(astNode, id, value, node);
+            }
             if (scope.getType() === "int") {
                 this.genIntAssignmentStatement(astNode, id, value, node);
             }
@@ -281,10 +285,46 @@ var mackintosh;
             _Functions.log("CODE GENERATOR - Generated code for ids assignment statement.");
         };
         codeGenerator.genIntExpr = function (astNode, scope) {
+            //Check how many children there are to determine the length of the expr.
+            if (astNode.getChildren().length > 1) {
+            }
+            //Only one int, load accumulator with it - base case.
+            else if (astNode.getChildren().length == 1) {
+                this.ldaConst(this.leftPad(astNode.getChildren()[0].getNodeName(), 2));
+            }
+            //Use recursion to evaluate an expression.
+            else {
+                this.genIntExpr(astNode.getChildren()[0], scope);
+                this.sta("00", "00");
+                this.ldaConst(this.leftPad(astNode.getChildren()[0].getNodeName(), 2));
+                this.adc("00", "00");
+            }
         };
-        codeGenerator.genStringExpr = function (astNode) {
+        codeGenerator.genStringExpr = function (astNode, scope) {
         };
-        codeGenerator.genBoolExpr = function (astNode) {
+        codeGenerator.genBoolExpr = function (astNode, scope) {
+            if (astNode.getChildren()[0].getNodeName() === "isEqual") {
+                this.genIsEqual(astNode.getChildren()[0], scope);
+            }
+            else if (astNode.getChildren()[0].getNodeName() === "isNotEqual") {
+            }
+            else if (astNode.getChildren()[0].getNodeName() === "true") {
+            }
+            else if (astNode.getChildren()[0].getNodeName() === "false") {
+                this.ldxConst("01");
+                this.ldaConst("00");
+                this.sta("00", "00");
+                this.cpx("00", "00");
+            }
+        };
+        codeGenerator.genIsEqual = function (astNode, scope) {
+            //Get the symbol table node for the current scope.
+            var symbolNode = symbolTable.getNode(curScope);
+            //Get the left side.
+            var leftVal = astNode.getChildren()[0].getNodeName();
+            //Get the right side.
+        };
+        codeGenerator.genIsNotEqual = function () {
         };
         codeGenerator.genWhileStatement = function (astNode) {
         };
@@ -2078,9 +2118,9 @@ var mackintosh;
             expand(this.rootNode, 0);
             return tableString;
         };
-        symbolTableTree.prototype.getNode = function (curScope, id) {
+        symbolTableTree.prototype.getNode = function (curScope) {
             var foundNode;
-            function expand(node, depth, id, curScope) {
+            function expand(node, depth, curScope) {
                 var map = node.getMap();
                 map.forEach(function (value, key) {
                     if (curScope == value.getScopePointer()) {
@@ -2088,10 +2128,10 @@ var mackintosh;
                     }
                 });
                 for (var i = 0; i < node.getChildren().length; i++) {
-                    expand(node.getChildren()[i], depth + 1, id, curScope);
+                    expand(node.getChildren()[i], depth + 1, curScope);
                 }
             }
-            expand(this.rootNode, 0, id, curScope);
+            expand(this.rootNode, 0, curScope);
             return foundNode;
         };
         return symbolTableTree;

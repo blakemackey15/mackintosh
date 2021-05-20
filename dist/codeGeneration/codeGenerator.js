@@ -93,7 +93,7 @@ var mackintosh;
             //Initialze to 0.
             this.ldaConst("00");
             let temp = _staticTable.getNextTemp();
-            let node = symbolTable.getNode(curScope, id);
+            let node = symbolTable.getNode(curScope);
             let scope = node.getMap().get(id);
             //Add the entry to the static table, and then store the temp data.
             let newEntry = new mackintosh.staticTableEntry(temp, id, _staticTable.getNextOffset(), scope);
@@ -104,7 +104,7 @@ var mackintosh;
         static genStringVarDecl(astNode, id) {
             _Functions.log("CODE GENERATOR - String Var Decl Found.");
             let tempId = _staticTable.getNextTemp();
-            let node = symbolTable.getNode(curScope, id);
+            let node = symbolTable.getNode(curScope);
             let scope = node.getMap().get(id);
             _staticTable.addEntry(new mackintosh.staticTableEntry(tempId, id, _staticTable.getNextOffset(), scope));
             _Functions.log("CODE GENERATOR - Generated code for String Var Decl.");
@@ -116,10 +116,14 @@ var mackintosh;
         static genAssignmentStatement(astNode) {
             let id = astNode.getChildren()[0].getNodeName();
             let value = astNode.getChildren()[1].getNodeName();
-            let node = symbolTable.getNode(curScope, id);
+            let node = symbolTable.getNode(curScope);
             let scope = node.getMap().get(id);
-            //TODO : handle assigning a variable to another variable.
+            let isId = node.lookup(value);
             //Check what data type it is to perform the correct assingment.
+            //isId is not null or undefined so that means the value id exists in the symbol table.
+            if (isId != null || isId != undefined) {
+                this.genIdAssignmentStatement(astNode, id, value, node);
+            }
             if (scope.getType() === "int") {
                 this.genIntAssignmentStatement(astNode, id, value, node);
             }
@@ -157,10 +161,46 @@ var mackintosh;
             _Functions.log("CODE GENERATOR - Generated code for ids assignment statement.");
         }
         static genIntExpr(astNode, scope) {
+            //Check how many children there are to determine the length of the expr.
+            if (astNode.getChildren().length > 1) {
+            }
+            //Only one int, load accumulator with it - base case.
+            else if (astNode.getChildren().length == 1) {
+                this.ldaConst(this.leftPad(astNode.getChildren()[0].getNodeName(), 2));
+            }
+            //Use recursion to evaluate an expression.
+            else {
+                this.genIntExpr(astNode.getChildren()[0], scope);
+                this.sta("00", "00");
+                this.ldaConst(this.leftPad(astNode.getChildren()[0].getNodeName(), 2));
+                this.adc("00", "00");
+            }
         }
-        static genStringExpr(astNode) {
+        static genStringExpr(astNode, scope) {
         }
-        static genBoolExpr(astNode) {
+        static genBoolExpr(astNode, scope) {
+            if (astNode.getChildren()[0].getNodeName() === "isEqual") {
+                this.genIsEqual(astNode.getChildren()[0], scope);
+            }
+            else if (astNode.getChildren()[0].getNodeName() === "isNotEqual") {
+            }
+            else if (astNode.getChildren()[0].getNodeName() === "true") {
+            }
+            else if (astNode.getChildren()[0].getNodeName() === "false") {
+                this.ldxConst("01");
+                this.ldaConst("00");
+                this.sta("00", "00");
+                this.cpx("00", "00");
+            }
+        }
+        static genIsEqual(astNode, scope) {
+            //Get the symbol table node for the current scope.
+            let symbolNode = symbolTable.getNode(curScope);
+            //Get the left side.
+            let leftVal = astNode.getChildren()[0].getNodeName();
+            //Get the right side.
+        }
+        static genIsNotEqual() {
         }
         static genWhileStatement(astNode) {
         }

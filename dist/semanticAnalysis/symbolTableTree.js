@@ -122,9 +122,9 @@ var mackintosh;
             expand(this.rootNode, 0);
             return tableString;
         }
-        getNode(curScope, id) {
+        getNode(curScope) {
             let foundNode;
-            function expand(node, depth, id, curScope) {
+            function expand(node, depth, curScope) {
                 let map = node.getMap();
                 map.forEach((value, key) => {
                     if (curScope == value.getScopePointer()) {
@@ -132,10 +132,10 @@ var mackintosh;
                     }
                 });
                 for (let i = 0; i < node.getChildren().length; i++) {
-                    expand(node.getChildren()[i], depth + 1, id, curScope);
+                    expand(node.getChildren()[i], depth + 1, curScope);
                 }
             }
-            expand(this.rootNode, 0, id, curScope);
+            expand(this.rootNode, 0, curScope);
             return foundNode;
         }
     }
