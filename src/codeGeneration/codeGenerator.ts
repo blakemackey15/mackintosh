@@ -234,13 +234,8 @@ module mackintosh {
             let symbolNode = symbolTable.getNode(curScope);
             //Get the left side.
             let leftVal = astNode.getChildren()[0].getNodeName();
-
-
+            let scope1 = symbolNode.getMap().get(leftVal);
             //Get the right side.
-        }
-
-        public static genIsNotEqual() {
-
         }
 
         public static genWhileStatement(astNode : CSTNode) {
@@ -248,7 +243,6 @@ module mackintosh {
         }
 
         public static genIfStatement(astNode : CSTNode) {
-
         }
 
         public static genPrintStatement(astNode : CSTNode) {

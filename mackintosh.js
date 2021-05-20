@@ -322,9 +322,8 @@ var mackintosh;
             var symbolNode = symbolTable.getNode(curScope);
             //Get the left side.
             var leftVal = astNode.getChildren()[0].getNodeName();
+            var scope1 = symbolNode.getMap().get(leftVal);
             //Get the right side.
-        };
-        codeGenerator.genIsNotEqual = function () {
         };
         codeGenerator.genWhileStatement = function (astNode) {
         };
@@ -1540,6 +1539,7 @@ var mackintosh;
         parse.parseIntExpr = function (parseTokens) {
             _Functions.log("PARSER - parseIntExpr()");
             CSTTree.addNode("IntExpr", "branch");
+            ASTTree.addNode("IntExpr", "branch");
             //Check if this is to be an expression or a single digit.
             if (parseTokens[tokenPointer + 1] == "+") {
                 this.parseDigit(parseTokens);
@@ -1550,21 +1550,26 @@ var mackintosh;
                 this.parseDigit(parseTokens);
             }
             CSTTree.climbTree();
+            ASTTree.climbTree();
         };
         //Expected tokens: "charlist"
         parse.parseStringExpr = function (parseTokens) {
             _Functions.log("PARSER - parseStringExpr()");
             CSTTree.addNode("StringExpr", "branch");
+            ASTTree.addNode("StringExpr", "branch");
+            //ASTTree.add
             this.parseQuotes(parseTokens);
             this.parseCharList(parseTokens);
             this.parseQuotes(parseTokens);
             CSTTree.climbTree();
+            ASTTree.climbTree();
         };
         //Expected tokens: ( expr boolop expr)
         //OR: boolval
         parse.parseBoolExpr = function (parseTokens) {
             _Functions.log("PARSER - parseBoolExpr()");
             CSTTree.addNode("BooleanExpr", "branch");
+            ASTTree.addNode("BooleanExpr", "branch");
             //If match parenthesis = true: (expr boolop expr)
             if (parseTokens[tokenPointer] == "(" || parseTokens[tokenPointer] == ")") {
                 this.parseParen(parseTokens);
@@ -1585,6 +1590,7 @@ var mackintosh;
                 this.parseBoolVal(parseTokens);
             }
             CSTTree.climbTree();
+            ASTTree.climbTree();
         };
         //Expected tokens: char
         parse.parseId = function (parseTokens) {
@@ -1829,8 +1835,8 @@ var mackintosh;
             //Add the symbol to the symbol table if it has not been declared already.
             _Functions.log("SEMANTIC ANALYSIS - VarDecl found.");
             //let map = symbolTable.getCurNode().getMap();
-            var scopeType = astNode.getChildren()[0].getNodeName();
-            var symbol = astNode.getChildren()[1].getNodeName();
+            var scopeType = astNode.getChildren()[0].getChildren()[0].getNodeName();
+            var symbol = astNode.getChildren()[0].getChildren()[1].getNodeName();
             //This symbol has not been given a value, so it will be null for now.
             var scope = new mackintosh.scope(null, scopeType, scopePointer);
             var current = symbolTable.getCurNode();
@@ -1838,7 +1844,7 @@ var mackintosh;
         };
         semanticAnalyser.analyzePrintStatement = function (astNode) {
             _Functions.log("SEMANTIC ANALYSIS - Print Statement found.");
-            var symbol = astNode.getChildren()[0].getNodeName();
+            var symbol = astNode.getChildren()[0].getChildren()[0].getNodeName();
             var isSymbol;
             var printVal;
             //Check if the value in print is a symbol or just a literal.
@@ -1856,8 +1862,8 @@ var mackintosh;
             else if (quotes.test(symbol)) {
                 isSymbol = false;
                 var i = 1;
-                while (!quotes.test(astNode.getChildren()[i].getNodeName())) {
-                    printVal += astNode.getChildren()[i].getNodeName();
+                while (!quotes.test(astNode.getChildren()[0].getChildren()[i].getNodeName())) {
+                    printVal += astNode.getChildren()[0].getChildren()[i].getNodeName();
                     i++;
                 }
                 printVal += '"';

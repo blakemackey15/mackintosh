@@ -290,6 +290,7 @@ module mackintosh {
         public static parseIntExpr(parseTokens : Array<string>) {
             _Functions.log("PARSER - parseIntExpr()");
             CSTTree.addNode("IntExpr", "branch");
+            ASTTree.addNode("IntExpr", "branch");
 
             //Check if this is to be an expression or a single digit.
             if(parseTokens[tokenPointer + 1] == "+") {
@@ -303,16 +304,20 @@ module mackintosh {
             }
 
             CSTTree.climbTree();
+            ASTTree.climbTree();
         }
 
         //Expected tokens: "charlist"
         public static parseStringExpr(parseTokens : Array<string>) {
             _Functions.log("PARSER - parseStringExpr()");
             CSTTree.addNode("StringExpr", "branch");
+            ASTTree.addNode("StringExpr", "branch");
+            //ASTTree.add
             this.parseQuotes(parseTokens);
             this.parseCharList(parseTokens);
             this.parseQuotes(parseTokens);
             CSTTree.climbTree();
+            ASTTree.climbTree();
         }
 
         //Expected tokens: ( expr boolop expr)
@@ -320,6 +325,8 @@ module mackintosh {
         public static parseBoolExpr(parseTokens : Array<string>) {
             _Functions.log("PARSER - parseBoolExpr()");
             CSTTree.addNode("BooleanExpr", "branch");
+            ASTTree.addNode("BooleanExpr", "branch");
+            
             //If match parenthesis = true: (expr boolop expr)
             if(parseTokens[tokenPointer] == "(" || parseTokens[tokenPointer] == ")") {
                 this.parseParen(parseTokens);
@@ -343,7 +350,9 @@ module mackintosh {
             else {
                 this.parseBoolVal(parseTokens);
             }
+
             CSTTree.climbTree();
+            ASTTree.climbTree();
         }
 
         //Expected tokens: char

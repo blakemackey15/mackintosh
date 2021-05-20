@@ -198,9 +198,8 @@ var mackintosh;
             let symbolNode = symbolTable.getNode(curScope);
             //Get the left side.
             let leftVal = astNode.getChildren()[0].getNodeName();
+            let scope1 = symbolNode.getMap().get(leftVal);
             //Get the right side.
-        }
-        static genIsNotEqual() {
         }
         static genWhileStatement(astNode) {
         }

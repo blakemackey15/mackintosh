@@ -119,8 +119,8 @@ module mackintosh {
             //Add the symbol to the symbol table if it has not been declared already.
             _Functions.log("SEMANTIC ANALYSIS - VarDecl found.");
             //let map = symbolTable.getCurNode().getMap();
-            let scopeType = astNode.getChildren()[0].getNodeName();
-            let symbol = astNode.getChildren()[1].getNodeName();
+            let scopeType = astNode.getChildren()[0].getChildren()[0].getNodeName();
+            let symbol = astNode.getChildren()[0].getChildren()[1].getNodeName();
             //This symbol has not been given a value, so it will be null for now.
             let scope = new mackintosh.scope(null, scopeType, scopePointer);
             let current = symbolTable.getCurNode();
@@ -129,7 +129,7 @@ module mackintosh {
 
         public static analyzePrintStatement(astNode : CSTNode) {
             _Functions.log("SEMANTIC ANALYSIS - Print Statement found.");
-            let symbol = astNode.getChildren()[0].getNodeName();
+            let symbol = astNode.getChildren()[0].getChildren()[0].getNodeName();
             let isSymbol : boolean;
             let printVal : string;
 
@@ -151,8 +151,8 @@ module mackintosh {
             else if(quotes.test(symbol)) {
                 isSymbol = false;
                 let i = 1;
-                while(!quotes.test(astNode.getChildren()[i].getNodeName())) {
-                    printVal += astNode.getChildren()[i].getNodeName();
+                while(!quotes.test(astNode.getChildren()[0].getChildren()[i].getNodeName())) {
+                    printVal += astNode.getChildren()[0].getChildren()[i].getNodeName();
                     i++;
                 }
                 printVal += '"';
