@@ -102,8 +102,8 @@ var mackintosh;
             //Add the symbol to the symbol table if it has not been declared already.
             _Functions.log("SEMANTIC ANALYSIS - VarDecl found.");
             //let map = symbolTable.getCurNode().getMap();
-            let scopeType = astNode.getChildren()[0].getChildren()[0].getNodeName();
-            let symbol = astNode.getChildren()[0].getChildren()[1].getNodeName();
+            let scopeType = astNode.getChildren()[0].getNodeName();
+            let symbol = astNode.getChildren()[1].getNodeName();
             //This symbol has not been given a value, so it will be null for now.
             let scope = new mackintosh.scope(null, scopeType, scopePointer);
             let current = symbolTable.getCurNode();
@@ -111,7 +111,13 @@ var mackintosh;
         }
         static analyzePrintStatement(astNode) {
             _Functions.log("SEMANTIC ANALYSIS - Print Statement found.");
-            let symbol = astNode.getChildren()[0].getChildren()[0].getNodeName();
+            let symbol;
+            if (astNode.getChildren()[0].getChildren().length == 0) {
+                symbol = astNode.getChildren()[0].getNodeName();
+            }
+            else {
+                symbol = astNode.getChildren()[0].getChildren()[0].getNodeName();
+            }
             let isSymbol;
             let printVal;
             //Check if the value in print is a symbol or just a literal.
@@ -159,7 +165,6 @@ var mackintosh;
         static analyzeIfStatement(astNode) {
             _Functions.log("SEMANTIC ANALYSIS - If Statement found.");
             //Check if both ends of the statement are in the symbol table
-            _Functions.log("SEMANTIC ANALYSIS - While Statement found.");
             let if1 = astNode.getChildren()[0].getChildren()[0].getNodeName();
             let if2 = astNode.getChildren()[0].getChildren()[1].getNodeName();
             if (symbolTable.getCurNode().lookup(if1) != null
@@ -188,7 +193,13 @@ var mackintosh;
         static analyzeAssignmentStatement(astNode) {
             _Functions.log("SEMANTIC ANALYSIS - Assignment Statement found.");
             let symbol = astNode.getChildren()[0].getNodeName();
-            let value = astNode.getChildren()[1].getNodeName();
+            let value;
+            if (astNode.getChildren()[1].getChildren().length == 0) {
+                value = astNode.getChildren()[1].getNodeName();
+            }
+            else {
+                value = astNode.getChildren()[1].getChildren()[0].getNodeName();
+            }
             let curSymbol = symbolTable.getCurNode().lookup(symbol);
             let expectedDataType;
             let dataType;

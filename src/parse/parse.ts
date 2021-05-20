@@ -326,7 +326,7 @@ module mackintosh {
             _Functions.log("PARSER - parseBoolExpr()");
             CSTTree.addNode("BooleanExpr", "branch");
             ASTTree.addNode("BooleanExpr", "branch");
-            
+
             //If match parenthesis = true: (expr boolop expr)
             if(parseTokens[tokenPointer] == "(" || parseTokens[tokenPointer] == ")") {
                 this.parseParen(parseTokens);

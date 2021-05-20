@@ -1835,8 +1835,8 @@ var mackintosh;
             //Add the symbol to the symbol table if it has not been declared already.
             _Functions.log("SEMANTIC ANALYSIS - VarDecl found.");
             //let map = symbolTable.getCurNode().getMap();
-            var scopeType = astNode.getChildren()[0].getChildren()[0].getNodeName();
-            var symbol = astNode.getChildren()[0].getChildren()[1].getNodeName();
+            var scopeType = astNode.getChildren()[0].getNodeName();
+            var symbol = astNode.getChildren()[1].getNodeName();
             //This symbol has not been given a value, so it will be null for now.
             var scope = new mackintosh.scope(null, scopeType, scopePointer);
             var current = symbolTable.getCurNode();
@@ -1844,7 +1844,13 @@ var mackintosh;
         };
         semanticAnalyser.analyzePrintStatement = function (astNode) {
             _Functions.log("SEMANTIC ANALYSIS - Print Statement found.");
-            var symbol = astNode.getChildren()[0].getChildren()[0].getNodeName();
+            var symbol;
+            if (astNode.getChildren()[0].getChildren().length == 0) {
+                symbol = astNode.getChildren()[0].getNodeName();
+            }
+            else {
+                symbol = astNode.getChildren()[0].getChildren()[0].getNodeName();
+            }
             var isSymbol;
             var printVal;
             //Check if the value in print is a symbol or just a literal.
@@ -1892,7 +1898,6 @@ var mackintosh;
         semanticAnalyser.analyzeIfStatement = function (astNode) {
             _Functions.log("SEMANTIC ANALYSIS - If Statement found.");
             //Check if both ends of the statement are in the symbol table
-            _Functions.log("SEMANTIC ANALYSIS - While Statement found.");
             var if1 = astNode.getChildren()[0].getChildren()[0].getNodeName();
             var if2 = astNode.getChildren()[0].getChildren()[1].getNodeName();
             if (symbolTable.getCurNode().lookup(if1) != null
@@ -1921,7 +1926,13 @@ var mackintosh;
         semanticAnalyser.analyzeAssignmentStatement = function (astNode) {
             _Functions.log("SEMANTIC ANALYSIS - Assignment Statement found.");
             var symbol = astNode.getChildren()[0].getNodeName();
-            var value = astNode.getChildren()[1].getNodeName();
+            var value;
+            if (astNode.getChildren()[1].getChildren().length == 0) {
+                value = astNode.getChildren()[1].getNodeName();
+            }
+            else {
+                value = astNode.getChildren()[1].getChildren()[0].getNodeName();
+            }
             var curSymbol = symbolTable.getCurNode().lookup(symbol);
             var expectedDataType;
             var dataType;
