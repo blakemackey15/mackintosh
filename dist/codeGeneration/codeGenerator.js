@@ -241,8 +241,7 @@ var mackintosh;
                 }
             }
             else if (characters.test(rightExprType) && rightExprType.length == 1) {
-                let staticTableEntry = _staticTable.getByVarAndScope(astNode.getChildren()[1]
-                    .getChildren()[0].getNodeName(), scope);
+                let staticTableEntry = _staticTable.getByVarAndScope(astNode.getChildren()[1].getNodeName(), scope);
                 this.cpx(staticTableEntry.getTemp(), "00");
             }
         }
@@ -311,7 +310,7 @@ var mackintosh;
             }
             else if (characters.test(exprType)) {
                 let staticTableEntry = _staticTable.getByVarAndScope(astNode.getChildren()[0]
-                    .getChildren()[0].getNodeName(), scope);
+                    .getNodeName(), scope);
                 this.ldyMem(staticTableEntry.getTemp(), "XX");
                 let map = scope.getMap();
                 let idScope = scope.getMap().get(astNode.getChildren()[0].getNodeName());

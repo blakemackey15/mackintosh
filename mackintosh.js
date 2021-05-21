@@ -365,8 +365,7 @@ var mackintosh;
                 }
             }
             else if (characters.test(rightExprType) && rightExprType.length == 1) {
-                var staticTableEntry_2 = _staticTable.getByVarAndScope(astNode.getChildren()[1]
-                    .getChildren()[0].getNodeName(), scope);
+                var staticTableEntry_2 = _staticTable.getByVarAndScope(astNode.getChildren()[1].getNodeName(), scope);
                 this.cpx(staticTableEntry_2.getTemp(), "00");
             }
         };
@@ -435,7 +434,7 @@ var mackintosh;
             }
             else if (characters.test(exprType)) {
                 var staticTableEntry_3 = _staticTable.getByVarAndScope(astNode.getChildren()[0]
-                    .getChildren()[0].getNodeName(), scope);
+                    .getNodeName(), scope);
                 this.ldyMem(staticTableEntry_3.getTemp(), "XX");
                 var map = scope.getMap();
                 var idScope = scope.getMap().get(astNode.getChildren()[0].getNodeName());
