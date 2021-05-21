@@ -248,7 +248,7 @@ var mackintosh;
         static parseIntExpr(parseTokens) {
             _Functions.log("PARSER - parseIntExpr()");
             CSTTree.addNode("IntExpr", "branch");
-            ASTTree.addNode("IntExpr", "branch");
+            //ASTTree.addNode("IntExpr", "branch");
             //Check if this is to be an expression or a single digit.
             if (parseTokens[tokenPointer + 1] == "+") {
                 this.parseDigit(parseTokens);
@@ -259,26 +259,25 @@ var mackintosh;
                 this.parseDigit(parseTokens);
             }
             CSTTree.climbTree();
-            ASTTree.climbTree();
+            //ASTTree.climbTree();
         }
         //Expected tokens: "charlist"
         static parseStringExpr(parseTokens) {
             _Functions.log("PARSER - parseStringExpr()");
             CSTTree.addNode("StringExpr", "branch");
-            ASTTree.addNode("StringExpr", "branch");
-            //ASTTree.add
+            //ASTTree.addNode("StringExpr", "branch");
             this.parseQuotes(parseTokens);
             this.parseCharList(parseTokens);
             this.parseQuotes(parseTokens);
             CSTTree.climbTree();
-            ASTTree.climbTree();
+            //ASTTree.climbTree();
         }
         //Expected tokens: ( expr boolop expr)
         //OR: boolval
         static parseBoolExpr(parseTokens) {
             _Functions.log("PARSER - parseBoolExpr()");
             CSTTree.addNode("BooleanExpr", "branch");
-            ASTTree.addNode("BooleanExpr", "branch");
+            //ASTTree.addNode("BooleanExpr", "branch");
             //If match parenthesis = true: (expr boolop expr)
             if (parseTokens[tokenPointer] == "(" || parseTokens[tokenPointer] == ")") {
                 this.parseParen(parseTokens);
@@ -299,7 +298,7 @@ var mackintosh;
                 this.parseBoolVal(parseTokens);
             }
             CSTTree.climbTree();
-            ASTTree.climbTree();
+            //ASTTree.climbTree();
         }
         //Expected tokens: char
         static parseId(parseTokens) {

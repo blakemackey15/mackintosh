@@ -1632,7 +1632,7 @@ var mackintosh;
         parse.parseIntExpr = function (parseTokens) {
             _Functions.log("PARSER - parseIntExpr()");
             CSTTree.addNode("IntExpr", "branch");
-            ASTTree.addNode("IntExpr", "branch");
+            //ASTTree.addNode("IntExpr", "branch");
             //Check if this is to be an expression or a single digit.
             if (parseTokens[tokenPointer + 1] == "+") {
                 this.parseDigit(parseTokens);
@@ -1643,26 +1643,25 @@ var mackintosh;
                 this.parseDigit(parseTokens);
             }
             CSTTree.climbTree();
-            ASTTree.climbTree();
+            //ASTTree.climbTree();
         };
         //Expected tokens: "charlist"
         parse.parseStringExpr = function (parseTokens) {
             _Functions.log("PARSER - parseStringExpr()");
             CSTTree.addNode("StringExpr", "branch");
-            ASTTree.addNode("StringExpr", "branch");
-            //ASTTree.add
+            //ASTTree.addNode("StringExpr", "branch");
             this.parseQuotes(parseTokens);
             this.parseCharList(parseTokens);
             this.parseQuotes(parseTokens);
             CSTTree.climbTree();
-            ASTTree.climbTree();
+            //ASTTree.climbTree();
         };
         //Expected tokens: ( expr boolop expr)
         //OR: boolval
         parse.parseBoolExpr = function (parseTokens) {
             _Functions.log("PARSER - parseBoolExpr()");
             CSTTree.addNode("BooleanExpr", "branch");
-            ASTTree.addNode("BooleanExpr", "branch");
+            //ASTTree.addNode("BooleanExpr", "branch");
             //If match parenthesis = true: (expr boolop expr)
             if (parseTokens[tokenPointer] == "(" || parseTokens[tokenPointer] == ")") {
                 this.parseParen(parseTokens);
@@ -1683,7 +1682,7 @@ var mackintosh;
                 this.parseBoolVal(parseTokens);
             }
             CSTTree.climbTree();
-            ASTTree.climbTree();
+            //ASTTree.climbTree();
         };
         //Expected tokens: char
         parse.parseId = function (parseTokens) {
@@ -1888,7 +1887,6 @@ var mackintosh;
                     this.analyzeStatement(astNode.getChildren()[i]);
                 }
             }
-            //this.analyzeStatement(astNode.getChildren()[0]);
             _Functions.log("SEMANTIC ANALYSIS - Closing scope " + scopePointer);
             symbolTable.closeScope();
             var unusedIds = symbolTable.getCurNode().getUnusedIds();
@@ -1902,7 +1900,6 @@ var mackintosh;
                 }
             }
             scopePointer--;
-            //Add check for unused ids.
         };
         semanticAnalyser.analyzeStatement = function (astNode) {
             if (astNode.getNodeName() === "Block") {
@@ -1937,13 +1934,8 @@ var mackintosh;
         };
         semanticAnalyser.analyzePrintStatement = function (astNode) {
             _Functions.log("SEMANTIC ANALYSIS - Print Statement found.");
-            var symbol;
-            if (astNode.getChildren()[0].getChildren().length == 0) {
-                symbol = astNode.getChildren()[0].getNodeName();
-            }
-            else {
-                symbol = astNode.getChildren()[0].getChildren()[0].getNodeName();
-            }
+            var symbol = astNode.getChildren()[0].getNodeName();
+            ;
             var isSymbol;
             var printVal;
             //Check if the value in print is a symbol or just a literal.
@@ -1961,8 +1953,8 @@ var mackintosh;
             else if (quotes.test(symbol)) {
                 isSymbol = false;
                 var i = 1;
-                while (!quotes.test(astNode.getChildren()[0].getChildren()[i].getNodeName())) {
-                    printVal += astNode.getChildren()[0].getChildren()[i].getNodeName();
+                while (!quotes.test(astNode.getChildren()[i].getNodeName())) {
+                    printVal += astNode.getChildren()[i].getNodeName();
                     i++;
                 }
                 printVal += '"';
@@ -2019,13 +2011,7 @@ var mackintosh;
         semanticAnalyser.analyzeAssignmentStatement = function (astNode) {
             _Functions.log("SEMANTIC ANALYSIS - Assignment Statement found.");
             var symbol = astNode.getChildren()[0].getNodeName();
-            var value;
-            if (astNode.getChildren()[1].getChildren().length == 0) {
-                value = astNode.getChildren()[1].getNodeName();
-            }
-            else {
-                value = astNode.getChildren()[1].getChildren()[0].getNodeName();
-            }
+            var value = astNode.getChildren()[1].getNodeName();
             var curSymbol = symbolTable.getCurNode().lookup(symbol);
             var expectedDataType;
             var dataType;

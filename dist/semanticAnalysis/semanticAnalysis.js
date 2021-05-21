@@ -62,7 +62,6 @@ var mackintosh;
                     this.analyzeStatement(astNode.getChildren()[i]);
                 }
             }
-            //this.analyzeStatement(astNode.getChildren()[0]);
             _Functions.log("SEMANTIC ANALYSIS - Closing scope " + scopePointer);
             symbolTable.closeScope();
             let unusedIds = symbolTable.getCurNode().getUnusedIds();
@@ -76,7 +75,6 @@ var mackintosh;
                 }
             }
             scopePointer--;
-            //Add check for unused ids.
         }
         static analyzeStatement(astNode) {
             if (astNode.getNodeName() === "Block") {
@@ -111,13 +109,8 @@ var mackintosh;
         }
         static analyzePrintStatement(astNode) {
             _Functions.log("SEMANTIC ANALYSIS - Print Statement found.");
-            let symbol;
-            if (astNode.getChildren()[0].getChildren().length == 0) {
-                symbol = astNode.getChildren()[0].getNodeName();
-            }
-            else {
-                symbol = astNode.getChildren()[0].getChildren()[0].getNodeName();
-            }
+            let symbol = astNode.getChildren()[0].getNodeName();
+            ;
             let isSymbol;
             let printVal;
             //Check if the value in print is a symbol or just a literal.
@@ -135,8 +128,8 @@ var mackintosh;
             else if (quotes.test(symbol)) {
                 isSymbol = false;
                 let i = 1;
-                while (!quotes.test(astNode.getChildren()[0].getChildren()[i].getNodeName())) {
-                    printVal += astNode.getChildren()[0].getChildren()[i].getNodeName();
+                while (!quotes.test(astNode.getChildren()[i].getNodeName())) {
+                    printVal += astNode.getChildren()[i].getNodeName();
                     i++;
                 }
                 printVal += '"';
@@ -193,13 +186,7 @@ var mackintosh;
         static analyzeAssignmentStatement(astNode) {
             _Functions.log("SEMANTIC ANALYSIS - Assignment Statement found.");
             let symbol = astNode.getChildren()[0].getNodeName();
-            let value;
-            if (astNode.getChildren()[1].getChildren().length == 0) {
-                value = astNode.getChildren()[1].getNodeName();
-            }
-            else {
-                value = astNode.getChildren()[1].getChildren()[0].getNodeName();
-            }
+            let value = astNode.getChildren()[1].getNodeName();
             let curSymbol = symbolTable.getCurNode().lookup(symbol);
             let expectedDataType;
             let dataType;

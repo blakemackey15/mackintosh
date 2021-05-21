@@ -293,7 +293,7 @@ module mackintosh {
         }
 
         public static genIfStatement(astNode : CSTNode, scope : symbolTableNode) {
-
+            
         }
 
         public static genPrintStatement(astNode : CSTNode, scope : symbolTableNode) {
