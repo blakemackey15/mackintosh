@@ -170,35 +170,36 @@ var mackintosh;
         };
         codeGenerator.genBlock = function (astNode) {
             curScope++;
+            var symbolNode = symbolTable.getNode(curScope);
             _Functions.log("CODE GENERATOR - Block found, generating code for scope " + curScope);
             //Use good old recursion to travel through the ast and generate code.
             if (astNode.getChildren().length != 0) {
                 for (var i = 0; i < astNode.getChildren().length; i++) {
-                    this.genStatement(astNode.getChildren()[i]);
+                    this.genStatement(astNode.getChildren()[i], symbolNode);
                 }
             }
             _Functions.log("CODE GENERATOR - Generated code for scope " + curScope);
         };
-        codeGenerator.genStatement = function (astNode) {
+        codeGenerator.genStatement = function (astNode, scope) {
             var nodeVal = astNode.getNodeName();
             //Find out what type of node it is and generate code for it.
             if (nodeVal === "Block") {
                 this.genBlock(astNode);
             }
             if (nodeVal === "VarDecl") {
-                this.genVarDecl(astNode);
+                this.genVarDecl(astNode, scope);
             }
             if (nodeVal === "PrintStatement") {
-                this.genPrintStatement(astNode);
+                this.genPrintStatement(astNode, scope);
             }
             if (nodeVal === "IfStatement") {
-                this.genIfStatement(astNode);
+                this.genIfStatement(astNode, scope);
             }
             if (nodeVal === "WhileStatement") {
-                this.genWhileStatement(astNode);
+                this.genWhileStatement(astNode, scope);
             }
         };
-        codeGenerator.genVarDecl = function (astNode) {
+        codeGenerator.genVarDecl = function (astNode, scope) {
             var type = astNode.getChildren()[0].getNodeName();
             var id = astNode.getChildren()[1].getNodeName();
             //Check what type of node this is to generate the correct code.
@@ -259,7 +260,7 @@ var mackintosh;
             }
         };
         codeGenerator.genIntAssignmentStatement = function (astNode, id, value, node) {
-            this.genIntExpr(astNode, node.getMap().get(id));
+            this.genIntExpr(astNode, node);
             var staticTableEntry = _staticTable.getByVarAndScope(id, node);
             this.sta(staticTableEntry.getTemp(), "XX");
             _Functions.log("CODE GENERATOR - Generated code for int assignment.");
@@ -318,18 +319,85 @@ var mackintosh;
             }
         };
         codeGenerator.genIsEqual = function (astNode, scope) {
-            //Get the symbol table node for the current scope.
-            var symbolNode = symbolTable.getNode(curScope);
             //Get the left side.
-            var leftVal = astNode.getChildren()[0].getNodeName();
-            var scope1 = symbolNode.getMap().get(leftVal);
-            //Get the right side.
+            var leftExprType = astNode.getChildren()[0].getNodeName();
+            //Check what type of expr the left side is.
+            if (leftExprType === "IntExpr") {
+                this.ldxConst(this.leftPad(astNode.getChildren()[0].getChildren()[0].getNodeName(), 2));
+            }
+            else if (leftExprType === "StringExpr") {
+                //TODO: Figure out string comparison.
+            }
+            else if (leftExprType === "BooleanExpr") {
+                //Check if true or false.
+                if (astNode.getChildren()[0].getChildren()[0].getNodeName() === "true") {
+                    this.ldxConst("01");
+                }
+                else {
+                    this.ldxConst("00");
+                }
+            }
+            else if (leftExprType === "Id") {
+            }
+            //Get the right side and make the comparison.
+            var rightExprType = astNode.getChildren()[1].getNodeName();
+            //Check what type of expr the right side is.
+            if (rightExprType === "IntExpr") {
+                this.ldaConst(this.leftPad(astNode.getChildren()[1].getChildren()[0].getNodeName(), 2));
+                this.sta("00", "00");
+                this.cpx("00", "00");
+            }
+            else if (rightExprType === "StringExpr") {
+            }
+            else if (rightExprType === "BooleanExpr") {
+            }
+            else if (rightExprType === "Id") {
+            }
         };
-        codeGenerator.genWhileStatement = function (astNode) {
+        codeGenerator.genWhileStatement = function (astNode, scope) {
         };
-        codeGenerator.genIfStatement = function (astNode) {
+        codeGenerator.genIfStatement = function (astNode, scope) {
         };
-        codeGenerator.genPrintStatement = function (astNode) {
+        codeGenerator.genPrintStatement = function (astNode, scope) {
+            var exprType = astNode.getChildren()[0].getNodeName();
+            //Check what we are trying to print.
+            if (exprType === "StringExpr") {
+                var pos = _executableImage.addString(astNode.getChildren()[0].getChildren()[0].getNodeName());
+                this.ldaConst(pos);
+                this.sta("00", "00");
+                //Make print system call.
+                this.ldxConst("02");
+                this.ldyMem("00", "00");
+                this.sys();
+            }
+            else if (exprType === "IntExpr") {
+                //Generate the code for the int expr.
+                this.genIntExpr(astNode, scope);
+                this.sta("00", "00");
+                //Make print system call.
+                this.ldxConst("01");
+                this.ldyMem("00", "00");
+                this.sys();
+            }
+            else if (exprType === "BooleanExpr") {
+                var bool = astNode.getChildren()[0].getChildren()[0].getNodeName();
+                var location_1;
+                var boolInHeap = _executableImage.searchHeap(bool);
+                //Check if its in the heap.
+                if (boolInHeap == null) {
+                    location_1 = _executableImage.addString(bool);
+                }
+                else {
+                    location_1 = boolInHeap;
+                }
+                this.ldaConst(location_1.toString(16));
+                this.sta("00", "00");
+                this.ldxConst("02");
+                this.ldyMem("00", "00");
+                this.sys();
+            }
+            else if (exprType === "Id") {
+            }
         };
         //Create methods for the 6502a op codes.
         //Load the accumulator with a constant.
@@ -401,7 +469,7 @@ var mackintosh;
             _executableImage.addToStack(data1);
             _executableImage.addToStack(data2);
         };
-        codeGenerator.system = function () {
+        codeGenerator.sys = function () {
             _executableImage.addToStack("FF");
         };
         codeGenerator.leftPad = function (data, length) {
