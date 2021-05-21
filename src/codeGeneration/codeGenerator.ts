@@ -188,7 +188,12 @@ module mackintosh {
         public static genIntExpr(astNode : CSTNode, scope : symbolTableNode) {
             //Check how many children there are to determine the length of the expr.
             if(astNode.getChildren().length > 1) {
-
+                let i = 0;
+                //Recurse through the children.
+                while(i != astNode.getChildren().length) {
+                    this.genIntExpr(astNode.getChildren()[i], scope);
+                    i++;
+                }
             }
 
             //Only one int, load accumulator with it - base case.
@@ -293,7 +298,7 @@ module mackintosh {
         }
 
         public static genIfStatement(astNode : CSTNode, scope : symbolTableNode) {
-            
+
         }
 
         public static genPrintStatement(astNode : CSTNode, scope : symbolTableNode) {
