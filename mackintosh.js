@@ -189,6 +189,9 @@ var mackintosh;
             if (nodeVal === "VarDecl") {
                 this.genVarDecl(astNode, scope);
             }
+            if (nodeVal === "AssignmentStatement") {
+                this.genAssignmentStatement(astNode);
+            }
             if (nodeVal === "PrintStatement") {
                 this.genPrintStatement(astNode, scope);
             }
@@ -260,12 +263,15 @@ var mackintosh;
             }
         };
         codeGenerator.genIntAssignmentStatement = function (astNode, id, value, node) {
+            _Functions.log("CODE GENERATOR - Int assignment statement found.");
+            //Pass the value to be evaluated.
             this.genIntExpr(astNode, node);
             var staticTableEntry = _staticTable.getByVarAndScope(id, node);
             this.sta(staticTableEntry.getTemp(), "XX");
             _Functions.log("CODE GENERATOR - Generated code for int assignment.");
         };
         codeGenerator.genStringAssignmentStatement = function (astNode, id, value, node) {
+            _Functions.log("CODE GENERATOR - String assignment statement found.");
             //Add the string to the heap, load the accumulator, and then store in memory.
             var pos = _executableImage.addString(value);
             this.ldaConst(this.leftPad(pos, 2));
@@ -274,9 +280,11 @@ var mackintosh;
             _Functions.log("CODE GENERATOR - Generated code for string assignment statement.");
         };
         codeGenerator.genBoolAssignmentStatement = function (astNode, id, value, node) {
+            _Functions.log("CODE GENERATOR - Boolean assignment statement found.");
             _Functions.log("CODE GENERATOR - Generated code for boolean assignment statement.");
         };
         codeGenerator.genIdAssignmentStatement = function (astNode, id, value, node) {
+            _Functions.log("CODE GENERATOR - Id assignment statement found.");
             //Find the value in static table, load the accumulator.
             var valueEntry = _staticTable.getByVarAndScope(value, node);
             this.ldaMem(valueEntry.getTemp(), "XX");
@@ -286,22 +294,13 @@ var mackintosh;
             _Functions.log("CODE GENERATOR - Generated code for ids assignment statement.");
         };
         codeGenerator.genIntExpr = function (astNode, scope) {
-            //Check how many children there are to determine the length of the expr.
-            if (astNode.getChildren().length > 1) {
-                var i = 0;
-                //Recurse through the children.
-                while (i != astNode.getChildren().length) {
-                    this.genIntExpr(astNode.getChildren()[i], scope);
-                    i++;
-                }
-            }
             //Only one int, load accumulator with it - base case.
-            else if (astNode.getChildren().length == 1) {
-                this.ldaConst(this.leftPad(astNode.getChildren()[0].getNodeName(), 2));
+            if (astNode.getChildren().length == 2) {
+                this.ldaConst(this.leftPad(astNode.getChildren()[1].getNodeName(), 2));
             }
             //Use recursion to evaluate an expression.
             else {
-                this.genIntExpr(astNode.getChildren()[0], scope);
+                this.genIntExpr(astNode.getChildren()[1], scope);
                 this.sta("00", "00");
                 this.ldaConst(this.leftPad(astNode.getChildren()[0].getNodeName(), 2));
                 this.adc("00", "00");
@@ -374,12 +373,33 @@ var mackintosh;
         codeGenerator.genWhileStatement = function (astNode, scope) {
         };
         codeGenerator.genIfStatement = function (astNode, scope) {
+            _Functions.log("CODE GENERATOR - Found if statement.");
+            //Don't generate code on false equality.
+            if (astNode.getChildren()[0].getChildren()[0].getNodeName() == "false") {
+                return;
+            }
+            //Set up the jump table so the branch can be performed.
+            //DONT FORGET TO ADD ONE SO THE JUMP DOESN'T HAVE AN OFF BY ONE ERROR.
+            var jumpId = _jumpTable.getNextTemp();
+            var newJumpTableEntry = _jumpTable.addEntry(new mackintosh.jumpTableEntry(jumpId, 0));
+            this.genBoolExpr(astNode, scope);
+            var jumpFrom = _executableImage.getStackPointer();
+            this.bne(newJumpTableEntry.getTemp());
+            //Use recursion to generate the code for the following block.
+            for (var i = 1; i < astNode.getChildren()[0].getChildren().length; i++) {
+                this.genStatement(astNode.getChildren()[0].getChildren()[i], scope);
+            }
+            //When recursion ends calculate the jump distance.
+            //Once again, you better not forget to add 1!
+            newJumpTableEntry.setDistance(_executableImage.getStackPointer() - jumpFrom + 1);
+            _Functions.log("CODE GENERATOR - Generated Code for if statement.");
         };
         codeGenerator.genPrintStatement = function (astNode, scope) {
+            _Functions.log("CODE GENERATOR - Print statement found.");
             var exprType = astNode.getChildren()[0].getNodeName();
             //Check what we are trying to print.
-            if (exprType === "StringExpr") {
-                var pos = _executableImage.addString(astNode.getChildren()[0].getChildren()[0].getNodeName());
+            if (quotes.test(exprType)) {
+                var pos = _executableImage.addString(astNode.getChildren()[0].getNodeName());
                 this.ldaConst(pos);
                 this.sta("00", "00");
                 //Make print system call.
@@ -387,7 +407,7 @@ var mackintosh;
                 this.ldyMem("00", "00");
                 this.sys();
             }
-            else if (exprType === "IntExpr") {
+            else if (digits.test(exprType)) {
                 //Generate the code for the int expr.
                 this.genIntExpr(astNode, scope);
                 this.sta("00", "00");
@@ -396,8 +416,8 @@ var mackintosh;
                 this.ldyMem("00", "00");
                 this.sys();
             }
-            else if (exprType === "BooleanExpr") {
-                var bool = astNode.getChildren()[0].getChildren()[0].getNodeName();
+            else if (exprType == "true" || exprType == "false") {
+                var bool = astNode.getChildren()[0].getNodeName();
                 var location_1;
                 var boolInHeap = _executableImage.searchHeap(bool);
                 //Check if its in the heap.
@@ -413,12 +433,12 @@ var mackintosh;
                 this.ldyMem("00", "00");
                 this.sys();
             }
-            else if (exprType === "Id") {
+            else if (characters.test(exprType)) {
                 var staticTableEntry_3 = _staticTable.getByVarAndScope(astNode.getChildren()[0]
                     .getChildren()[0].getNodeName(), scope);
                 this.ldyMem(staticTableEntry_3.getTemp(), "XX");
                 var map = scope.getMap();
-                var idScope = scope.getMap().get(astNode.getChildren()[0].getChildren()[0].getNodeName());
+                var idScope = scope.getMap().get(astNode.getChildren()[0].getNodeName());
                 if (idScope != null || idScope != undefined) {
                     if (idScope.getType() == "int") {
                         this.ldxConst("01");
@@ -429,6 +449,7 @@ var mackintosh;
                     this.sys();
                 }
             }
+            _Functions.log("CODE GENERATOR - Generated code for print statement.");
         };
         //Create methods for the 6502a op codes.
         //Load the accumulator with a constant.
@@ -489,10 +510,9 @@ var mackintosh;
             _executableImage.addToStack(data2);
         };
         //Branch not equal.
-        codeGenerator.bne = function (data1, data2) {
+        codeGenerator.bne = function (data1) {
             _executableImage.addToStack("D0");
             _executableImage.addToStack(data1);
-            _executableImage.addToStack(data2);
         };
         //Increment.
         codeGenerator.inc = function (data1, data2) {
@@ -506,7 +526,7 @@ var mackintosh;
         codeGenerator.leftPad = function (data, length) {
             var temp = "" + data;
             while (temp.length < length) {
-                temp = '0' + temp;
+                temp = "0" + temp;
             }
             return temp;
         };
@@ -1596,7 +1616,7 @@ var mackintosh;
         parse.parseIfStatement = function (parseTokens) {
             _Functions.log("PARSER - parseIfStatement()");
             CSTTree.addNode("IfStatement", "branch");
-            ASTTree.addNode("WhileStatement", "branch");
+            ASTTree.addNode("IfStatement", "branch");
             this.parseIf(parseTokens);
             this.parseBoolExpr(parseTokens);
             this.parseBlock(parseTokens);
@@ -1834,7 +1854,6 @@ var mackintosh;
         function semanticAnalyser() {
         }
         semanticAnalyser.semanticAnalysis = function () {
-            debugger;
             scopePointer = 0;
             symbolTable = new mackintosh.symbolTableTree();
             semErr = 0;

@@ -206,7 +206,7 @@ var mackintosh;
         static parseIfStatement(parseTokens) {
             _Functions.log("PARSER - parseIfStatement()");
             CSTTree.addNode("IfStatement", "branch");
-            ASTTree.addNode("WhileStatement", "branch");
+            ASTTree.addNode("IfStatement", "branch");
             this.parseIf(parseTokens);
             this.parseBoolExpr(parseTokens);
             this.parseBlock(parseTokens);
