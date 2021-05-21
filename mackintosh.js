@@ -326,13 +326,13 @@ var mackintosh;
             //Get the left side.
             var leftExprType = astNode.getChildren()[0].getNodeName();
             //Check what type of expr the left side is.
-            if (leftExprType === "IntExpr") {
+            if (digits.test(leftExprType)) {
                 this.ldxConst(this.leftPad(astNode.getChildren()[0].getChildren()[0].getNodeName(), 2));
             }
-            else if (leftExprType === "StringExpr") {
+            else if (quotes.test(leftExprType)) {
                 //TODO: Figure out string comparison.
             }
-            else if (leftExprType === "BooleanExpr") {
+            else if (leftExprType === "true" || leftExprType === "false") {
                 //Check if true or false - 01 true and 00 false.
                 if (astNode.getChildren()[0].getChildren()[0].getNodeName() === "true") {
                     this.ldxConst("01");
@@ -349,14 +349,14 @@ var mackintosh;
             //Get the right side and make the comparison.
             var rightExprType = astNode.getChildren()[1].getNodeName();
             //Check what type of expr the right side is.
-            if (rightExprType === "IntExpr") {
+            if (digits.test(rightExprType)) {
                 this.ldaConst(this.leftPad(astNode.getChildren()[1].getChildren()[0].getNodeName(), 2));
                 this.sta("00", "00");
                 this.cpx("00", "00");
             }
-            else if (rightExprType === "StringExpr") {
+            else if (quotes.test(rightExprType)) {
             }
-            else if (rightExprType === "BooleanExpr") {
+            else if (rightExprType === "true" || rightExprType === "false") {
                 //Check if true or false - 01 true and 00 false.
                 if (astNode.getChildren()[1].getChildren()[0].getNodeName() === "true") {
                     this.ldxConst("01");
