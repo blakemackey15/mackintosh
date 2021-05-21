@@ -205,11 +205,7 @@ module mackintosh {
             }
         }
 
-        public static genStringExpr(astNode : CSTNode, scope : scope) {
-
-        }
-
-        public static genBoolExpr(astNode : CSTNode, scope : scope) {
+        public static genBoolExpr(astNode : CSTNode, scope : symbolTableNode) {
             if(astNode.getChildren()[0].getNodeName() === "isEqual") {
                 this.genIsEqual(astNode.getChildren()[0], scope);
             }
@@ -230,7 +226,7 @@ module mackintosh {
             }
         }
 
-        public static genIsEqual(astNode : CSTNode, scope : scope) {
+        public static genIsEqual(astNode : CSTNode, scope : symbolTableNode) {
             //Get the left side.
             let leftExprType = astNode.getChildren()[0].getNodeName();
 
@@ -244,7 +240,7 @@ module mackintosh {
             }
 
             else if(leftExprType === "BooleanExpr") {
-                //Check if true or false.
+                //Check if true or false - 01 true and 00 false.
                 if(astNode.getChildren()[0].getChildren()[0].getNodeName() === "true") {
                     this.ldxConst("01");
                 }
@@ -254,8 +250,10 @@ module mackintosh {
                 }
             }
 
-            else if(leftExprType === "Id") {
-
+            //Handle id assignment.
+            else if(characters.test(leftExprType) && leftExprType.length == 1) {
+                let staticTableEntry = _staticTable.getByVarAndScope(leftExprType, scope);
+                this.ldxMem(staticTableEntry.getTemp(), "XX");
             }
 
             //Get the right side and make the comparison.
@@ -273,11 +271,20 @@ module mackintosh {
             }
 
             else if(rightExprType === "BooleanExpr") {
-
+                //Check if true or false - 01 true and 00 false.
+                if(astNode.getChildren()[1].getChildren()[0].getNodeName() === "true") {
+                    this.ldxConst("01");
+                }
+                
+                else {
+                    this.ldxConst("00");
+                }
             }
 
-            else if(rightExprType === "Id") {
-
+            else if(characters.test(rightExprType) && rightExprType.length == 1) {
+                let staticTableEntry = _staticTable.getByVarAndScope(astNode.getChildren()[1]
+                .getChildren()[0].getNodeName(), scope);
+                this.cpx(staticTableEntry.getTemp(), "00");
             }
         }
 
@@ -286,6 +293,7 @@ module mackintosh {
         }
 
         public static genIfStatement(astNode : CSTNode, scope : symbolTableNode) {
+
         }
 
         public static genPrintStatement(astNode : CSTNode, scope : symbolTableNode) {
@@ -334,7 +342,22 @@ module mackintosh {
             }
 
             else if(exprType === "Id") {
+                let staticTableEntry = _staticTable.getByVarAndScope(astNode.getChildren()[0]
+                .getChildren()[0].getNodeName(), scope);
+                this.ldyMem(staticTableEntry.getTemp(), "XX");
+                let map = scope.getMap();
+                let idScope = scope.getMap().get(astNode.getChildren()[0].getChildren()[0].getNodeName());
+                if(idScope != null || idScope != undefined) {
+                    if(idScope.getType() == "int") {
+                        this.ldxConst("01");
+                    }
 
+                    else {
+                        this.ldxConst("02");
+                    }
+
+                    this.sys();
+                }
             }
         }
 

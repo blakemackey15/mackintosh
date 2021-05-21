@@ -301,8 +301,6 @@ var mackintosh;
                 this.adc("00", "00");
             }
         };
-        codeGenerator.genStringExpr = function (astNode, scope) {
-        };
         codeGenerator.genBoolExpr = function (astNode, scope) {
             if (astNode.getChildren()[0].getNodeName() === "isEqual") {
                 this.genIsEqual(astNode.getChildren()[0], scope);
@@ -329,7 +327,7 @@ var mackintosh;
                 //TODO: Figure out string comparison.
             }
             else if (leftExprType === "BooleanExpr") {
-                //Check if true or false.
+                //Check if true or false - 01 true and 00 false.
                 if (astNode.getChildren()[0].getChildren()[0].getNodeName() === "true") {
                     this.ldxConst("01");
                 }
@@ -337,7 +335,10 @@ var mackintosh;
                     this.ldxConst("00");
                 }
             }
-            else if (leftExprType === "Id") {
+            //Handle id assignment.
+            else if (characters.test(leftExprType) && leftExprType.length == 1) {
+                var staticTableEntry_1 = _staticTable.getByVarAndScope(leftExprType, scope);
+                this.ldxMem(staticTableEntry_1.getTemp(), "XX");
             }
             //Get the right side and make the comparison.
             var rightExprType = astNode.getChildren()[1].getNodeName();
@@ -350,8 +351,18 @@ var mackintosh;
             else if (rightExprType === "StringExpr") {
             }
             else if (rightExprType === "BooleanExpr") {
+                //Check if true or false - 01 true and 00 false.
+                if (astNode.getChildren()[1].getChildren()[0].getNodeName() === "true") {
+                    this.ldxConst("01");
+                }
+                else {
+                    this.ldxConst("00");
+                }
             }
-            else if (rightExprType === "Id") {
+            else if (characters.test(rightExprType) && rightExprType.length == 1) {
+                var staticTableEntry_2 = _staticTable.getByVarAndScope(astNode.getChildren()[1]
+                    .getChildren()[0].getNodeName(), scope);
+                this.cpx(staticTableEntry_2.getTemp(), "00");
             }
         };
         codeGenerator.genWhileStatement = function (astNode, scope) {
@@ -397,6 +408,20 @@ var mackintosh;
                 this.sys();
             }
             else if (exprType === "Id") {
+                var staticTableEntry_3 = _staticTable.getByVarAndScope(astNode.getChildren()[0]
+                    .getChildren()[0].getNodeName(), scope);
+                this.ldyMem(staticTableEntry_3.getTemp(), "XX");
+                var map = scope.getMap();
+                var idScope = scope.getMap().get(astNode.getChildren()[0].getChildren()[0].getNodeName());
+                if (idScope != null || idScope != undefined) {
+                    if (idScope.getType() == "int") {
+                        this.ldxConst("01");
+                    }
+                    else {
+                        this.ldxConst("02");
+                    }
+                    this.sys();
+                }
             }
         };
         //Create methods for the 6502a op codes.
