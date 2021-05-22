@@ -86,7 +86,7 @@ var _staticTable = new mackintosh.staticTable;
 var _jumpTable = new mackintosh.jumpTable;
 var curScope = 0;
 var tempIdMatch = /^(T[0-9])/;
-var jumpIdMatch = /^(T[0-9])/;
+var jumpIdMatch = /^(J[0-9])/;
 /*
 References: Here is a list of the resources I referenced while developing this project.
 https://regex101.com/ - Useful tool I used to test my regular expressions for my tokens.

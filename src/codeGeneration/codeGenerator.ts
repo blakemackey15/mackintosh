@@ -54,6 +54,7 @@ module mackintosh {
             if(symbolNode == undefined || symbolNode == null) {
                 symbolNode = symbolTable.getNode(curScope - 1);
             }
+            
             _Functions.log("CODE GENERATOR - Block found, generating code for scope " + curScope);
             //Use good old recursion to travel through the ast and generate code.
             if(astNode.getChildren().length != 0) {
