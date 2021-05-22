@@ -333,9 +333,7 @@ module mackintosh {
             this.bne(newJumpTableEntry.getTemp());
 
             //Use recursion to generate the code for the following block.
-            for(let i = 1; i < astNode.getChildren()[0].getChildren().length; i++) {
-                this.genStatement(astNode.getChildren()[0].getChildren()[i], scope);
-            }
+            this.genStatement(astNode.getChildren()[0].getChildren()[2], scope);
 
             //When recursion ends calculate the jump distance.
             //Once again, you better not forget to add 1!
@@ -393,8 +391,7 @@ module mackintosh {
                 let staticTableEntry = _staticTable.getByVarAndScope(astNode.getChildren()[0]
                 .getNodeName(), scope);
                 this.ldyMem(staticTableEntry.getTemp(), "XX");
-                let map = scope.getMap();
-                let idScope = scope.getMap().get(astNode.getChildren()[0].getNodeName());
+                let idScope = scope.lookup(astNode.getChildren()[0].getNodeName());
                 if(idScope != null || idScope != undefined) {
                     if(idScope.getType() == "int") {
                         this.ldxConst("01");

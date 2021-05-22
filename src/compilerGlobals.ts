@@ -72,4 +72,5 @@ var _executableImage = new mackintosh.executableImage;
 var _staticTable = new mackintosh.staticTable;
 var _jumpTable = new mackintosh.jumpTable;
 var curScope : number = 0;
-var tempIdMatch = new RegExp('/^(J[0-9])/');
+var tempIdMatch = /^(T[0-9])/;
+var jumpIdMatch = /^(T[0-9])/;

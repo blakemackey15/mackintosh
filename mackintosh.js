@@ -85,7 +85,8 @@ var _executableImage = new mackintosh.executableImage;
 var _staticTable = new mackintosh.staticTable;
 var _jumpTable = new mackintosh.jumpTable;
 var curScope = 0;
-var tempIdMatch = new RegExp('/^(J[0-9])/');
+var tempIdMatch = /^(T[0-9])/;
+var jumpIdMatch = /^(T[0-9])/;
 /*
 References: Here is a list of the resources I referenced while developing this project.
 https://regex101.com/ - Useful tool I used to test my regular expressions for my tokens.
@@ -405,9 +406,7 @@ var mackintosh;
             var jumpFrom = _executableImage.getStackPointer();
             this.bne(newJumpTableEntry.getTemp());
             //Use recursion to generate the code for the following block.
-            for (var i = 1; i < astNode.getChildren()[0].getChildren().length; i++) {
-                this.genStatement(astNode.getChildren()[0].getChildren()[i], scope);
-            }
+            this.genStatement(astNode.getChildren()[0].getChildren()[2], scope);
             //When recursion ends calculate the jump distance.
             //Once again, you better not forget to add 1!
             newJumpTableEntry.setDistance(_executableImage.getStackPointer() - jumpFrom + 1);
@@ -456,8 +455,7 @@ var mackintosh;
                 var staticTableEntry_3 = _staticTable.getByVarAndScope(astNode.getChildren()[0]
                     .getNodeName(), scope);
                 this.ldyMem(staticTableEntry_3.getTemp(), "XX");
-                var map = scope.getMap();
-                var idScope = scope.getMap().get(astNode.getChildren()[0].getNodeName());
+                var idScope = scope.lookup(astNode.getChildren()[0].getNodeName());
                 if (idScope != null || idScope != undefined) {
                     if (idScope.getType() == "int") {
                         this.ldxConst("01");
@@ -570,6 +568,9 @@ var mackintosh;
                 }
             }
         };
+        executableImage.prototype.getEntries = function () {
+            return this.executableImage;
+        };
         executableImage.prototype.getIMAGE_SIZE = function () {
             return this.IMAGE_SIZE;
         };
@@ -677,7 +678,7 @@ var mackintosh;
             return newEntry;
         };
         jumpTable.prototype.getNextTemp = function () {
-            return "T" + this.curTemp++;
+            return "J" + this.curTemp++;
         };
         //Get a value by it's temp id.
         jumpTable.prototype.getByTemp = function (tempId) {
@@ -692,9 +693,11 @@ var mackintosh;
         //Go back and replace temps with the correct code.
         jumpTable.prototype.backpatch = function (executableImage) {
             for (var i = 0; i < this.tableEntries.length; i++) {
-                if (tempIdMatch.test(executableImage[i])) {
-                    var entry = this.getByTemp(executableImage[i]);
-                    executableImage.addCode(mackintosh.codeGenerator.leftPad(entry.getDistance().toString(16), 2), i);
+                var entry = executableImage.getEntries()[i];
+                var matched = entry.match(tempIdMatch);
+                if (matched) {
+                    var foundEntry = this.getByTemp(matched[1]);
+                    executableImage.addCode(mackintosh.codeGenerator.leftPad(foundEntry.getDistance().toString(16), 2), i);
                 }
             }
         };
@@ -756,17 +759,20 @@ var mackintosh;
             return this.curOffset++;
         };
         //Search for the entry by scope and var.
-        staticTable.prototype.getByVarAndScope = function (varId, curScope) {
+        staticTable.prototype.getByVarAndScope = function (varId, searchScope) {
+            /* while (searchScope == undefined || searchScope == null) {
+                searchScope = symbolTable.getNode(curScope - 1);
+            } */
             for (var i = this.tableEntries.length - 1; i >= 0; i--) {
                 //Check if both the scope and var are in the table.
                 if (this.tableEntries[i].getId() == varId) {
                     var expectedScope = this.tableEntries[i].getCurScope().getScopePointer();
-                    var actualScope = curScope.getMap().get(varId).getScopePointer();
+                    var actualScope = searchScope.lookup(varId).getScopePointer();
                     if (expectedScope == actualScope) {
                         return this.tableEntries[i];
                     }
                     else {
-                        var parent_1 = curScope.getParentScope();
+                        var parent_1 = searchScope.getParentScope();
                         while (parent_1 != null) {
                             //Reassign the expected scope pointer to the parent's scope pointer.
                             expectedScope = parent_1.getMap().get(varId).getScopePointer();
@@ -795,10 +801,13 @@ var mackintosh;
         };
         staticTable.prototype.backpatch = function (executableImage) {
             //Go back and replace all of the temp data points with the correct data.
-            for (var i = 0; i < this.tableEntries.length; i++) {
-                if (tempIdMatch.test(executableImage[i])) {
-                    var entry = this.getByTemp(executableImage[i]);
-                    executableImage.addCode(mackintosh.codeGenerator.leftPad((entry.getOffset() + executableImage.getStackPointer() + 1).toString(16), 2), i);
+            for (var i = 0; i < executableImage.getIMAGE_SIZE(); i++) {
+                var entry = executableImage.getEntries()[i];
+                //Creates an array of matched ids.
+                var matched = entry.match(tempIdMatch);
+                if (matched) {
+                    var foundEntry = this.getByTemp(matched[1]);
+                    executableImage.addCode(mackintosh.codeGenerator.leftPad((foundEntry.getOffset() + executableImage.getStackPointer() + 1).toString(16), 2), i);
                     executableImage.addCode('00', i + 1);
                 }
             }

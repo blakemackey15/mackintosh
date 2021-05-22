@@ -19,7 +19,7 @@ module mackintosh {
         }
 
         public getNextTemp() : string {
-            return "T" + this.curTemp++;
+            return "J" + this.curTemp++;
         }
 
         //Get a value by it's temp id.
@@ -37,9 +37,11 @@ module mackintosh {
         //Go back and replace temps with the correct code.
         public backpatch(executableImage : executableImage) {
             for(let i = 0; i < this.tableEntries.length; i++) {
-                if(tempIdMatch.test(executableImage[i])) {
-                    let entry = this.getByTemp(executableImage[i]);
-                    executableImage.addCode(codeGenerator.leftPad(entry.getDistance().toString(16), 2), i);
+                let entry = executableImage.getEntries()[i];
+                let matched = entry.match(tempIdMatch);
+                if(matched) {
+                    let foundEntry = this.getByTemp(matched[1]);
+                    executableImage.addCode(codeGenerator.leftPad(foundEntry.getDistance().toString(16), 2), i);
                 }
             }
         }

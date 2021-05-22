@@ -31,17 +31,20 @@ var mackintosh;
             return this.curOffset++;
         }
         //Search for the entry by scope and var.
-        getByVarAndScope(varId, curScope) {
+        getByVarAndScope(varId, searchScope) {
+            /* while (searchScope == undefined || searchScope == null) {
+                searchScope = symbolTable.getNode(curScope - 1);
+            } */
             for (let i = this.tableEntries.length - 1; i >= 0; i--) {
                 //Check if both the scope and var are in the table.
                 if (this.tableEntries[i].getId() == varId) {
                     let expectedScope = this.tableEntries[i].getCurScope().getScopePointer();
-                    let actualScope = curScope.getMap().get(varId).getScopePointer();
+                    let actualScope = searchScope.lookup(varId).getScopePointer();
                     if (expectedScope == actualScope) {
                         return this.tableEntries[i];
                     }
                     else {
-                        let parent = curScope.getParentScope();
+                        let parent = searchScope.getParentScope();
                         while (parent != null) {
                             //Reassign the expected scope pointer to the parent's scope pointer.
                             expectedScope = parent.getMap().get(varId).getScopePointer();
@@ -70,10 +73,13 @@ var mackintosh;
         }
         backpatch(executableImage) {
             //Go back and replace all of the temp data points with the correct data.
-            for (let i = 0; i < this.tableEntries.length; i++) {
-                if (tempIdMatch.test(executableImage[i])) {
-                    let entry = this.getByTemp(executableImage[i]);
-                    executableImage.addCode(mackintosh.codeGenerator.leftPad((entry.getOffset() + executableImage.getStackPointer() + 1).toString(16), 2), i);
+            for (let i = 0; i < executableImage.getIMAGE_SIZE(); i++) {
+                let entry = executableImage.getEntries()[i];
+                //Creates an array of matched ids.
+                let matched = entry.match(tempIdMatch);
+                if (matched) {
+                    let foundEntry = this.getByTemp(matched[1]);
+                    executableImage.addCode(mackintosh.codeGenerator.leftPad((foundEntry.getOffset() + executableImage.getStackPointer() + 1).toString(16), 2), i);
                     executableImage.addCode('00', i + 1);
                 }
             }

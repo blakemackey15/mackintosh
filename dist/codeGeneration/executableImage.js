@@ -15,6 +15,9 @@ var mackintosh;
                 }
             }
         }
+        getEntries() {
+            return this.executableImage;
+        }
         getIMAGE_SIZE() {
             return this.IMAGE_SIZE;
         }

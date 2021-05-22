@@ -21,6 +21,10 @@ module mackintosh {
             }
         }
 
+        public getEntries() : Array<string> {
+            return this.executableImage;
+        }
+
         public getIMAGE_SIZE() : number {
             return this.IMAGE_SIZE;
         }

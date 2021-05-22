@@ -14,7 +14,7 @@ var mackintosh;
             return newEntry;
         }
         getNextTemp() {
-            return "T" + this.curTemp++;
+            return "J" + this.curTemp++;
         }
         //Get a value by it's temp id.
         getByTemp(tempId) {
@@ -29,9 +29,11 @@ var mackintosh;
         //Go back and replace temps with the correct code.
         backpatch(executableImage) {
             for (let i = 0; i < this.tableEntries.length; i++) {
-                if (tempIdMatch.test(executableImage[i])) {
-                    let entry = this.getByTemp(executableImage[i]);
-                    executableImage.addCode(mackintosh.codeGenerator.leftPad(entry.getDistance().toString(16), 2), i);
+                let entry = executableImage.getEntries()[i];
+                let matched = entry.match(tempIdMatch);
+                if (matched) {
+                    let foundEntry = this.getByTemp(matched[1]);
+                    executableImage.addCode(mackintosh.codeGenerator.leftPad(foundEntry.getDistance().toString(16), 2), i);
                 }
             }
         }
