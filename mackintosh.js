@@ -1818,7 +1818,6 @@ var mackintosh;
             this.match(["="], parseTokens[tokenPointer], false);
         };
         parse.parseQuotes = function (parseTokens) {
-            isASTNode = true;
             this.match(['"', '"'], parseTokens[tokenPointer], false);
         };
         parse.parseIf = function (parseTokens) {
@@ -2006,13 +2005,10 @@ var mackintosh;
                 isSymbol = false;
                 printVal = symbol;
             }
-            else if (quotes.test(symbol)) {
+            else if (characters.test(symbol) && symbol.length > 1) {
                 isSymbol = false;
-                var i = 1;
-                while (!quotes.test(astNode.getChildren()[i].getNodeName())) {
-                    printVal += astNode.getChildren()[i].getNodeName();
-                    i++;
-                }
+                printVal += '"';
+                printVal += symbol;
                 printVal += '"';
             }
             if (isSymbol == true) {
@@ -2102,13 +2098,7 @@ var mackintosh;
                 else if (value === "true" || value === "false") {
                     expectedDataType = true;
                 }
-                else if (quotes.test(value)) {
-                    var i = 2;
-                    while (!quotes.test(astNode.getChildren()[i].getNodeName())) {
-                        value += astNode.getChildren()[i].getNodeName();
-                        i++;
-                    }
-                    value += '"';
+                else if (characters.test(value) && value.length > 0) {
                     expectedDataType = "dsadsa";
                 }
                 else if (digits.test(value)) {

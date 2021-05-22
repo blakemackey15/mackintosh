@@ -146,13 +146,10 @@ module mackintosh {
                 printVal = symbol;
             }
 
-            else if(quotes.test(symbol)) {
+            else if(characters.test(symbol) && symbol.length > 1) {
                 isSymbol = false;
-                let i = 1;
-                while(!quotes.test(astNode.getChildren()[i].getNodeName())) {
-                    printVal += astNode.getChildren()[i].getNodeName();
-                    i++;
-                }
+                printVal += '"';
+                printVal += symbol;
                 printVal += '"';
             }
 
@@ -194,7 +191,7 @@ module mackintosh {
             }
 
             for(let i = 1; i < astNode.getChildren()[0].getChildren().length; i++) {
-                    this.analyzeStatement(astNode.getChildren()[0].getChildren()[i]);
+                this.analyzeStatement(astNode.getChildren()[0].getChildren()[i]);
             }
             
         }
@@ -261,13 +258,7 @@ module mackintosh {
                     expectedDataType = true;
                 }
 
-                else if(quotes.test(value)) {
-                    let i = 2;
-                    while(!quotes.test(astNode.getChildren()[i].getNodeName())) {
-                        value += astNode.getChildren()[i].getNodeName();
-                        i++;
-                    }
-                    value += '"';
+                else if(characters.test(value) && value.length > 0) {                    
                     expectedDataType = "dsadsa"
                 }
 

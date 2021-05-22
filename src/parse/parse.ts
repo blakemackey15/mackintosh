@@ -449,7 +449,6 @@ module mackintosh {
         }
 
         public static parseQuotes(parseTokens : Array<string>) {
-            isASTNode = true;
             this.match(['"', '"'], parseTokens[tokenPointer], false);
         }
 
