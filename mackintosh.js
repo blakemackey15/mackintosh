@@ -172,6 +172,9 @@ var mackintosh;
         codeGenerator.genBlock = function (astNode) {
             curScope++;
             var symbolNode = symbolTable.getNode(curScope);
+            if (symbolNode == undefined || symbolNode == null) {
+                symbolNode = symbolTable.getNode(curScope - 1);
+            }
             _Functions.log("CODE GENERATOR - Block found, generating code for scope " + curScope);
             //Use good old recursion to travel through the ast and generate code.
             if (astNode.getChildren().length != 0) {
@@ -274,8 +277,9 @@ var mackintosh;
         codeGenerator.genStringAssignmentStatement = function (astNode, id, value, node) {
             _Functions.log("CODE GENERATOR - String assignment statement found.");
             //Add the string to the heap, load the accumulator, and then store in memory.
-            var pos = _executableImage.addString(value);
-            this.ldaConst(this.leftPad(pos, 2));
+            var pos;
+            pos = _executableImage.addString(value);
+            this.ldaConst(this.leftPad(pos.toString(16), 2));
             var staticTableEntry = _staticTable.getByVarAndScope(id, node);
             this.sta(staticTableEntry.getTemp(), "XX");
             _Functions.log("CODE GENERATOR - Generated code for string assignment statement.");
@@ -416,16 +420,7 @@ var mackintosh;
             _Functions.log("CODE GENERATOR - Print statement found.");
             var exprType = astNode.getChildren()[0].getNodeName();
             //Check what we are trying to print.
-            if (quotes.test(exprType)) {
-                var pos = _executableImage.addString(astNode.getChildren()[0].getNodeName());
-                this.ldaConst(pos);
-                this.sta("00", "00");
-                //Make print system call.
-                this.ldxConst("02");
-                this.ldyMem("00", "00");
-                this.sys();
-            }
-            else if (digits.test(exprType)) {
+            if (digits.test(exprType)) {
                 //Generate the code for the int expr.
                 this.genIntExpr(astNode, scope);
                 this.sta("00", "00");
@@ -451,7 +446,16 @@ var mackintosh;
                 this.ldyMem("00", "00");
                 this.sys();
             }
-            else if (characters.test(exprType)) {
+            else if (characters.test(exprType) && exprType.length > 1) {
+                var pos = _executableImage.addString(astNode.getChildren()[0].getNodeName());
+                this.ldaConst(pos);
+                this.sta("00", "00");
+                //Make print system call.
+                this.ldxConst("02");
+                this.ldyMem("00", "00");
+                this.sys();
+            }
+            else if (characters.test(exprType) && exprType.length == 1) {
                 var staticTableEntry_3 = _staticTable.getByVarAndScope(astNode.getChildren()[0]
                     .getNodeName(), scope);
                 this.ldyMem(staticTableEntry_3.getTemp(), "XX");
