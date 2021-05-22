@@ -293,7 +293,28 @@ module mackintosh {
         }
 
         public static genWhileStatement(astNode : CSTNode, scope : symbolTableNode) {
+            _Functions.log("CODE GENERATOR - Found while statement.");
+            //Set up jump table.
+            //Seriously blake, you didn't forget the add one in the if statement so don't do it now!
+            let jumpFrom = _executableImage.getStackPointer();
+            this.genBoolExpr(astNode, scope);
+            let jumpId = _jumpTable.getNextTemp();
+            let newJumpTableEntry = _jumpTable.addEntry(new jumpTableEntry(jumpId, 0));
+            this.bne(this.leftPad(_executableImage.getStackPointer().toString(16), 2));
 
+            //Use recursion to generate the code for the following block.
+            for(let i = 1; i < astNode.getChildren()[0].getChildren().length; i++) {
+                this.genStatement(astNode.getChildren()[0].getChildren()[i], scope);
+            }
+
+            this.ldaConst("00");
+            this.sta("00", "00");
+            this.ldxConst("01");
+            this.cpx("00", "00");
+            this.bne(this.leftPad((_executableImage.getIMAGE_SIZE() - (_executableImage.getStackPointer() - jumpFrom + 2))
+            .toString(16), 2));
+            newJumpTableEntry.setDistance(_executableImage.getStackPointer() - jumpFrom + 1);
+            _Functions.log("CODE GENERATOR - Generated code for while statement.");
         }
 
         public static genIfStatement(astNode : CSTNode, scope : symbolTableNode) {

@@ -15,6 +15,9 @@ var mackintosh;
                 }
             }
         }
+        getIMAGE_SIZE() {
+            return this.IMAGE_SIZE;
+        }
         updateStackPointer(stackPointer) {
             this.stackPointer = stackPointer;
         }

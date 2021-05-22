@@ -370,6 +370,26 @@ var mackintosh;
             }
         };
         codeGenerator.genWhileStatement = function (astNode, scope) {
+            _Functions.log("CODE GENERATOR - Found while statement.");
+            //Set up jump table.
+            //Seriously blake, you didn't forget the add one in the if statement so don't do it now!
+            var jumpFrom = _executableImage.getStackPointer();
+            this.genBoolExpr(astNode, scope);
+            var jumpId = _jumpTable.getNextTemp();
+            var newJumpTableEntry = _jumpTable.addEntry(new mackintosh.jumpTableEntry(jumpId, 0));
+            this.bne(this.leftPad(_executableImage.getStackPointer().toString(16), 2));
+            //Use recursion to generate the code for the following block.
+            for (var i = 1; i < astNode.getChildren()[0].getChildren().length; i++) {
+                this.genStatement(astNode.getChildren()[0].getChildren()[i], scope);
+            }
+            this.ldaConst("00");
+            this.sta("00", "00");
+            this.ldxConst("01");
+            this.cpx("00", "00");
+            this.bne(this.leftPad((_executableImage.getIMAGE_SIZE() - (_executableImage.getStackPointer() - jumpFrom + 2))
+                .toString(16), 2));
+            newJumpTableEntry.setDistance(_executableImage.getStackPointer() - jumpFrom + 1);
+            _Functions.log("CODE GENERATOR - Generated code for while statement.");
         };
         codeGenerator.genIfStatement = function (astNode, scope) {
             _Functions.log("CODE GENERATOR - Found if statement.");
@@ -549,6 +569,9 @@ var mackintosh;
                     this.executableImage[i] = "00";
                 }
             }
+        };
+        executableImage.prototype.getIMAGE_SIZE = function () {
+            return this.IMAGE_SIZE;
         };
         executableImage.prototype.updateStackPointer = function (stackPointer) {
             this.stackPointer = stackPointer;

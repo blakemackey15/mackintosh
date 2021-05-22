@@ -21,6 +21,10 @@ module mackintosh {
             }
         }
 
+        public getIMAGE_SIZE() : number {
+            return this.IMAGE_SIZE;
+        }
+
         public updateStackPointer(stackPointer : number) {
             this.stackPointer = stackPointer;
         }
