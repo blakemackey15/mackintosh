@@ -32,9 +32,6 @@ var mackintosh;
         }
         //Search for the entry by scope and var.
         getByVarAndScope(varId, searchScope) {
-            /* while (searchScope == undefined || searchScope == null) {
-                searchScope = symbolTable.getNode(curScope - 1);
-            } */
             for (let i = this.tableEntries.length - 1; i >= 0; i--) {
                 //Check if both the scope and var are in the table.
                 if (this.tableEntries[i].getId() == varId) {

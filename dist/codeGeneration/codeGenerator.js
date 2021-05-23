@@ -131,7 +131,7 @@ var mackintosh;
             if (isId != null || isId != undefined) {
                 this.genIdAssignmentStatement(astNode, id, value, node);
             }
-            if (scope.getType() === "int") {
+            else if (scope.getType() === "int") {
                 this.genIntAssignmentStatement(astNode, id, value, node);
             }
             else if (scope.getType() === "string") {

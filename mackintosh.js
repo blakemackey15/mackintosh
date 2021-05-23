@@ -256,7 +256,7 @@ var mackintosh;
             if (isId != null || isId != undefined) {
                 this.genIdAssignmentStatement(astNode, id, value, node);
             }
-            if (scope.getType() === "int") {
+            else if (scope.getType() === "int") {
                 this.genIntAssignmentStatement(astNode, id, value, node);
             }
             else if (scope.getType() === "string") {
@@ -696,9 +696,9 @@ var mackintosh;
         };
         //Go back and replace temps with the correct code.
         jumpTable.prototype.backpatch = function (executableImage) {
-            for (var i = 0; i < this.tableEntries.length; i++) {
+            for (var i = 0; i < executableImage.getIMAGE_SIZE(); i++) {
                 var entry = executableImage.getEntries()[i];
-                var matched = entry.match(tempIdMatch);
+                var matched = entry.match(jumpIdMatch);
                 if (matched) {
                     var foundEntry = this.getByTemp(matched[1]);
                     executableImage.addCode(mackintosh.codeGenerator.leftPad(foundEntry.getDistance().toString(16), 2), i);
@@ -764,9 +764,6 @@ var mackintosh;
         };
         //Search for the entry by scope and var.
         staticTable.prototype.getByVarAndScope = function (varId, searchScope) {
-            /* while (searchScope == undefined || searchScope == null) {
-                searchScope = symbolTable.getNode(curScope - 1);
-            } */
             for (var i = this.tableEntries.length - 1; i >= 0; i--) {
                 //Check if both the scope and var are in the table.
                 if (this.tableEntries[i].getId() == varId) {

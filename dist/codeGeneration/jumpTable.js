@@ -28,9 +28,9 @@ var mackintosh;
         }
         //Go back and replace temps with the correct code.
         backpatch(executableImage) {
-            for (let i = 0; i < this.tableEntries.length; i++) {
+            for (let i = 0; i < executableImage.getIMAGE_SIZE(); i++) {
                 let entry = executableImage.getEntries()[i];
-                let matched = entry.match(tempIdMatch);
+                let matched = entry.match(jumpIdMatch);
                 if (matched) {
                     let foundEntry = this.getByTemp(matched[1]);
                     executableImage.addCode(mackintosh.codeGenerator.leftPad(foundEntry.getDistance().toString(16), 2), i);
