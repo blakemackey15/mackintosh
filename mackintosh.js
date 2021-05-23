@@ -456,8 +456,7 @@ var mackintosh;
                 this.sys();
             }
             else if (characters.test(exprType) && exprType.length == 1) {
-                var staticTableEntry_3 = _staticTable.getByVarAndScope(astNode.getChildren()[0]
-                    .getNodeName(), scope);
+                var staticTableEntry_3 = _staticTable.getByVarAndScope(exprType, scope);
                 this.ldyMem(staticTableEntry_3.getTemp(), "XX");
                 var idScope = scope.lookup(astNode.getChildren()[0].getNodeName());
                 if (idScope != null || idScope != undefined) {
@@ -1495,14 +1494,14 @@ var mackintosh;
         //Match function.
         parse.match = function (expectedTokens, parseToken, isString) {
             //Check if the token is in a the expected token array.
-            for (var i = 0; i < expectedTokens.length; i++) {
-                if (expectedTokens[i] == parseToken) {
+            if (isString) {
+                if (characters.test(parseToken)) {
                     isMatch = true;
                 }
             }
-            if (isString) {
+            else {
                 for (var i = 0; i < expectedTokens.length; i++) {
-                    if (expectedTokens[i] == parseToken.charAt(i)) {
+                    if (expectedTokens[i] == parseToken) {
                         isMatch = true;
                     }
                 }

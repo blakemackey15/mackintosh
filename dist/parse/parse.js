@@ -53,14 +53,14 @@ var mackintosh;
         //Match function.
         static match(expectedTokens, parseToken, isString) {
             //Check if the token is in a the expected token array.
-            for (let i = 0; i < expectedTokens.length; i++) {
-                if (expectedTokens[i] == parseToken) {
+            if (isString) {
+                if (characters.test(parseToken)) {
                     isMatch = true;
                 }
             }
-            if (isString) {
+            else {
                 for (let i = 0; i < expectedTokens.length; i++) {
-                    if (expectedTokens[i] == parseToken.charAt(i)) {
+                    if (expectedTokens[i] == parseToken) {
                         isMatch = true;
                     }
                 }

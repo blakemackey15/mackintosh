@@ -394,8 +394,7 @@ module mackintosh {
             }
 
             else if(characters.test(exprType) && exprType.length == 1) {
-                let staticTableEntry = _staticTable.getByVarAndScope(astNode.getChildren()[0]
-                .getNodeName(), scope);
+                let staticTableEntry = _staticTable.getByVarAndScope(exprType, scope);
                 this.ldyMem(staticTableEntry.getTemp(), "XX");
                 let idScope = scope.lookup(astNode.getChildren()[0].getNodeName());
                 if(idScope != null || idScope != undefined) {
