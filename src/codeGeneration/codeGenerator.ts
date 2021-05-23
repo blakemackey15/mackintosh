@@ -243,7 +243,7 @@ module mackintosh {
 
             //Check what type of expr the left side is.
             if(digits.test(leftExprType)) {
-                this.ldxConst(this.leftPad(astNode.getChildren()[0].getChildren()[0].getNodeName(), 2));
+                this.ldxConst(this.leftPad(astNode.getChildren()[0].getNodeName(), 2));
             }
 
             else if(quotes.test(leftExprType)) {
@@ -252,7 +252,7 @@ module mackintosh {
 
             else if(leftExprType === "true" || leftExprType === "false") {
                 //Check if true or false - 01 true and 00 false.
-                if(astNode.getChildren()[0].getChildren()[0].getNodeName() === "true") {
+                if(astNode.getChildren()[0].getNodeName() === "true") {
                     this.ldxConst("01");
                 }
 
@@ -272,7 +272,7 @@ module mackintosh {
             
             //Check what type of expr the right side is.
             if(digits.test(rightExprType)) {
-                this.ldaConst(this.leftPad(astNode.getChildren()[1].getChildren()[0].getNodeName(), 2));
+                this.ldaConst(this.leftPad(astNode.getChildren()[1].getNodeName(), 2));
                 this.sta("00", "00");
                 this.cpx("00", "00");
             }
@@ -283,7 +283,7 @@ module mackintosh {
 
             else if(rightExprType === "true" || rightExprType === "false") {
                 //Check if true or false - 01 true and 00 false.
-                if(astNode.getChildren()[1].getChildren()[0].getNodeName() === "true") {
+                if(astNode.getChildren()[1].getNodeName() === "true") {
                     this.ldxConst("01");
                 }
                 
@@ -384,8 +384,9 @@ module mackintosh {
             }
 
             else if(characters.test(exprType) && exprType.length > 1) {
-                let pos = _executableImage.addString(astNode.getChildren()[0].getNodeName());
-                this.ldaConst(pos);
+                let pos; 
+                pos = _executableImage.addString(astNode.getChildren()[0].getNodeName());
+                this.ldaConst(pos.toString(16));
                 this.sta("00", "00");
                 //Make print system call.
                 this.ldxConst("02");
