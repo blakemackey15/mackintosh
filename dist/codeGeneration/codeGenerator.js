@@ -58,6 +58,8 @@ var mackintosh;
                 }
             }
             _Functions.log("CODE GENERATOR - Generated code for scope " + curScope);
+            curScope--;
+            symbolNode = symbolTable.getNode(curScope);
         }
         static genStatement(astNode, scope) {
             let nodeVal = astNode.getNodeName();
@@ -128,7 +130,7 @@ var mackintosh;
             let id = astNode.getChildren()[0].getNodeName();
             let value = astNode.getChildren()[1].getNodeName();
             let node = symbolTable.getNode(curScope);
-            let scope = node.getMap().get(id);
+            let scope = node.lookup(id);
             let isId = node.lookup(value);
             //Check what data type it is to perform the correct assingment.
             //isId is not null or undefined so that means the value id exists in the symbol table.

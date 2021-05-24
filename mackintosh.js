@@ -183,6 +183,8 @@ var mackintosh;
                 }
             }
             _Functions.log("CODE GENERATOR - Generated code for scope " + curScope);
+            curScope--;
+            symbolNode = symbolTable.getNode(curScope);
         };
         codeGenerator.genStatement = function (astNode, scope) {
             var nodeVal = astNode.getNodeName();
@@ -253,7 +255,7 @@ var mackintosh;
             var id = astNode.getChildren()[0].getNodeName();
             var value = astNode.getChildren()[1].getNodeName();
             var node = symbolTable.getNode(curScope);
-            var scope = node.getMap().get(id);
+            var scope = node.lookup(id);
             var isId = node.lookup(value);
             //Check what data type it is to perform the correct assingment.
             //isId is not null or undefined so that means the value id exists in the symbol table.
@@ -814,7 +816,9 @@ var mackintosh;
                 var matched = entry.match(tempIdMatch);
                 if (matched) {
                     var foundEntry = this.getByTemp(matched[1]);
-                    executableImage.addCode(mackintosh.codeGenerator.leftPad((foundEntry.getOffset() + executableImage.getStackPointer() + 1).toString(16), 2), i);
+                    var hex = foundEntry.getOffset() + executableImage.getStackPointer() + 1;
+                    var hexStr = hex.toString(16);
+                    executableImage.addCode(mackintosh.codeGenerator.leftPad(hexStr, 2), i);
                     executableImage.addCode('00', i + 1);
                 }
             }
@@ -1891,6 +1895,7 @@ var mackintosh;
         function semanticAnalyser() {
         }
         semanticAnalyser.semanticAnalysis = function () {
+            debugger;
             scopePointer = 0;
             symbolTable = new mackintosh.symbolTableTree();
             semErr = 0;
@@ -2191,6 +2196,8 @@ var mackintosh;
         };
         symbolTableNode.prototype.assignment = function (symbol, value) {
             var newScope = this.lookup(symbol);
+            var scope = newScope.getScopePointer();
+            var symbolTableNode = symbolTable.getNode(scope);
             if (newScope == null) {
                 semErr++;
                 throw new Error("SEMANTIC ANALYSIS - Id " + symbol + " has not been identified in symbol table.");
@@ -2200,7 +2207,7 @@ var mackintosh;
                 newScope.setValue(value);
                 newScope.setIsUsed(true);
                 newScope.setType(type);
-                this.hashmap.set(symbol, newScope);
+                symbolTableNode.getMap().set(symbol, newScope);
             }
         };
         symbolTableNode.prototype.lookup = function (symbol) {

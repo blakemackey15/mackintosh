@@ -62,6 +62,8 @@ module mackintosh {
 
         public assignment(symbol : any, value : any) {
             let newScope = this.lookup(symbol);
+            let scope = newScope.getScopePointer();
+            let symbolTableNode = symbolTable.getNode(scope);
 
             if(newScope == null) {
                 semErr++;
@@ -73,7 +75,7 @@ module mackintosh {
                 newScope.setValue(value);
                 newScope.setIsUsed(true);
                 newScope.setType(type);
-                this.hashmap.set(symbol, newScope);
+                symbolTableNode.getMap().set(symbol, newScope);
             }
         }
 

@@ -49,7 +49,7 @@ module mackintosh {
                     let expectedScope = this.tableEntries[i].getCurScope().getScopePointer();
                     let actualScope = searchScope.lookup(varId).getScopePointer();
 
-                    if( expectedScope == actualScope) {
+                    if(expectedScope == actualScope) {
                         return this.tableEntries[i];
                     }
 
@@ -95,8 +95,9 @@ module mackintosh {
                 let matched = entry.match(tempIdMatch);
                 if(matched) {
                     let foundEntry = this.getByTemp(matched[1]);
-                    executableImage.addCode(codeGenerator.leftPad(
-                        (foundEntry.getOffset() + executableImage.getStackPointer() + 1).toString(16), 2), i);
+                    let hex = foundEntry.getOffset() + executableImage.getStackPointer() + 1;
+                    let hexStr = hex.toString(16);
+                    executableImage.addCode(codeGenerator.leftPad(hexStr, 2), i);
                     executableImage.addCode('00', i + 1);
                 }
             }
