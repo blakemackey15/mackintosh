@@ -128,53 +128,53 @@ module mackintosh {
 
         public static analyzePrintStatement(astNode : CSTNode) {
             _Functions.log("SEMANTIC ANALYSIS - Print Statement found.");
-            let symbol = astNode.getChildren()[0].getNodeName();            ;
-            let isSymbol : boolean;
-            let printVal : string;
-
-            //Check if the value in print is a symbol or just a literal.
-            if(characters.test(symbol) && symbol.length == 1) {
-                isSymbol = true;
-            }
-
-            else if(symbol === "true" || symbol === "false" ) {
-                isSymbol = false;
-                printVal = symbol;
-            }
-
-            else if(digits.test(symbol)) {
-                isSymbol = false;
-                printVal = symbol;
-            }
-
-            else if(characters.test(symbol) && symbol.length > 1) {
-                isSymbol = false;
-                printVal += '"';
-                printVal += symbol;
-                printVal += '"';
-            }
-
-            if(isSymbol == true) {
-                //Check if the symbol to be printed is in the symbol table.
-                if(symbolTable.getCurNode().lookup(symbol) != null) {
-                    _Functions.log("SEMANTIC ANALYSIS - Print " + symbol);
+            for(let i = 0; i < astNode.getChildren().length; i++) {
+                let symbol = astNode.getChildren()[i].getNodeName();            ;
+                let isSymbol : boolean;
+                let printVal : string;
+    
+                //Check if the value in print is a symbol or just a literal.
+                if(characters.test(symbol) && symbol.length == 1) {
+                    isSymbol = true;
                 }
-
+    
+                else if(symbol === "true" || symbol === "false" ) {
+                    isSymbol = false;
+                    printVal = symbol;
+                }
+    
+                else if(digits.test(symbol)) {
+                    isSymbol = false;
+                    printVal = symbol;
+                }
+    
+                else if(characters.test(symbol) && symbol.length > 1) {
+                    isSymbol = false;
+                    printVal = symbol;
+                }
+    
+                if(isSymbol == true) {
+                    //Check if the symbol to be printed is in the symbol table.
+                    if(symbolTable.getCurNode().lookup(symbol) != null) {
+                        _Functions.log("SEMANTIC ANALYSIS - Print " + symbol);
+                    }
+    
+                    else {
+                        semErr++;
+                        throw new Error("SEMANTIC ANALYSIS - Symbol " + symbol + " does not exist in symbol table.");
+                    }
+                }
+    
+                //If the value is not a symbol see if its valid to be printed. Else, throw an error.
                 else {
-                    semErr++;
-                    throw new Error("SEMANTIC ANALYSIS - Symbol " + symbol + " does not exist in symbol table.");
-                }
-            }
-
-            //If the value is not a symbol see if its valid to be printed. Else, throw an error.
-            else {
-                if(printVal != undefined) {
-                    _Functions.log("SEMANTIC ANALYSIS - Print " + printVal);
-                }
-
-                else {
-                    semErr++;
-                    throw new Error("SEMANTIC ANALYSIS - Value " + printVal + " cannot be printed.");
+                    if(printVal != undefined) {
+                        _Functions.log("SEMANTIC ANALYSIS - Print " + printVal);
+                    }
+    
+                    else {
+                        semErr++;
+                        throw new Error("SEMANTIC ANALYSIS - Value " + printVal + " cannot be printed.");
+                    }
                 }
             }
         }

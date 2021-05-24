@@ -71,7 +71,7 @@ var mackintosh;
                 this.genVarDecl(astNode, scope);
             }
             else if (nodeVal === "AssignmentStatement") {
-                this.genAssignmentStatement(astNode);
+                this.genAssignmentStatement(astNode, scope);
             }
             else if (nodeVal === "PrintStatement") {
                 this.genPrintStatement(astNode, scope);
@@ -126,10 +126,9 @@ var mackintosh;
             _staticTable.addEntry(new mackintosh.staticTableEntry(temp, id, _staticTable.getNextOffset(), scope));
             _Functions.log("CODE GENERATOR - Generated code for Bool Var Decl.");
         }
-        static genAssignmentStatement(astNode) {
+        static genAssignmentStatement(astNode, node) {
             let id = astNode.getChildren()[0].getNodeName();
             let value = astNode.getChildren()[1].getNodeName();
-            let node = symbolTable.getNode(curScope);
             let scope = node.lookup(id);
             let isId = node.lookup(value);
             //Check what data type it is to perform the correct assingment.
@@ -201,9 +200,13 @@ var mackintosh;
             }
             else if (astNode.getChildren()[0].getNodeName() === "isNotEqual") {
             }
-            else if (astNode.getChildren()[0].getNodeName() === "true") {
+            else if (astNode.getChildren()[1].getNodeName() === "true") {
+                this.ldxConst("00");
+                this.ldaConst("01");
+                this.sta("00", "00");
+                this.cpx("00", "00");
             }
-            else if (astNode.getChildren()[0].getNodeName() === "false") {
+            else if (astNode.getChildren()[1].getNodeName() === "false") {
                 this.ldxConst("01");
                 this.ldaConst("00");
                 this.sta("00", "00");
@@ -268,9 +271,7 @@ var mackintosh;
             let newJumpTableEntry = _jumpTable.addEntry(new mackintosh.jumpTableEntry(jumpId, 0));
             this.bne(this.leftPad(_executableImage.getStackPointer().toString(16), 2));
             //Use recursion to generate the code for the following block.
-            for (let i = 1; i < astNode.getChildren()[0].getChildren().length; i++) {
-                this.genStatement(astNode.getChildren()[0].getChildren()[i], scope);
-            }
+            this.genStatement(astNode.getChildren()[0].getChildren()[2], scope);
             this.ldaConst("00");
             this.sta("00", "00");
             this.ldxConst("01");

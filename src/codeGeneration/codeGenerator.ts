@@ -79,7 +79,7 @@ module mackintosh {
             }
 
             else if(nodeVal === "AssignmentStatement") {
-                this.genAssignmentStatement(astNode);
+                this.genAssignmentStatement(astNode, scope);
             }
 
             else if(nodeVal === "PrintStatement") {
@@ -145,10 +145,9 @@ module mackintosh {
             _Functions.log("CODE GENERATOR - Generated code for Bool Var Decl.");
         }
 
-        public static genAssignmentStatement(astNode : CSTNode) {
+        public static genAssignmentStatement(astNode : CSTNode, node : symbolTableNode) {
             let id = astNode.getChildren()[0].getNodeName();
             let value = astNode.getChildren()[1].getNodeName();
-            let node = symbolTable.getNode(curScope);
             let scope = node.lookup(id);
             let isId = node.lookup(value);
 
@@ -231,14 +230,17 @@ module mackintosh {
             }
 
             else if(astNode.getChildren()[0].getNodeName() === "isNotEqual") {
-
+                
             }
 
-            else if(astNode.getChildren()[0].getNodeName() === "true") {
-
+            else if(astNode.getChildren()[1].getNodeName() === "true") {
+                this.ldxConst("00");
+                this.ldaConst("01");
+                this.sta("00", "00");
+                this.cpx("00", "00");
             }
 
-            else if(astNode.getChildren()[0].getNodeName() === "false") {
+            else if(astNode.getChildren()[1].getNodeName() === "false") {
                 this.ldxConst("01");
                 this.ldaConst("00");
                 this.sta("00", "00");
@@ -318,9 +320,7 @@ module mackintosh {
             this.bne(this.leftPad(_executableImage.getStackPointer().toString(16), 2));
 
             //Use recursion to generate the code for the following block.
-            for(let i = 1; i < astNode.getChildren()[0].getChildren().length; i++) {
-                this.genStatement(astNode.getChildren()[0].getChildren()[i], scope);
-            }
+            this.genStatement(astNode.getChildren()[0].getChildren()[2], scope);
 
             this.ldaConst("00");
             this.sta("00", "00");

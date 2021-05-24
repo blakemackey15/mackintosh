@@ -196,7 +196,7 @@ var mackintosh;
                 this.genVarDecl(astNode, scope);
             }
             else if (nodeVal === "AssignmentStatement") {
-                this.genAssignmentStatement(astNode);
+                this.genAssignmentStatement(astNode, scope);
             }
             else if (nodeVal === "PrintStatement") {
                 this.genPrintStatement(astNode, scope);
@@ -251,10 +251,9 @@ var mackintosh;
             _staticTable.addEntry(new mackintosh.staticTableEntry(temp, id, _staticTable.getNextOffset(), scope));
             _Functions.log("CODE GENERATOR - Generated code for Bool Var Decl.");
         };
-        codeGenerator.genAssignmentStatement = function (astNode) {
+        codeGenerator.genAssignmentStatement = function (astNode, node) {
             var id = astNode.getChildren()[0].getNodeName();
             var value = astNode.getChildren()[1].getNodeName();
-            var node = symbolTable.getNode(curScope);
             var scope = node.lookup(id);
             var isId = node.lookup(value);
             //Check what data type it is to perform the correct assingment.
@@ -326,9 +325,13 @@ var mackintosh;
             }
             else if (astNode.getChildren()[0].getNodeName() === "isNotEqual") {
             }
-            else if (astNode.getChildren()[0].getNodeName() === "true") {
+            else if (astNode.getChildren()[1].getNodeName() === "true") {
+                this.ldxConst("00");
+                this.ldaConst("01");
+                this.sta("00", "00");
+                this.cpx("00", "00");
             }
-            else if (astNode.getChildren()[0].getNodeName() === "false") {
+            else if (astNode.getChildren()[1].getNodeName() === "false") {
                 this.ldxConst("01");
                 this.ldaConst("00");
                 this.sta("00", "00");
@@ -393,9 +396,7 @@ var mackintosh;
             var newJumpTableEntry = _jumpTable.addEntry(new mackintosh.jumpTableEntry(jumpId, 0));
             this.bne(this.leftPad(_executableImage.getStackPointer().toString(16), 2));
             //Use recursion to generate the code for the following block.
-            for (var i = 1; i < astNode.getChildren()[0].getChildren().length; i++) {
-                this.genStatement(astNode.getChildren()[0].getChildren()[i], scope);
-            }
+            this.genStatement(astNode.getChildren()[0].getChildren()[2], scope);
             this.ldaConst("00");
             this.sta("00", "00");
             this.ldxConst("01");
@@ -2001,46 +2002,46 @@ var mackintosh;
         };
         semanticAnalyser.analyzePrintStatement = function (astNode) {
             _Functions.log("SEMANTIC ANALYSIS - Print Statement found.");
-            var symbol = astNode.getChildren()[0].getNodeName();
-            ;
-            var isSymbol;
-            var printVal;
-            //Check if the value in print is a symbol or just a literal.
-            if (characters.test(symbol) && symbol.length == 1) {
-                isSymbol = true;
-            }
-            else if (symbol === "true" || symbol === "false") {
-                isSymbol = false;
-                printVal = symbol;
-            }
-            else if (digits.test(symbol)) {
-                isSymbol = false;
-                printVal = symbol;
-            }
-            else if (characters.test(symbol) && symbol.length > 1) {
-                isSymbol = false;
-                printVal += '"';
-                printVal += symbol;
-                printVal += '"';
-            }
-            if (isSymbol == true) {
-                //Check if the symbol to be printed is in the symbol table.
-                if (symbolTable.getCurNode().lookup(symbol) != null) {
-                    _Functions.log("SEMANTIC ANALYSIS - Print " + symbol);
+            for (var i = 0; i < astNode.getChildren().length; i++) {
+                var symbol = astNode.getChildren()[i].getNodeName();
+                ;
+                var isSymbol = void 0;
+                var printVal = void 0;
+                //Check if the value in print is a symbol or just a literal.
+                if (characters.test(symbol) && symbol.length == 1) {
+                    isSymbol = true;
                 }
+                else if (symbol === "true" || symbol === "false") {
+                    isSymbol = false;
+                    printVal = symbol;
+                }
+                else if (digits.test(symbol)) {
+                    isSymbol = false;
+                    printVal = symbol;
+                }
+                else if (characters.test(symbol) && symbol.length > 1) {
+                    isSymbol = false;
+                    printVal = symbol;
+                }
+                if (isSymbol == true) {
+                    //Check if the symbol to be printed is in the symbol table.
+                    if (symbolTable.getCurNode().lookup(symbol) != null) {
+                        _Functions.log("SEMANTIC ANALYSIS - Print " + symbol);
+                    }
+                    else {
+                        semErr++;
+                        throw new Error("SEMANTIC ANALYSIS - Symbol " + symbol + " does not exist in symbol table.");
+                    }
+                }
+                //If the value is not a symbol see if its valid to be printed. Else, throw an error.
                 else {
-                    semErr++;
-                    throw new Error("SEMANTIC ANALYSIS - Symbol " + symbol + " does not exist in symbol table.");
-                }
-            }
-            //If the value is not a symbol see if its valid to be printed. Else, throw an error.
-            else {
-                if (printVal != undefined) {
-                    _Functions.log("SEMANTIC ANALYSIS - Print " + printVal);
-                }
-                else {
-                    semErr++;
-                    throw new Error("SEMANTIC ANALYSIS - Value " + printVal + " cannot be printed.");
+                    if (printVal != undefined) {
+                        _Functions.log("SEMANTIC ANALYSIS - Print " + printVal);
+                    }
+                    else {
+                        semErr++;
+                        throw new Error("SEMANTIC ANALYSIS - Value " + printVal + " cannot be printed.");
+                    }
                 }
             }
         };
