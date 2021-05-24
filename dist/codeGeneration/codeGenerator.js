@@ -118,6 +118,10 @@ var mackintosh;
         }
         static genBoolVarDecl(astNode, id) {
             _Functions.log("CODE GENERATOR - Bool Var Decl Found.");
+            let temp = _staticTable.getNextTemp();
+            let node = symbolTable.getNode(curScope);
+            let scope = node.getMap().get(id);
+            _staticTable.addEntry(new mackintosh.staticTableEntry(temp, id, _staticTable.getNextOffset(), scope));
             _Functions.log("CODE GENERATOR - Generated code for Bool Var Decl.");
         }
         static genAssignmentStatement(astNode) {
@@ -161,6 +165,9 @@ var mackintosh;
         }
         static genBoolAssignmentStatement(astNode, id, value, node) {
             _Functions.log("CODE GENERATOR - Boolean assignment statement found.");
+            this.genBoolExpr(astNode, node);
+            let staticTableEntry = _staticTable.getByVarAndScope(id, node);
+            this.sta(staticTableEntry.getTemp(), "XX");
             _Functions.log("CODE GENERATOR - Generated code for boolean assignment statement.");
         }
         static genIdAssignmentStatement(astNode, id, value, node) {

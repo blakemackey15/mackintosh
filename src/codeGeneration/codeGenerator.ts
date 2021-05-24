@@ -136,6 +136,10 @@ module mackintosh {
 
         public static genBoolVarDecl(astNode : CSTNode, id : string) {
             _Functions.log("CODE GENERATOR - Bool Var Decl Found.");
+            let temp = _staticTable.getNextTemp();
+            let node = symbolTable.getNode(curScope);
+            let scope = node.getMap().get(id);
+            _staticTable.addEntry(new staticTableEntry(temp, id, _staticTable.getNextOffset(), scope));
             _Functions.log("CODE GENERATOR - Generated code for Bool Var Decl.");
         }
 
@@ -187,6 +191,9 @@ module mackintosh {
 
         public static genBoolAssignmentStatement(astNode : CSTNode, id : string, value : string, node : symbolTableNode) {
             _Functions.log("CODE GENERATOR - Boolean assignment statement found.");
+            this.genBoolExpr(astNode, node);
+            let staticTableEntry = _staticTable.getByVarAndScope(id, node);
+            this.sta(staticTableEntry.getTemp(), "XX");
             _Functions.log("CODE GENERATOR - Generated code for boolean assignment statement.");
         }
 
