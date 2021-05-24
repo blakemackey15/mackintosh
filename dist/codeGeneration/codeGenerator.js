@@ -65,19 +65,19 @@ var mackintosh;
             if (nodeVal === "Block") {
                 this.genBlock(astNode);
             }
-            if (nodeVal === "VarDecl") {
+            else if (nodeVal === "VarDecl") {
                 this.genVarDecl(astNode, scope);
             }
-            if (nodeVal === "AssignmentStatement") {
+            else if (nodeVal === "AssignmentStatement") {
                 this.genAssignmentStatement(astNode);
             }
-            if (nodeVal === "PrintStatement") {
+            else if (nodeVal === "PrintStatement") {
                 this.genPrintStatement(astNode, scope);
             }
-            if (nodeVal === "IfStatement") {
+            else if (nodeVal === "IfStatement") {
                 this.genIfStatement(astNode, scope);
             }
-            if (nodeVal === "WhileStatement") {
+            else if (nodeVal === "WhileStatement") {
                 this.genWhileStatement(astNode, scope);
             }
         }

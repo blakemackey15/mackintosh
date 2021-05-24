@@ -35,15 +35,14 @@ var mackintosh;
         }
         addToStack(data) {
             this.addCode(data, this.stackPointer);
-            this.stackPointer++;
-            return this.stackPointer;
+            return this.stackPointer++;
         }
         addToHeap(data) {
             this.addCode(data, this.heapPointer);
-            this.heapPointer--;
-            return this.heapPointer;
+            return this.heapPointer--;
         }
         addCode(data, pointer) {
+            data = data.toUpperCase();
             //Check if the pointer is pointing to a valid space in the executable image.
             if (pointer >= this.IMAGE_SIZE || pointer < 0) {
                 genErr++;

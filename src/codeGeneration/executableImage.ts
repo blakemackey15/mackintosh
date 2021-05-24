@@ -47,17 +47,16 @@ module mackintosh {
 
         public addToStack(data : string) : number {
             this.addCode(data, this.stackPointer);
-            this.stackPointer++;
-            return this.stackPointer;
+            return this.stackPointer++;
         }
 
         public addToHeap(data : string) : number {
             this.addCode(data, this.heapPointer);
-            this.heapPointer--;
-            return this.heapPointer;
+            return this.heapPointer--;
         }
 
         public addCode(data : string, pointer : number) : number {
+            data = data.toUpperCase();
             //Check if the pointer is pointing to a valid space in the executable image.
             if(pointer >= this.IMAGE_SIZE || pointer < 0) {
                 genErr++;

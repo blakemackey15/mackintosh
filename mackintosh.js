@@ -190,19 +190,19 @@ var mackintosh;
             if (nodeVal === "Block") {
                 this.genBlock(astNode);
             }
-            if (nodeVal === "VarDecl") {
+            else if (nodeVal === "VarDecl") {
                 this.genVarDecl(astNode, scope);
             }
-            if (nodeVal === "AssignmentStatement") {
+            else if (nodeVal === "AssignmentStatement") {
                 this.genAssignmentStatement(astNode);
             }
-            if (nodeVal === "PrintStatement") {
+            else if (nodeVal === "PrintStatement") {
                 this.genPrintStatement(astNode, scope);
             }
-            if (nodeVal === "IfStatement") {
+            else if (nodeVal === "IfStatement") {
                 this.genIfStatement(astNode, scope);
             }
-            if (nodeVal === "WhileStatement") {
+            else if (nodeVal === "WhileStatement") {
                 this.genWhileStatement(astNode, scope);
             }
         };
@@ -592,15 +592,14 @@ var mackintosh;
         };
         executableImage.prototype.addToStack = function (data) {
             this.addCode(data, this.stackPointer);
-            this.stackPointer++;
-            return this.stackPointer;
+            return this.stackPointer++;
         };
         executableImage.prototype.addToHeap = function (data) {
             this.addCode(data, this.heapPointer);
-            this.heapPointer--;
-            return this.heapPointer;
+            return this.heapPointer--;
         };
         executableImage.prototype.addCode = function (data, pointer) {
+            data = data.toUpperCase();
             //Check if the pointer is pointing to a valid space in the executable image.
             if (pointer >= this.IMAGE_SIZE || pointer < 0) {
                 genErr++;
