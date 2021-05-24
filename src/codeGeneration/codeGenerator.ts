@@ -158,6 +158,15 @@ module mackintosh {
             }
 
             else if(scope.getType() === "int") {
+                if(astNode.getChildren().length > 2) {
+                    for(let i = 2; i < astNode.getChildren().length; i++) {
+                        let num : number = Number(value);
+                        let nextNum : number = Number(astNode.getChildren()[i].getNodeName());
+                        let sum : number = num + nextNum;
+                        value = sum.toString();
+                    }
+                }
+
                 this.genIntAssignmentStatement(astNode, id, value, node)
             }
 

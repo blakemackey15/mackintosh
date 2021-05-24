@@ -262,6 +262,14 @@ var mackintosh;
                 this.genIdAssignmentStatement(astNode, id, value, node);
             }
             else if (scope.getType() === "int") {
+                if (astNode.getChildren().length > 2) {
+                    for (var i = 2; i < astNode.getChildren().length; i++) {
+                        var num = Number(value);
+                        var nextNum = Number(astNode.getChildren()[i].getNodeName());
+                        var sum = num + nextNum;
+                        value = sum.toString();
+                    }
+                }
                 this.genIntAssignmentStatement(astNode, id, value, node);
             }
             else if (scope.getType() === "string") {
