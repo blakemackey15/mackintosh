@@ -1756,10 +1756,11 @@ var mackintosh;
             }
             //Boolean value.
             else {
+                ASTTree.addNode("BooleanExpr", "branch");
                 this.parseBoolVal(parseTokens);
             }
             CSTTree.climbTree();
-            //ASTTree.climbTree();
+            ASTTree.climbTree();
         };
         //Expected tokens: char
         parse.parseId = function (parseTokens) {
@@ -2019,9 +2020,12 @@ var mackintosh;
                 if (characters.test(symbol) && symbol.length == 1) {
                     isSymbol = true;
                 }
-                else if (symbol === "true" || symbol === "false") {
-                    isSymbol = false;
-                    printVal = symbol;
+                else if (symbol === "BooleanExpr") {
+                    var boolVal = astNode.getChildren()[i].getChildren()[0].getNodeName();
+                    if (boolVal === "true" || boolVal === "false") {
+                        isSymbol = false;
+                        printVal = astNode.getChildren()[i].getChildren()[0].getNodeName();
+                    }
                 }
                 else if (digits.test(symbol)) {
                     isSymbol = false;
@@ -2071,7 +2075,10 @@ var mackintosh;
             //Check if both ends of the statement are in the symbol table
             _Functions.log("SEMANTIC ANALYSIS - While Statement found.");
             var while1 = astNode.getChildren()[0].getChildren()[0].getNodeName();
-            var while2 = astNode.getChildren()[0].getChildren()[1].getNodeName();
+            var while2;
+            if (astNode.getChildren()[0].getChildren().length > 1) {
+                while2 = astNode.getChildren()[0].getChildren()[1].getNodeName();
+            }
             if (symbolTable.getCurNode().lookup(while1) != null
                 && symbolTable.getCurNode().lookup(while2) != null) {
                 _Functions.log("SEMANTIC ANALYSIS - While " +

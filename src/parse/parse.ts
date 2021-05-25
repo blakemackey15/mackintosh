@@ -347,11 +347,12 @@ module mackintosh {
 
             //Boolean value.
             else {
+                ASTTree.addNode("BooleanExpr", "branch");
                 this.parseBoolVal(parseTokens);
             }
 
             CSTTree.climbTree();
-            //ASTTree.climbTree();
+            ASTTree.climbTree();
         }
 
         //Expected tokens: char
