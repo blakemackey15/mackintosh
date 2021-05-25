@@ -329,8 +329,8 @@ module mackintosh {
             let newJumpTableEntry = _jumpTable.addEntry(new jumpTableEntry(jumpId, 0));
             this.bne(this.leftPad(_executableImage.getStackPointer().toString(16), 2));
 
-            //Use recursion to generate the code for the following block.
-            this.genStatement(astNode.getChildren()[0].getChildren()[2], scope);
+            //Generate the code for the block inside the loop.
+            this.genStatement(astNode.getChildren()[1], scope);
 
             this.ldaConst("00");
             this.sta("00", "00");
@@ -357,8 +357,8 @@ module mackintosh {
             let jumpFrom = _executableImage.getStackPointer();
             this.bne(newJumpTableEntry.getTemp());
 
-            //Use recursion to generate the code for the following block.
-            this.genStatement(astNode.getChildren()[0].getChildren()[2], scope);
+            //Generate the code for the block inside the if statement.
+            this.genStatement(astNode.getChildren()[1], scope);
 
             //When recursion ends calculate the jump distance.
             //Once again, you better not forget to add 1!
