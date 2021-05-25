@@ -60,6 +60,7 @@ var mackintosh;
                         _Functions.log('LEXER - Lex Completed With ' + errCount + ' Errors and ' + warnCount + ' Warnings');
                         let isParsed = _Parser.parse(tokenStream);
                         let isSemantic;
+                        let isGen;
                         if (isParsed) {
                             isSemantic = _SemanticAnalyzer.semanticAnalysis();
                         }
@@ -67,6 +68,7 @@ var mackintosh;
                             _Functions.log("PARSER - Semantic analysis skipped due to parse errors.");
                         }
                         if (isSemantic) {
+                            isGen = _CodeGenerator.codeGeneration();
                         }
                         else {
                             _Functions.log("SEMANTIC ANALYSIS - Code generation skipped due to semantic errors.");

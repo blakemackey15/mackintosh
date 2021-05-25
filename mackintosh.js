@@ -27,6 +27,7 @@ var _Parser = mackintosh.parse;
 var _Token = mackintosh.token;
 var _Functions = mackintosh.compilerFunctions;
 var _SemanticAnalyzer = mackintosh.semanticAnalyser;
+var _CodeGenerator = mackintosh.codeGenerator;
 var symbolTable = new mackintosh.symbolTableTree;
 //Lex errors.
 var errCount = 0;
@@ -77,6 +78,15 @@ var isASTNode = false;
 var scopePointer = 0;
 var semErr = 0;
 var semWarn = 0;
+//Code gen globals
+var genErr = 0;
+var genWarn = 0;
+var _executableImage = new mackintosh.executableImage;
+var _staticTable = new mackintosh.staticTable;
+var _jumpTable = new mackintosh.jumpTable;
+var curScope = 0;
+var tempIdMatch = /^(T[0-9])/;
+var jumpIdMatch = /^(J[0-9])/;
 /*
 References: Here is a list of the resources I referenced while developing this project.
 https://regex101.com/ - Useful tool I used to test my regular expressions for my tokens.
@@ -110,6 +120,764 @@ var mackintosh;
         return index;
     }());
     mackintosh.index = index;
+})(mackintosh || (mackintosh = {}));
+var mackintosh;
+(function (mackintosh) {
+    //Perform code generation.
+    var codeGenerator = /** @class */ (function () {
+        function codeGenerator() {
+        }
+        codeGenerator.codeGeneration = function () {
+            var isGen = false;
+            genErr = 0;
+            genWarn = 0;
+            curScope = 0;
+            _executableImage = new mackintosh.executableImage();
+            _jumpTable = new mackintosh.jumpTable();
+            _staticTable = new mackintosh.staticTable();
+            _Functions.log("\n");
+            _Functions.log("\n");
+            _Functions.log("CODE GENERATOR - Beginning Code Generation " + (programCount - 1));
+            try {
+                //_Functions.log(_executableImage.displayCode());
+                _executableImage.initTable();
+                this.genBlock(ASTTree.getRoot());
+                this.break();
+                //Once recursion ends, pass the executable image to be backpatched.
+                if (genErr == 0) {
+                    _jumpTable.backpatch(_executableImage);
+                    _staticTable.backpatch(_executableImage);
+                    _Functions.log("\n");
+                    _Functions.log("\n");
+                    _Functions.log("CODE GENERATOR - Completed Code Generation " + (programCount - 1));
+                    _Functions.log("\n");
+                    _Functions.log("\n");
+                    _Functions.log(_executableImage.displayCode());
+                    isGen = true;
+                }
+                else {
+                    isGen = false;
+                    _Functions.log("\n");
+                    _Functions.log("\n");
+                    _Functions.log("CODE GENERATOR - Generated code not displayed due to error.");
+                }
+            }
+            catch (error) {
+                _Functions.log(error);
+                _Functions.log("CODE GENERATOR - Code Generation ended due to error.");
+            }
+            return isGen;
+        };
+        codeGenerator.genBlock = function (astNode) {
+            curScope++;
+            var symbolNode = symbolTable.getNode(curScope);
+            if (symbolNode == undefined || symbolNode == null) {
+                symbolNode = symbolTable.getNode(curScope - 1);
+            }
+            _Functions.log("CODE GENERATOR - Block found, generating code for scope " + curScope);
+            //Use good old recursion to travel through the ast and generate code.
+            if (astNode.getChildren().length != 0) {
+                for (var i = 0; i < astNode.getChildren().length; i++) {
+                    this.genStatement(astNode.getChildren()[i], symbolNode);
+                }
+            }
+            _Functions.log("CODE GENERATOR - Generated code for scope " + curScope);
+            curScope--;
+            symbolNode = symbolTable.getNode(curScope);
+        };
+        codeGenerator.genStatement = function (astNode, scope) {
+            var nodeVal = astNode.getNodeName();
+            //Find out what type of node it is and generate code for it.
+            if (nodeVal === "Block") {
+                this.genBlock(astNode);
+            }
+            else if (nodeVal === "VarDecl") {
+                this.genVarDecl(astNode, scope);
+            }
+            else if (nodeVal === "AssignmentStatement") {
+                this.genAssignmentStatement(astNode, scope);
+            }
+            else if (nodeVal === "PrintStatement") {
+                this.genPrintStatement(astNode, scope);
+            }
+            else if (nodeVal === "IfStatement") {
+                this.genIfStatement(astNode, scope);
+            }
+            else if (nodeVal === "WhileStatement") {
+                this.genWhileStatement(astNode, scope);
+            }
+        };
+        codeGenerator.genVarDecl = function (astNode, scope) {
+            var type = astNode.getChildren()[0].getNodeName();
+            var id = astNode.getChildren()[1].getNodeName();
+            //Check what type of node this is to generate the correct code.
+            if (type === "int") {
+                this.genIntVarDecl(astNode, id);
+            }
+            else if (type === "string") {
+                this.genStringVarDecl(astNode, id);
+            }
+            else if (type === "boolean") {
+                this.genBoolVarDecl(astNode, id);
+            }
+        };
+        codeGenerator.genIntVarDecl = function (astNode, id) {
+            _Functions.log("CODE GENERATOR - Int Var Decl Found.");
+            //Initialze to 0.
+            this.ldaConst("00");
+            var temp = _staticTable.getNextTemp();
+            var node = symbolTable.getNode(curScope);
+            var scope = node.getMap().get(id);
+            //Add the entry to the static table, and then store the temp data.
+            var newEntry = new mackintosh.staticTableEntry(temp, id, _staticTable.getNextOffset(), scope);
+            _staticTable.addEntry(newEntry);
+            this.sta(temp, "XX");
+            _Functions.log("CODE GENERATOR - Generated code for Int Var Decl.");
+        };
+        codeGenerator.genStringVarDecl = function (astNode, id) {
+            _Functions.log("CODE GENERATOR - String Var Decl Found.");
+            var tempId = _staticTable.getNextTemp();
+            var node = symbolTable.getNode(curScope);
+            var scope = node.getMap().get(id);
+            _staticTable.addEntry(new mackintosh.staticTableEntry(tempId, id, _staticTable.getNextOffset(), scope));
+            _Functions.log("CODE GENERATOR - Generated code for String Var Decl.");
+        };
+        codeGenerator.genBoolVarDecl = function (astNode, id) {
+            _Functions.log("CODE GENERATOR - Bool Var Decl Found.");
+            var temp = _staticTable.getNextTemp();
+            var node = symbolTable.getNode(curScope);
+            var scope = node.getMap().get(id);
+            _staticTable.addEntry(new mackintosh.staticTableEntry(temp, id, _staticTable.getNextOffset(), scope));
+            _Functions.log("CODE GENERATOR - Generated code for Bool Var Decl.");
+        };
+        codeGenerator.genAssignmentStatement = function (astNode, node) {
+            var id = astNode.getChildren()[0].getNodeName();
+            var value = astNode.getChildren()[1].getNodeName();
+            var scope = node.lookup(id);
+            var isId = node.lookup(value);
+            //Check what data type it is to perform the correct assingment.
+            //isId is not null or undefined so that means the value id exists in the symbol table.
+            if (isId != null || isId != undefined) {
+                this.genIdAssignmentStatement(astNode, id, value, node);
+            }
+            else if (scope.getType() === "int") {
+                this.genIntAssignmentStatement(astNode, id, value, node);
+            }
+            else if (scope.getType() === "string") {
+                this.genStringAssignmentStatement(astNode, id, value, node);
+            }
+            else if (scope.getType() === "boolean") {
+                this.genBoolAssignmentStatement(astNode, id, value, node);
+            }
+        };
+        codeGenerator.genIntAssignmentStatement = function (astNode, id, value, node) {
+            _Functions.log("CODE GENERATOR - Int assignment statement found.");
+            //Pass the value to be evaluated.
+            this.genIntExpr(astNode, node, value);
+            var staticTableEntry = _staticTable.getByVarAndScope(id, node);
+            this.sta(staticTableEntry.getTemp(), "XX");
+            _Functions.log("CODE GENERATOR - Generated code for int assignment.");
+        };
+        codeGenerator.genStringAssignmentStatement = function (astNode, id, value, node) {
+            _Functions.log("CODE GENERATOR - String assignment statement found.");
+            //Add the string to the heap, load the accumulator, and then store in memory.
+            var pos;
+            pos = _executableImage.addString(value);
+            this.ldaConst(this.leftPad(pos.toString(16), 2));
+            var staticTableEntry = _staticTable.getByVarAndScope(id, node);
+            this.sta(staticTableEntry.getTemp(), "XX");
+            _Functions.log("CODE GENERATOR - Generated code for string assignment statement.");
+        };
+        codeGenerator.genBoolAssignmentStatement = function (astNode, id, value, node) {
+            _Functions.log("CODE GENERATOR - Boolean assignment statement found.");
+            this.genBoolExpr(astNode, node);
+            var staticTableEntry = _staticTable.getByVarAndScope(id, node);
+            this.sta(staticTableEntry.getTemp(), "XX");
+            _Functions.log("CODE GENERATOR - Generated code for boolean assignment statement.");
+        };
+        codeGenerator.genIdAssignmentStatement = function (astNode, id, value, node) {
+            _Functions.log("CODE GENERATOR - Id assignment statement found.");
+            //Find the value in static table, load the accumulator.
+            var valueEntry = _staticTable.getByVarAndScope(value, node);
+            this.ldaMem(valueEntry.getTemp(), "XX");
+            //Find the id in static table, load the accumulator.
+            var staticTableEntry = _staticTable.getByVarAndScope(id, node);
+            this.sta(staticTableEntry.getTemp(), "XX");
+            _Functions.log("CODE GENERATOR - Generated code for ids assignment statement.");
+        };
+        codeGenerator.genIntExpr = function (astNode, scope, value) {
+            //Only one int, load accumulator with it - base case.
+            if (astNode.getChildren().length <= 2) {
+                this.ldaConst(this.leftPad(value, 2));
+            }
+            //Perform the addition.
+            else {
+                if (astNode.getChildren().length > 2) {
+                    for (var i = 2; i < astNode.getChildren().length; i++) {
+                        var num = Number(value);
+                        var nextNum = Number(astNode.getChildren()[i].getNodeName());
+                        var sum = num + nextNum;
+                        value = sum.toString();
+                    }
+                    //scope.setValue(value);
+                }
+                //this.genIntExpr(astNode.getChildren()[1], scope, value);
+                this.sta("00", "00");
+                this.ldaConst(this.leftPad(value, 2));
+                this.adc("00", "00");
+            }
+        };
+        codeGenerator.genBoolExpr = function (astNode, scope) {
+            if (astNode.getChildren()[0].getNodeName() === "isEqual") {
+                this.genIsEqual(astNode.getChildren()[0], scope);
+            }
+            else if (astNode.getChildren()[0].getNodeName() === "isNotEqual") {
+            }
+            else if (astNode.getChildren()[1].getNodeName() === "true") {
+                this.ldxConst("00");
+                this.ldaConst("01");
+                this.sta("00", "00");
+                this.cpx("00", "00");
+            }
+            else if (astNode.getChildren()[1].getNodeName() === "false") {
+                this.ldxConst("01");
+                this.ldaConst("00");
+                this.sta("00", "00");
+                this.cpx("00", "00");
+            }
+        };
+        codeGenerator.genIsEqual = function (astNode, scope) {
+            //Get the left side.
+            var leftExprType = astNode.getChildren()[0].getNodeName();
+            //Check what type of expr the left side is.
+            if (digits.test(leftExprType)) {
+                this.ldxConst(this.leftPad(leftExprType, 2));
+            }
+            else if (leftExprType === "true" || leftExprType === "false") {
+                //Check if true or false - 01 true and 00 false.
+                if (leftExprType === "true") {
+                    this.ldxConst("01");
+                }
+                else {
+                    this.ldxConst("00");
+                }
+            }
+            else if (characters.test(leftExprType) && leftExprType.length > 1) {
+                this.ldxConst(this.leftPad(leftExprType, 2));
+            }
+            //Handle id assignment.
+            else if (characters.test(leftExprType) && leftExprType.length == 1) {
+                var staticTableEntry_1 = _staticTable.getByVarAndScope(leftExprType, scope);
+                this.ldxMem(staticTableEntry_1.getTemp(), "XX");
+            }
+            //Get the right side and make the comparison.
+            var rightExprType = astNode.getChildren()[1].getNodeName();
+            //Check what type of expr the right side is.
+            if (digits.test(rightExprType)) {
+                this.ldaConst(this.leftPad(rightExprType, 2));
+                this.sta("00", "00");
+                this.cpx("00", "00");
+            }
+            else if (rightExprType === "true" || rightExprType === "false") {
+                //Check if true or false - 01 true and 00 false.
+                if (rightExprType === "true") {
+                    this.ldxConst("01");
+                }
+                else {
+                    this.ldxConst("00");
+                }
+            }
+            else if (characters.test(rightExprType) && rightExprType.length > 1) {
+                this.ldaConst(this.leftPad(rightExprType, 2));
+                this.sta("00", "00");
+                this.cpx("00", "00");
+            }
+            else if (characters.test(rightExprType) && rightExprType.length == 1) {
+                var staticTableEntry_2 = _staticTable.getByVarAndScope(rightExprType, scope);
+                this.cpx(staticTableEntry_2.getTemp(), "00");
+            }
+        };
+        codeGenerator.genWhileStatement = function (astNode, scope) {
+            _Functions.log("CODE GENERATOR - Found while statement.");
+            //Set up jump table.
+            //Seriously blake, you didn't forget the add one in the if statement so don't do it now!
+            var jumpFrom = _executableImage.getStackPointer();
+            this.genBoolExpr(astNode, scope);
+            var jumpId = _jumpTable.getNextTemp();
+            var newJumpTableEntry = _jumpTable.addEntry(new mackintosh.jumpTableEntry(jumpId, 0));
+            this.bne(this.leftPad(_executableImage.getStackPointer().toString(16), 2));
+            //Generate the code for the block inside the loop.
+            this.genStatement(astNode.getChildren()[1], scope);
+            this.ldaConst("00");
+            this.sta("00", "00");
+            this.ldxConst("01");
+            this.cpx("00", "00");
+            this.bne(this.leftPad((_executableImage.getIMAGE_SIZE() - (_executableImage.getStackPointer() - jumpFrom + 2))
+                .toString(16), 2));
+            newJumpTableEntry.setDistance(_executableImage.getStackPointer() - jumpFrom + 1);
+            _Functions.log("CODE GENERATOR - Generated code for while statement.");
+        };
+        codeGenerator.genIfStatement = function (astNode, scope) {
+            _Functions.log("CODE GENERATOR - Found if statement.");
+            //Don't generate code on false equality.
+            if (astNode.getChildren()[0].getChildren()[0].getNodeName() == "false") {
+                return;
+            }
+            //Set up the jump table so the branch can be performed.
+            //DONT FORGET TO ADD ONE SO THE JUMP DOESN'T HAVE AN OFF BY ONE ERROR.
+            var jumpId = _jumpTable.getNextTemp();
+            var newJumpTableEntry = _jumpTable.addEntry(new mackintosh.jumpTableEntry(jumpId, 0));
+            this.genBoolExpr(astNode, scope);
+            var jumpFrom = _executableImage.getStackPointer();
+            this.bne(newJumpTableEntry.getTemp());
+            //Generate the code for the block inside the if statement.
+            this.genStatement(astNode.getChildren()[1], scope);
+            //When recursion ends calculate the jump distance.
+            //Once again, you better not forget to add 1!
+            newJumpTableEntry.setDistance(_executableImage.getStackPointer() - jumpFrom + 1);
+            _Functions.log("CODE GENERATOR - Generated Code for if statement.");
+        };
+        codeGenerator.genPrintStatement = function (astNode, scope) {
+            _Functions.log("CODE GENERATOR - Print statement found.");
+            if (astNode.getChildren().length == 0) {
+                //Print out nothing.
+            }
+            else {
+                var exprType = astNode.getChildren()[0].getNodeName();
+                //Check what we are trying to print.
+                if (digits.test(exprType)) {
+                    //Generate the code for the int expr.
+                    this.genIntExpr(astNode, scope, exprType);
+                    this.sta("00", "00");
+                    //Make print system call.
+                    this.ldxConst("01");
+                    this.ldyMem("00", "00");
+                    this.sys();
+                }
+                else if (exprType == "true" || exprType == "false") {
+                    var bool = astNode.getChildren()[0].getNodeName();
+                    var location_1;
+                    var boolInHeap = _executableImage.searchHeap(bool);
+                    //Check if its in the heap.
+                    if (boolInHeap == null) {
+                        location_1 = _executableImage.addString(bool);
+                    }
+                    else {
+                        location_1 = boolInHeap;
+                    }
+                    this.ldaConst(location_1.toString(16));
+                    this.sta("00", "00");
+                    this.ldxConst("02");
+                    this.ldyMem("00", "00");
+                    this.sys();
+                }
+                else if (characters.test(exprType) && exprType.length > 1) {
+                    var pos = void 0;
+                    pos = _executableImage.addString(astNode.getChildren()[0].getNodeName());
+                    this.ldaConst(pos.toString(16));
+                    this.sta("00", "00");
+                    //Make print system call.
+                    this.ldxConst("02");
+                    this.ldyMem("00", "00");
+                    this.sys();
+                }
+                else if (characters.test(exprType) && exprType.length == 1) {
+                    var staticTableEntry_3 = _staticTable.getByVarAndScope(exprType, scope);
+                    this.ldyMem(staticTableEntry_3.getTemp(), "XX");
+                    var idScope = scope.lookup(astNode.getChildren()[0].getNodeName());
+                    if (idScope != null || idScope != undefined) {
+                        if (idScope.getType() == "int") {
+                            this.ldxConst("01");
+                        }
+                        else {
+                            this.ldxConst("02");
+                        }
+                        this.sys();
+                    }
+                }
+            }
+            _Functions.log("CODE GENERATOR - Generated code for print statement.");
+        };
+        //Create methods for the 6502a op codes.
+        //Load the accumulator with a constant.
+        codeGenerator.ldaConst = function (data) {
+            _executableImage.addToStack("A9");
+            _executableImage.addToStack(data);
+        };
+        //Load the accumulator from memory.
+        codeGenerator.ldaMem = function (data1, data2) {
+            _executableImage.addToStack("AD");
+            _executableImage.addToStack(data1);
+            _executableImage.addToStack(data2);
+        };
+        //Store from the accumulator.
+        codeGenerator.sta = function (data1, data2) {
+            _executableImage.addToStack("8D");
+            _executableImage.addToStack(data1);
+            _executableImage.addToStack(data2);
+        };
+        //Add with carry.
+        codeGenerator.adc = function (data1, data2) {
+            _executableImage.addToStack("6D");
+            _executableImage.addToStack(data1);
+            _executableImage.addToStack(data2);
+        };
+        //Load the x register with a constant.
+        codeGenerator.ldxConst = function (data) {
+            _executableImage.addToStack("A2");
+            _executableImage.addToStack(data);
+        };
+        //Load the x register from memory.
+        codeGenerator.ldxMem = function (data1, data2) {
+            _executableImage.addToStack("AE");
+            _executableImage.addToStack(data1);
+            _executableImage.addToStack(data2);
+        };
+        //Load the y register with a constant.
+        codeGenerator.ldyConst = function (data) {
+            _executableImage.addToStack("A0");
+            _executableImage.addToStack(data);
+        };
+        //Load the y register from memory.
+        codeGenerator.ldyMem = function (data1, data2) {
+            _executableImage.addToStack("AC");
+            _executableImage.addToStack(data1);
+            _executableImage.addToStack(data2);
+        };
+        codeGenerator.noOp = function () {
+            _executableImage.addToStack("EA");
+        };
+        codeGenerator.break = function () {
+            _executableImage.addToStack("00");
+        };
+        //Compare a byte in mem to the x register.
+        codeGenerator.cpx = function (data1, data2) {
+            _executableImage.addToStack("EC");
+            _executableImage.addToStack(data1);
+            _executableImage.addToStack(data2);
+        };
+        //Branch not equal.
+        codeGenerator.bne = function (data1) {
+            _executableImage.addToStack("D0");
+            _executableImage.addToStack(data1);
+        };
+        //Increment.
+        codeGenerator.inc = function (data1, data2) {
+            _executableImage.addToStack("EE");
+            _executableImage.addToStack(data1);
+            _executableImage.addToStack(data2);
+        };
+        codeGenerator.sys = function () {
+            _executableImage.addToStack("FF");
+        };
+        codeGenerator.leftPad = function (data, length) {
+            var temp = "" + data;
+            while (temp.length < length) {
+                temp = "0" + temp;
+            }
+            return temp;
+        };
+        return codeGenerator;
+    }());
+    mackintosh.codeGenerator = codeGenerator;
+})(mackintosh || (mackintosh = {}));
+var mackintosh;
+(function (mackintosh) {
+    var executableImage = /** @class */ (function () {
+        function executableImage() {
+            this.IMAGE_SIZE = 256;
+            this.executableImage = new Array(this.IMAGE_SIZE);
+            this.stackPointer = 0;
+            this.heapPointer = this.executableImage.length - 1;
+        }
+        executableImage.prototype.initTable = function () {
+            //Initialize the executable image to be filled with 00.
+            for (var i = 0; i < this.IMAGE_SIZE; i++) {
+                if (this.executableImage[i] === null || this.executableImage[i] === undefined) {
+                    this.executableImage[i] = "00";
+                }
+            }
+        };
+        executableImage.prototype.getEntries = function () {
+            return this.executableImage;
+        };
+        executableImage.prototype.getIMAGE_SIZE = function () {
+            return this.IMAGE_SIZE;
+        };
+        executableImage.prototype.updateStackPointer = function (stackPointer) {
+            this.stackPointer = stackPointer;
+        };
+        executableImage.prototype.getStackPointer = function () {
+            return this.stackPointer;
+        };
+        executableImage.prototype.updateHeapPointer = function (heapPointer) {
+            this.heapPointer = heapPointer;
+        };
+        executableImage.prototype.getHeapPointer = function () {
+            return this.heapPointer;
+        };
+        executableImage.prototype.addToStack = function (data) {
+            this.addCode(data, this.stackPointer);
+            return this.stackPointer++;
+        };
+        executableImage.prototype.addToHeap = function (data) {
+            this.addCode(data, this.heapPointer);
+            return this.heapPointer--;
+        };
+        executableImage.prototype.addCode = function (data, pointer) {
+            data = data.toUpperCase();
+            //Check if the pointer is pointing to a valid space in the executable image.
+            if (pointer >= this.IMAGE_SIZE || pointer < 0) {
+                genErr++;
+                throw new Error("CODE GENERATOR - Invalid position " + pointer + " in executable image.");
+            }
+            //Check for collision in stack and heap.
+            this.checkOverflow();
+            this.executableImage[pointer] = data;
+            return pointer;
+        };
+        executableImage.prototype.addStringHelper = function (string) {
+            var pos;
+            if (string.length <= 0) {
+                pos = this.addToHeap("00");
+            }
+            //Null terminate the string.
+            this.addToHeap("00");
+            for (var i = string.length - 1; i >= 0; i--) {
+                //Get the hexidecimal representation of each character in the string.
+                //Then add it to the heap.
+                var toHex = string.charCodeAt(i).toString(16);
+                pos = this.addToHeap(toHex);
+            }
+            return pos;
+        };
+        executableImage.prototype.addString = function (string) {
+            return this.addStringHelper(string);
+        };
+        executableImage.prototype.checkOverflow = function () {
+            if (this.stackPointer >= this.heapPointer) {
+                genErr++;
+                throw new Error("CODE GENERATOR - Stack Heap Collision - Program is too long.");
+            }
+        };
+        //Search the heap for a string.
+        executableImage.prototype.searchHeap = function (data) {
+            var string = "";
+            for (var i = this.IMAGE_SIZE - 1; i >= this.heapPointer; i++) {
+                if (this.executableImage[i] == "00") {
+                    if (string == data) {
+                        return i;
+                    }
+                }
+                else {
+                    string = String.fromCharCode(parseInt(this.executableImage[i], 16)) + string;
+                }
+            }
+            return null;
+        };
+        executableImage.prototype.displayCode = function () {
+            var code = "";
+            //Traverse through the executable image and print out the generated code.
+            for (var i = 0; i < this.IMAGE_SIZE; i++) {
+                //Improves readability by adding a new line.
+                if (i % 8 == 0 && i != 0) {
+                    code += "\n";
+                }
+                code += this.executableImage[i] + " ";
+            }
+            return code;
+        };
+        return executableImage;
+    }());
+    mackintosh.executableImage = executableImage;
+})(mackintosh || (mackintosh = {}));
+var mackintosh;
+(function (mackintosh) {
+    //Represents the jump table.
+    var jumpTable = /** @class */ (function () {
+        function jumpTable() {
+            this.tableEntries = new Array();
+            this.curTemp = 0;
+        }
+        jumpTable.prototype.getCurTemp = function () {
+            return this.curTemp;
+        };
+        jumpTable.prototype.addEntry = function (newEntry) {
+            this.tableEntries.push(newEntry);
+            return newEntry;
+        };
+        jumpTable.prototype.getNextTemp = function () {
+            return "J" + this.curTemp++;
+        };
+        //Get a value by it's temp id.
+        jumpTable.prototype.getByTemp = function (tempId) {
+            for (var i = 0; i < this.tableEntries.length; i++) {
+                if (this.tableEntries[i].getTemp() == tempId) {
+                    return this.tableEntries[i];
+                }
+            }
+            //If we get here, its not in the table.
+            return null;
+        };
+        //Go back and replace temps with the correct code.
+        jumpTable.prototype.backpatch = function (executableImage) {
+            for (var i = 0; i < executableImage.getIMAGE_SIZE(); i++) {
+                var entry = executableImage.getEntries()[i];
+                var matched = entry.match(jumpIdMatch);
+                if (matched) {
+                    var foundEntry = this.getByTemp(matched[1]);
+                    executableImage.addCode(mackintosh.codeGenerator.leftPad(foundEntry.getDistance().toString(16), 2), i);
+                }
+            }
+        };
+        return jumpTable;
+    }());
+    mackintosh.jumpTable = jumpTable;
+    //Represents a single entry in the jump table.
+    var jumpTableEntry = /** @class */ (function () {
+        function jumpTableEntry(temp, distance) {
+            this.temp = temp;
+            this.distance = distance;
+        }
+        jumpTableEntry.prototype.getTemp = function () {
+            return this.temp;
+        };
+        jumpTableEntry.prototype.setTemp = function (temp) {
+            this.temp = temp;
+        };
+        jumpTableEntry.prototype.getDistance = function () {
+            return this.distance;
+        };
+        jumpTableEntry.prototype.setDistance = function (distance) {
+            this.distance = distance;
+        };
+        return jumpTableEntry;
+    }());
+    mackintosh.jumpTableEntry = jumpTableEntry;
+})(mackintosh || (mackintosh = {}));
+var mackintosh;
+(function (mackintosh) {
+    //Represents the static table and implements the codeGenTable interface.
+    var staticTable = /** @class */ (function () {
+        function staticTable() {
+            this.tableEntries = new Array();
+            this.curTemp = 0;
+            this.curOffset = 0;
+        }
+        staticTable.prototype.getCurTemp = function () {
+            return this.curTemp;
+        };
+        staticTable.prototype.setCurTemp = function (curTemp) {
+            this.curTemp = curTemp;
+        };
+        staticTable.prototype.getCurOffset = function () {
+            return this.curOffset;
+        };
+        staticTable.prototype.setCurOffset = function (curOffset) {
+            this.curOffset = curOffset;
+        };
+        //Add an entry to the static table.
+        staticTable.prototype.addEntry = function (entry) {
+            this.tableEntries.push(entry);
+            return entry;
+        };
+        staticTable.prototype.getNextTemp = function () {
+            return "T" + this.curTemp++;
+        };
+        staticTable.prototype.getNextOffset = function () {
+            return this.curOffset++;
+        };
+        //Search for the entry by scope and var.
+        staticTable.prototype.getByVarAndScope = function (varId, searchScope) {
+            for (var i = this.tableEntries.length - 1; i >= 0; i--) {
+                //Check if both the scope and var are in the table.
+                if (this.tableEntries[i].getId() == varId) {
+                    var expectedScope = this.tableEntries[i].getCurScope().getScopePointer();
+                    var actualScope = searchScope.lookup(varId).getScopePointer();
+                    if (expectedScope == actualScope) {
+                        return this.tableEntries[i];
+                    }
+                    else {
+                        var parent_1 = searchScope.getParentScope();
+                        while (parent_1 != null) {
+                            //Reassign the expected scope pointer to the parent's scope pointer.
+                            expectedScope = parent_1.getMap().get(varId).getScopePointer();
+                            if (expectedScope == actualScope) {
+                                return this.tableEntries[i];
+                            }
+                            //Go up to the next parent.
+                            parent_1 = parent_1.getParentScope();
+                        }
+                    }
+                }
+            }
+            //If we get here, then its not there.
+            return null;
+        };
+        //Get by temp id.
+        staticTable.prototype.getByTemp = function (tempId) {
+            for (var i = 0; i < this.tableEntries.length; i++) {
+                //Search for the entry that matches the temp id.
+                if (this.tableEntries[i].getTemp() == tempId) {
+                    return this.tableEntries[i];
+                }
+            }
+            //If we get here, that means there was no match.
+            return null;
+        };
+        staticTable.prototype.backpatch = function (executableImage) {
+            //Go back and replace all of the temp data points with the correct data.
+            for (var i = 0; i < executableImage.getIMAGE_SIZE(); i++) {
+                var entry = executableImage.getEntries()[i];
+                //Creates an array of matched ids.
+                var matched = entry.match(tempIdMatch);
+                if (matched) {
+                    var foundEntry = this.getByTemp(matched[1]);
+                    var hex = foundEntry.getOffset() + executableImage.getStackPointer() + 1;
+                    var hexStr = hex.toString(16);
+                    executableImage.addCode(mackintosh.codeGenerator.leftPad(hexStr, 2), i);
+                    executableImage.addCode('00', i + 1);
+                }
+            }
+        };
+        return staticTable;
+    }());
+    mackintosh.staticTable = staticTable;
+    //Represents an entry in the static table.
+    var staticTableEntry = /** @class */ (function () {
+        function staticTableEntry(temp, id, offset, curScope) {
+            this.temp = temp;
+            this.id = id;
+            this.offset = offset;
+            this.curScope = curScope;
+        }
+        staticTableEntry.prototype.getTemp = function () {
+            return this.temp;
+        };
+        staticTableEntry.prototype.setTemp = function (temp) {
+            this.temp = temp;
+        };
+        staticTableEntry.prototype.getId = function () {
+            return this.id;
+        };
+        staticTableEntry.prototype.setId = function (id) {
+            this.id = id;
+        };
+        staticTableEntry.prototype.getOffset = function () {
+            return this.offset;
+        };
+        staticTableEntry.prototype.setOffset = function (offset) {
+            this.offset = offset;
+        };
+        staticTableEntry.prototype.getCurScope = function () {
+            return this.curScope;
+        };
+        staticTableEntry.prototype.setCurScope = function (curScope) {
+            this.curScope = curScope;
+        };
+        return staticTableEntry;
+    }());
+    mackintosh.staticTableEntry = staticTableEntry;
 })(mackintosh || (mackintosh = {}));
 var mackintosh;
 (function (mackintosh) {
@@ -175,6 +943,7 @@ var mackintosh;
                         _Functions.log('LEXER - Lex Completed With ' + errCount + ' Errors and ' + warnCount + ' Warnings');
                         var isParsed = _Parser.parse(tokenStream);
                         var isSemantic = void 0;
+                        var isGen = void 0;
                         if (isParsed) {
                             isSemantic = _SemanticAnalyzer.semanticAnalysis();
                         }
@@ -182,6 +951,7 @@ var mackintosh;
                             _Functions.log("PARSER - Semantic analysis skipped due to parse errors.");
                         }
                         if (isSemantic) {
+                            isGen = _CodeGenerator.codeGeneration();
                         }
                         else {
                             _Functions.log("SEMANTIC ANALYSIS - Code generation skipped due to semantic errors.");
@@ -287,6 +1057,10 @@ var mackintosh;
                     this.setTokenCode("");
                     this.setTokenValue("");
                     this.isToken = true;
+                    if (this.quoteCount != 0) {
+                        this.setTokenCode("SPACE");
+                        this.setTokenValue(" ");
+                    }
                     break;
             }
             switch (digits.test(input)) {
@@ -693,13 +1467,12 @@ var mackintosh;
 })(mackintosh || (mackintosh = {}));
 var mackintosh;
 (function (mackintosh) {
-    //Class that represents parse/
+    //Class that represents parse
     var parse = /** @class */ (function () {
         function parse() {
         }
         //Recursive descent parser implimentation.
         parse.parse = function (parseTokens) {
-            debugger;
             var isParsed = false;
             CSTTree = new mackintosh.CST();
             ASTTree = new mackintosh.CST();
@@ -747,17 +1520,27 @@ var mackintosh;
             return isParsed;
         };
         //Match function.
-        parse.match = function (expectedTokens, parseToken) {
+        parse.match = function (expectedTokens, parseToken, isString) {
             //Check if the token is in a the expected token array.
-            for (var i = 0; i < expectedTokens.length; i++) {
-                if (expectedTokens[i] == parseToken) {
+            if (isString) {
+                if (characters.test(parseToken)) {
                     isMatch = true;
+                }
+            }
+            else {
+                for (var i = 0; i < expectedTokens.length; i++) {
+                    if (expectedTokens[i] == parseToken) {
+                        isMatch = true;
+                    }
                 }
             }
             if (isMatch) {
                 _Functions.log("PARSER - Token Matched! " + parseToken);
                 CSTTree.addNode(parseToken, "leaf");
-                tokenPointer++;
+                //Don't increment the token pointer if its a string, its already where it needs to be.
+                if (!isString) {
+                    tokenPointer++;
+                }
                 isMatch = false;
                 //Add AST Node.
                 if (isASTNode) {
@@ -781,7 +1564,7 @@ var mackintosh;
             this.parseBlock(parseTokens);
             //Check for EOP at the end of program.
             if (parseTokens[tokenPointer] == "$") {
-                this.match(["$"], parseTokens[tokenPointer]);
+                this.match(["$"], parseTokens[tokenPointer], false);
                 _Functions.log("PARSER - Program successfully parsed.");
             }
             else if (parseTokens[tokenPointer + 1] == undefined) {
@@ -798,6 +1581,9 @@ var mackintosh;
             this.parseStatementList(parseTokens);
             this.parseCloseBrace(parseTokens);
             CSTTree.climbTree();
+            if (ASTTree.getRoot() != ASTTree.getCurNode()) {
+                ASTTree.climbTree();
+            }
         };
         //Expected tokens: statement statementList
         //OR - empty
@@ -892,7 +1678,7 @@ var mackintosh;
         parse.parseIfStatement = function (parseTokens) {
             _Functions.log("PARSER - parseIfStatement()");
             CSTTree.addNode("IfStatement", "branch");
-            ASTTree.addNode("WhileStatement", "branch");
+            ASTTree.addNode("IfStatement", "branch");
             this.parseIf(parseTokens);
             this.parseBoolExpr(parseTokens);
             this.parseBlock(parseTokens);
@@ -934,6 +1720,7 @@ var mackintosh;
         parse.parseIntExpr = function (parseTokens) {
             _Functions.log("PARSER - parseIntExpr()");
             CSTTree.addNode("IntExpr", "branch");
+            //ASTTree.addNode("IntExpr", "branch");
             //Check if this is to be an expression or a single digit.
             if (parseTokens[tokenPointer + 1] == "+") {
                 this.parseDigit(parseTokens);
@@ -944,21 +1731,25 @@ var mackintosh;
                 this.parseDigit(parseTokens);
             }
             CSTTree.climbTree();
+            //ASTTree.climbTree();
         };
         //Expected tokens: "charlist"
         parse.parseStringExpr = function (parseTokens) {
             _Functions.log("PARSER - parseStringExpr()");
             CSTTree.addNode("StringExpr", "branch");
+            //ASTTree.addNode("StringExpr", "branch");
             this.parseQuotes(parseTokens);
             this.parseCharList(parseTokens);
             this.parseQuotes(parseTokens);
             CSTTree.climbTree();
+            //ASTTree.climbTree();
         };
         //Expected tokens: ( expr boolop expr)
         //OR: boolval
         parse.parseBoolExpr = function (parseTokens) {
             _Functions.log("PARSER - parseBoolExpr()");
             CSTTree.addNode("BooleanExpr", "branch");
+            //ASTTree.addNode("BooleanExpr", "branch");
             //If match parenthesis = true: (expr boolop expr)
             if (parseTokens[tokenPointer] == "(" || parseTokens[tokenPointer] == ")") {
                 this.parseParen(parseTokens);
@@ -976,9 +1767,11 @@ var mackintosh;
             }
             //Boolean value.
             else {
+                ASTTree.addNode("BooleanExpr", "branch");
                 this.parseBoolVal(parseTokens);
             }
             CSTTree.climbTree();
+            ASTTree.climbTree();
         };
         //Expected tokens: char
         parse.parseId = function (parseTokens) {
@@ -995,13 +1788,15 @@ var mackintosh;
                 this.parseSpace(parseTokens);
             }
             else if (characters.test(parseTokens[tokenPointer])) {
-                var string = void 0;
+                var string = "";
                 //Builds string until there is a quote.
                 while (!quotes.test(parseTokens[tokenPointer])) {
-                    this.parseChar(parseTokens);
+                    //this.parseChar(parseTokens);
                     string += parseTokens[tokenPointer];
+                    tokenPointer++;
                 }
                 _Functions.log("PARSER - String: " + string);
+                this.parseString(parseTokens, string);
             }
             else {
                 //Not an empty else, represents do nothing.
@@ -1011,61 +1806,66 @@ var mackintosh;
         //Expected tokens: int, string, boolean
         parse.parseType = function (parseTokens) {
             isASTNode = true;
-            this.match(["int", "string", "boolean"], parseTokens[tokenPointer]);
+            this.match(["int", "string", "boolean"], parseTokens[tokenPointer], false);
         };
         //Expected tokens: a-z
         parse.parseChar = function (parseTokens) {
             isASTNode = true;
             this.match(["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k",
                 "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x",
-                "y", "z"], parseTokens[tokenPointer]);
+                "y", "z"], parseTokens[tokenPointer], false);
+        };
+        parse.parseString = function (parseTokens, string) {
+            isASTNode = true;
+            this.match(["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k",
+                "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x",
+                "y", "z"], string, true);
         };
         //Expected tokens: space
         parse.parseSpace = function (parseTokens) {
-            this.match([" "], parseTokens[tokenPointer]);
+            this.match([" "], parseTokens[tokenPointer], false);
         };
         //Expected tokens: 0-9
         parse.parseDigit = function (parseTokens) {
             isASTNode = true;
-            this.match(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"], parseTokens[tokenPointer]);
+            this.match(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"], parseTokens[tokenPointer], false);
         };
         //Expected tokens: ==, !=
         parse.parseBoolOp = function (parseTokens) {
-            this.match(["==", "!="], parseTokens[tokenPointer]);
+            this.match(["==", "!="], parseTokens[tokenPointer], false);
         };
         //Expected tokens: false, true
         parse.parseBoolVal = function (parseTokens) {
             isASTNode = true;
-            this.match(["false", "true"], parseTokens[tokenPointer]);
+            this.match(["false", "true"], parseTokens[tokenPointer], false);
         };
         //Expected tokens: +
         parse.parseIntOp = function (parseTokens) {
-            this.match(["+"], parseTokens[tokenPointer]);
+            this.match(["+"], parseTokens[tokenPointer], false);
         };
         parse.parseParen = function (parseTokens) {
-            this.match(["(", ")"], parseTokens[tokenPointer]);
+            this.match(["(", ")"], parseTokens[tokenPointer], false);
         };
         parse.parseAssignmentOp = function (parseTokens) {
-            this.match(["="], parseTokens[tokenPointer]);
+            this.match(["="], parseTokens[tokenPointer], false);
         };
         parse.parseQuotes = function (parseTokens) {
-            isASTNode = true;
-            this.match(['"', '"'], parseTokens[tokenPointer]);
+            this.match(['"', '"'], parseTokens[tokenPointer], false);
         };
         parse.parseIf = function (parseTokens) {
-            this.match(["if"], parseTokens[tokenPointer]);
+            this.match(["if"], parseTokens[tokenPointer], false);
         };
         parse.parseWhile = function (parseTokens) {
-            this.match(["while"], parseTokens[tokenPointer]);
+            this.match(["while"], parseTokens[tokenPointer], false);
         };
         parse.parsePrint = function (parseTokens) {
-            this.match(["print"], parseTokens[tokenPointer]);
+            this.match(["print"], parseTokens[tokenPointer], false);
         };
         parse.parseOpenBrace = function (parseTokens) {
-            this.match(["{"], parseTokens[tokenPointer]);
+            this.match(["{"], parseTokens[tokenPointer], false);
         };
         parse.parseCloseBrace = function (parseTokens) {
-            this.match(["}"], parseTokens[tokenPointer]);
+            this.match(["}"], parseTokens[tokenPointer], false);
         };
         return parse;
     }());
@@ -1174,7 +1974,6 @@ var mackintosh;
                     this.analyzeStatement(astNode.getChildren()[i]);
                 }
             }
-            //this.analyzeStatement(astNode.getChildren()[0]);
             _Functions.log("SEMANTIC ANALYSIS - Closing scope " + scopePointer);
             symbolTable.closeScope();
             var unusedIds = symbolTable.getCurNode().getUnusedIds();
@@ -1188,7 +1987,6 @@ var mackintosh;
                 }
             }
             scopePointer--;
-            //Add check for unused ids.
         };
         semanticAnalyser.analyzeStatement = function (astNode) {
             if (astNode.getNodeName() === "Block") {
@@ -1223,55 +2021,55 @@ var mackintosh;
         };
         semanticAnalyser.analyzePrintStatement = function (astNode) {
             _Functions.log("SEMANTIC ANALYSIS - Print Statement found.");
-            var symbol = astNode.getChildren()[0].getNodeName();
-            var isSymbol;
-            var printVal;
-            //Check if the value in print is a symbol or just a literal.
-            if (characters.test(symbol) && symbol.length == 1) {
-                isSymbol = true;
-            }
-            else if (symbol === "true" || symbol === "false") {
-                isSymbol = false;
-                printVal = symbol;
-            }
-            else if (digits.test(symbol)) {
-                isSymbol = false;
-                printVal = symbol;
-            }
-            else if (quotes.test(symbol)) {
-                isSymbol = false;
-                var i = 1;
-                while (!quotes.test(astNode.getChildren()[i].getNodeName())) {
-                    printVal += astNode.getChildren()[i].getNodeName();
-                    i++;
+            for (var i = 0; i < astNode.getChildren().length; i++) {
+                var symbol = astNode.getChildren()[i].getNodeName();
+                ;
+                var isSymbol = void 0;
+                var printVal = void 0;
+                //Check if the value in print is a symbol or just a literal.
+                if (characters.test(symbol) && symbol.length == 1) {
+                    isSymbol = true;
                 }
-                printVal += '"';
-            }
-            if (isSymbol == true) {
-                //Check if the symbol to be printed is in the symbol table.
-                if (symbolTable.getCurNode().lookup(symbol) != null) {
-                    _Functions.log("SEMANTIC ANALYSIS - Print " + symbol);
+                else if (symbol === "BooleanExpr") {
+                    var boolVal = astNode.getChildren()[i].getChildren()[0].getNodeName();
+                    if (boolVal === "true" || boolVal === "false") {
+                        isSymbol = false;
+                        printVal = astNode.getChildren()[i].getChildren()[0].getNodeName();
+                    }
                 }
+                else if (digits.test(symbol)) {
+                    isSymbol = false;
+                    printVal = symbol;
+                }
+                else if (characters.test(symbol) && symbol.length > 1) {
+                    isSymbol = false;
+                    printVal = symbol;
+                }
+                if (isSymbol == true) {
+                    //Check if the symbol to be printed is in the symbol table.
+                    if (symbolTable.getCurNode().lookup(symbol) != null) {
+                        _Functions.log("SEMANTIC ANALYSIS - Print " + symbol);
+                    }
+                    else {
+                        semErr++;
+                        throw new Error("SEMANTIC ANALYSIS - Symbol " + symbol + " does not exist in symbol table.");
+                    }
+                }
+                //If the value is not a symbol see if its valid to be printed. Else, throw an error.
                 else {
-                    semErr++;
-                    throw new Error("SEMANTIC ANALYSIS - Symbol " + symbol + " does not exist in symbol table.");
-                }
-            }
-            //If the value is not a symbol see if its valid to be printed. Else, throw an error.
-            else {
-                if (printVal != undefined) {
-                    _Functions.log("SEMANTIC ANALYSIS - Print " + printVal);
-                }
-                else {
-                    semErr++;
-                    throw new Error("SEMANTIC ANALYSIS - Value " + printVal + " cannot be printed.");
+                    if (printVal != undefined) {
+                        _Functions.log("SEMANTIC ANALYSIS - Print " + printVal);
+                    }
+                    else {
+                        semErr++;
+                        throw new Error("SEMANTIC ANALYSIS - Value " + printVal + " cannot be printed.");
+                    }
                 }
             }
         };
         semanticAnalyser.analyzeIfStatement = function (astNode) {
             _Functions.log("SEMANTIC ANALYSIS - If Statement found.");
             //Check if both ends of the statement are in the symbol table
-            _Functions.log("SEMANTIC ANALYSIS - While Statement found.");
             var if1 = astNode.getChildren()[0].getChildren()[0].getNodeName();
             var if2 = astNode.getChildren()[0].getChildren()[1].getNodeName();
             if (symbolTable.getCurNode().lookup(if1) != null
@@ -1287,7 +2085,10 @@ var mackintosh;
             //Check if both ends of the statement are in the symbol table
             _Functions.log("SEMANTIC ANALYSIS - While Statement found.");
             var while1 = astNode.getChildren()[0].getChildren()[0].getNodeName();
-            var while2 = astNode.getChildren()[0].getChildren()[1].getNodeName();
+            var while2;
+            if (astNode.getChildren()[0].getChildren().length > 1) {
+                while2 = astNode.getChildren()[0].getChildren()[1].getNodeName();
+            }
             if (symbolTable.getCurNode().lookup(while1) != null
                 && symbolTable.getCurNode().lookup(while2) != null) {
                 _Functions.log("SEMANTIC ANALYSIS - While " +
@@ -1304,6 +2105,7 @@ var mackintosh;
             var curSymbol = symbolTable.getCurNode().lookup(symbol);
             var expectedDataType;
             var dataType;
+            var assigned = false;
             if (symbolTable.getCurNode().lookup(symbol) == null) {
                 throw new Error("SEMANTIC ANALYSIS - Symbol does not exist in symbol table.");
             }
@@ -1325,36 +2127,35 @@ var mackintosh;
                     }
                     //Assign the variable.
                     else {
+                        _Functions.log("SEMANTIC ANALYSIS - Performing Assignment " + symbol
+                            + " " + newSymbol.getValue());
                         symbolTable.getCurNode().assignment(symbol, newSymbol.getValue());
+                        assigned = true;
                     }
                 }
                 else if (value === "true" || value === "false") {
                     expectedDataType = true;
                 }
-                else if (quotes.test(value)) {
-                    var i = 2;
-                    while (!quotes.test(astNode.getChildren()[i].getNodeName())) {
-                        value += astNode.getChildren()[i].getNodeName();
-                        i++;
-                    }
-                    value += '"';
+                else if (characters.test(value) && value.length > 0) {
                     expectedDataType = "dsadsa";
                 }
                 else if (digits.test(value)) {
                     expectedDataType = 1;
                 }
-                if (intRegEx.test(curSymbol.getType())) {
-                    dataType = 1;
-                }
-                else if (stringRegEx.test(curSymbol.getType())) {
-                    dataType = "xcsadsa";
-                }
-                else if (boolRegEx.test(curSymbol.getType())) {
-                    dataType = true;
-                }
-                if (this.checkType(expectedDataType, dataType)) {
-                    _Functions.log("SEMANTIC ANALYSIS - Performing assignment " + symbol + " " + value);
-                    symbolTable.getCurNode().assignment(symbol, value);
+                if (!assigned) {
+                    if (intRegEx.test(curSymbol.getType())) {
+                        dataType = 1;
+                    }
+                    else if (stringRegEx.test(curSymbol.getType())) {
+                        dataType = "xcsadsa";
+                    }
+                    else if (boolRegEx.test(curSymbol.getType())) {
+                        dataType = true;
+                    }
+                    if (this.checkType(expectedDataType, dataType)) {
+                        _Functions.log("SEMANTIC ANALYSIS - Performing assignment " + symbol + " " + value);
+                        symbolTable.getCurNode().assignment(symbol, value);
+                    }
                 }
             }
         };
@@ -1421,6 +2222,8 @@ var mackintosh;
         };
         symbolTableNode.prototype.assignment = function (symbol, value) {
             var newScope = this.lookup(symbol);
+            var scope = newScope.getScopePointer();
+            var symbolTableNode = symbolTable.getNode(scope);
             if (newScope == null) {
                 semErr++;
                 throw new Error("SEMANTIC ANALYSIS - Id " + symbol + " has not been identified in symbol table.");
@@ -1429,7 +2232,8 @@ var mackintosh;
                 var type = newScope.getType();
                 newScope.setValue(value);
                 newScope.setIsUsed(true);
-                this.hashmap.set(symbol, newScope);
+                newScope.setType(type);
+                symbolTableNode.getMap().set(symbol, newScope);
             }
         };
         symbolTableNode.prototype.lookup = function (symbol) {
@@ -1483,9 +2287,6 @@ var mackintosh;
         symbolTableTree.prototype.toString = function () {
             var tableString = "";
             function expand(node, depth) {
-                for (var i = 0; i < depth; i++) {
-                    //tableString += "Scope " + i + "\n";
-                }
                 //Iterate through each key value pair and add them to the tree.
                 var map = node.getMap();
                 map.forEach(function (value, key) {
@@ -1498,6 +2299,22 @@ var mackintosh;
             }
             expand(this.rootNode, 0);
             return tableString;
+        };
+        symbolTableTree.prototype.getNode = function (curScope) {
+            var foundNode;
+            function expand(node, depth, curScope) {
+                var map = node.getMap();
+                map.forEach(function (value, key) {
+                    if (curScope == value.getScopePointer()) {
+                        foundNode = node;
+                    }
+                });
+                for (var i = 0; i < node.getChildren().length; i++) {
+                    expand(node.getChildren()[i], depth + 1, curScope);
+                }
+            }
+            expand(this.rootNode, 0, curScope);
+            return foundNode;
         };
         return symbolTableTree;
     }());

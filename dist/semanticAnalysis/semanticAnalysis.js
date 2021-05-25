@@ -61,7 +61,6 @@ var mackintosh;
                     this.analyzeStatement(astNode.getChildren()[i]);
                 }
             }
-            //this.analyzeStatement(astNode.getChildren()[0]);
             _Functions.log("SEMANTIC ANALYSIS - Closing scope " + scopePointer);
             symbolTable.closeScope();
             let unusedIds = symbolTable.getCurNode().getUnusedIds();
@@ -75,7 +74,6 @@ var mackintosh;
                 }
             }
             scopePointer--;
-            //Add check for unused ids.
         }
         static analyzeStatement(astNode) {
             if (astNode.getNodeName() === "Block") {
@@ -110,55 +108,55 @@ var mackintosh;
         }
         static analyzePrintStatement(astNode) {
             _Functions.log("SEMANTIC ANALYSIS - Print Statement found.");
-            let symbol = astNode.getChildren()[0].getNodeName();
-            let isSymbol;
-            let printVal;
-            //Check if the value in print is a symbol or just a literal.
-            if (characters.test(symbol) && symbol.length == 1) {
-                isSymbol = true;
-            }
-            else if (symbol === "true" || symbol === "false") {
-                isSymbol = false;
-                printVal = symbol;
-            }
-            else if (digits.test(symbol)) {
-                isSymbol = false;
-                printVal = symbol;
-            }
-            else if (quotes.test(symbol)) {
-                isSymbol = false;
-                let i = 1;
-                while (!quotes.test(astNode.getChildren()[i].getNodeName())) {
-                    printVal += astNode.getChildren()[i].getNodeName();
-                    i++;
+            for (let i = 0; i < astNode.getChildren().length; i++) {
+                let symbol = astNode.getChildren()[i].getNodeName();
+                ;
+                let isSymbol;
+                let printVal;
+                //Check if the value in print is a symbol or just a literal.
+                if (characters.test(symbol) && symbol.length == 1) {
+                    isSymbol = true;
                 }
-                printVal += '"';
-            }
-            if (isSymbol == true) {
-                //Check if the symbol to be printed is in the symbol table.
-                if (symbolTable.getCurNode().lookup(symbol) != null) {
-                    _Functions.log("SEMANTIC ANALYSIS - Print " + symbol);
+                else if (symbol === "BooleanExpr") {
+                    let boolVal = astNode.getChildren()[i].getChildren()[0].getNodeName();
+                    if (boolVal === "true" || boolVal === "false") {
+                        isSymbol = false;
+                        printVal = astNode.getChildren()[i].getChildren()[0].getNodeName();
+                    }
                 }
+                else if (digits.test(symbol)) {
+                    isSymbol = false;
+                    printVal = symbol;
+                }
+                else if (characters.test(symbol) && symbol.length > 1) {
+                    isSymbol = false;
+                    printVal = symbol;
+                }
+                if (isSymbol == true) {
+                    //Check if the symbol to be printed is in the symbol table.
+                    if (symbolTable.getCurNode().lookup(symbol) != null) {
+                        _Functions.log("SEMANTIC ANALYSIS - Print " + symbol);
+                    }
+                    else {
+                        semErr++;
+                        throw new Error("SEMANTIC ANALYSIS - Symbol " + symbol + " does not exist in symbol table.");
+                    }
+                }
+                //If the value is not a symbol see if its valid to be printed. Else, throw an error.
                 else {
-                    semErr++;
-                    throw new Error("SEMANTIC ANALYSIS - Symbol " + symbol + " does not exist in symbol table.");
-                }
-            }
-            //If the value is not a symbol see if its valid to be printed. Else, throw an error.
-            else {
-                if (printVal != undefined) {
-                    _Functions.log("SEMANTIC ANALYSIS - Print " + printVal);
-                }
-                else {
-                    semErr++;
-                    throw new Error("SEMANTIC ANALYSIS - Value " + printVal + " cannot be printed.");
+                    if (printVal != undefined) {
+                        _Functions.log("SEMANTIC ANALYSIS - Print " + printVal);
+                    }
+                    else {
+                        semErr++;
+                        throw new Error("SEMANTIC ANALYSIS - Value " + printVal + " cannot be printed.");
+                    }
                 }
             }
         }
         static analyzeIfStatement(astNode) {
             _Functions.log("SEMANTIC ANALYSIS - If Statement found.");
             //Check if both ends of the statement are in the symbol table
-            _Functions.log("SEMANTIC ANALYSIS - While Statement found.");
             let if1 = astNode.getChildren()[0].getChildren()[0].getNodeName();
             let if2 = astNode.getChildren()[0].getChildren()[1].getNodeName();
             if (symbolTable.getCurNode().lookup(if1) != null
@@ -174,7 +172,10 @@ var mackintosh;
             //Check if both ends of the statement are in the symbol table
             _Functions.log("SEMANTIC ANALYSIS - While Statement found.");
             let while1 = astNode.getChildren()[0].getChildren()[0].getNodeName();
-            let while2 = astNode.getChildren()[0].getChildren()[1].getNodeName();
+            let while2;
+            if (astNode.getChildren()[0].getChildren().length > 1) {
+                while2 = astNode.getChildren()[0].getChildren()[1].getNodeName();
+            }
             if (symbolTable.getCurNode().lookup(while1) != null
                 && symbolTable.getCurNode().lookup(while2) != null) {
                 _Functions.log("SEMANTIC ANALYSIS - While " +
@@ -191,6 +192,7 @@ var mackintosh;
             let curSymbol = symbolTable.getCurNode().lookup(symbol);
             let expectedDataType;
             let dataType;
+            let assigned = false;
             if (symbolTable.getCurNode().lookup(symbol) == null) {
                 throw new Error("SEMANTIC ANALYSIS - Symbol does not exist in symbol table.");
             }
@@ -212,36 +214,35 @@ var mackintosh;
                     }
                     //Assign the variable.
                     else {
+                        _Functions.log("SEMANTIC ANALYSIS - Performing Assignment " + symbol
+                            + " " + newSymbol.getValue());
                         symbolTable.getCurNode().assignment(symbol, newSymbol.getValue());
+                        assigned = true;
                     }
                 }
                 else if (value === "true" || value === "false") {
                     expectedDataType = true;
                 }
-                else if (quotes.test(value)) {
-                    let i = 2;
-                    while (!quotes.test(astNode.getChildren()[i].getNodeName())) {
-                        value += astNode.getChildren()[i].getNodeName();
-                        i++;
-                    }
-                    value += '"';
+                else if (characters.test(value) && value.length > 0) {
                     expectedDataType = "dsadsa";
                 }
                 else if (digits.test(value)) {
                     expectedDataType = 1;
                 }
-                if (intRegEx.test(curSymbol.getType())) {
-                    dataType = 1;
-                }
-                else if (stringRegEx.test(curSymbol.getType())) {
-                    dataType = "xcsadsa";
-                }
-                else if (boolRegEx.test(curSymbol.getType())) {
-                    dataType = true;
-                }
-                if (this.checkType(expectedDataType, dataType)) {
-                    _Functions.log("SEMANTIC ANALYSIS - Performing assignment " + symbol + " " + value);
-                    symbolTable.getCurNode().assignment(symbol, value);
+                if (!assigned) {
+                    if (intRegEx.test(curSymbol.getType())) {
+                        dataType = 1;
+                    }
+                    else if (stringRegEx.test(curSymbol.getType())) {
+                        dataType = "xcsadsa";
+                    }
+                    else if (boolRegEx.test(curSymbol.getType())) {
+                        dataType = true;
+                    }
+                    if (this.checkType(expectedDataType, dataType)) {
+                        _Functions.log("SEMANTIC ANALYSIS - Performing assignment " + symbol + " " + value);
+                        symbolTable.getCurNode().assignment(symbol, value);
+                    }
                 }
             }
         }

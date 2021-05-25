@@ -62,6 +62,8 @@ module mackintosh {
 
         public assignment(symbol : any, value : any) {
             let newScope = this.lookup(symbol);
+            let scope = newScope.getScopePointer();
+            let symbolTableNode = symbolTable.getNode(scope);
 
             if(newScope == null) {
                 semErr++;
@@ -72,7 +74,8 @@ module mackintosh {
                 let type = newScope.getType();
                 newScope.setValue(value);
                 newScope.setIsUsed(true);
-                this.hashmap.set(symbol, newScope);
+                newScope.setType(type);
+                symbolTableNode.getMap().set(symbol, newScope);
             }
         }
 
@@ -99,11 +102,11 @@ module mackintosh {
             this.rootNode = null;
         }
 
-        public getRoot() {
+        public getRoot() : symbolTableNode {
             return this.rootNode;
         }
 
-        public getCurNode() {
+        public getCurNode() : symbolTableNode {
             return this.curNode;
         }
 
@@ -138,14 +141,10 @@ module mackintosh {
             }
         }
 
-        public toString() {
+        public toString() : string {
             let tableString = "";
 
             function expand(node : symbolTableNode, depth : number) {
-                for(let i = 0; i < depth; i++) {
-                    //tableString += "Scope " + i + "\n";
-                }
-
                 //Iterate through each key value pair and add them to the tree.
                 let map = node.getMap()
                 map.forEach((value : scope, key : any) => {
@@ -160,5 +159,25 @@ module mackintosh {
             expand(this.rootNode, 0);
             return tableString;
         }
+
+        public getNode(curScope : number) : symbolTableNode {
+            let foundNode : symbolTableNode
+            function expand(node : symbolTableNode, depth : number, curScope : number)  {
+                let map = node.getMap();
+                map.forEach((value : scope, key : any) => {
+                    if(curScope == value.getScopePointer() as number) {
+                        foundNode = node;
+                    }
+                });
+
+                for(let i = 0; i < node.getChildren().length; i++) {
+                    expand(node.getChildren()[i], depth + 1, curScope);
+                }
+            }
+
+            expand(this.rootNode, 0, curScope);
+            return foundNode;
+        }
+
     }
 }

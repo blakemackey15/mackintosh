@@ -47,6 +47,8 @@ var mackintosh;
         }
         assignment(symbol, value) {
             let newScope = this.lookup(symbol);
+            let scope = newScope.getScopePointer();
+            let symbolTableNode = symbolTable.getNode(scope);
             if (newScope == null) {
                 semErr++;
                 throw new Error("SEMANTIC ANALYSIS - Id " + symbol + " has not been identified in symbol table.");
@@ -55,7 +57,8 @@ var mackintosh;
                 let type = newScope.getType();
                 newScope.setValue(value);
                 newScope.setIsUsed(true);
-                this.hashmap.set(symbol, newScope);
+                newScope.setType(type);
+                symbolTableNode.getMap().set(symbol, newScope);
             }
         }
         lookup(symbol) {
@@ -108,9 +111,6 @@ var mackintosh;
         toString() {
             let tableString = "";
             function expand(node, depth) {
-                for (let i = 0; i < depth; i++) {
-                    //tableString += "Scope " + i + "\n";
-                }
                 //Iterate through each key value pair and add them to the tree.
                 let map = node.getMap();
                 map.forEach((value, key) => {
@@ -123,6 +123,22 @@ var mackintosh;
             }
             expand(this.rootNode, 0);
             return tableString;
+        }
+        getNode(curScope) {
+            let foundNode;
+            function expand(node, depth, curScope) {
+                let map = node.getMap();
+                map.forEach((value, key) => {
+                    if (curScope == value.getScopePointer()) {
+                        foundNode = node;
+                    }
+                });
+                for (let i = 0; i < node.getChildren().length; i++) {
+                    expand(node.getChildren()[i], depth + 1, curScope);
+                }
+            }
+            expand(this.rootNode, 0, curScope);
+            return foundNode;
         }
     }
     mackintosh.symbolTableTree = symbolTableTree;

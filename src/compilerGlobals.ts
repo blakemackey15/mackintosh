@@ -8,6 +8,7 @@ var _Parser = mackintosh.parse;
 var _Token = mackintosh.token;
 var _Functions = mackintosh.compilerFunctions;
 var _SemanticAnalyzer = mackintosh.semanticAnalyser;
+var _CodeGenerator = mackintosh.codeGenerator;
 var symbolTable = new mackintosh.symbolTableTree;
 
 //Lex errors.
@@ -63,3 +64,13 @@ var isASTNode : boolean = false;
 var scopePointer : number = 0;
 var semErr : number = 0; 
 var semWarn : number = 0;
+
+//Code gen globals
+var genErr : number = 0;
+var genWarn : number = 0;
+var _executableImage = new mackintosh.executableImage;
+var _staticTable = new mackintosh.staticTable;
+var _jumpTable = new mackintosh.jumpTable;
+var curScope : number = 0;
+var tempIdMatch = /^(T[0-9])/;
+var jumpIdMatch = /^(J[0-9])/;
