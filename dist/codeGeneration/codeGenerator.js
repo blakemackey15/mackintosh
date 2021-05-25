@@ -3,7 +3,6 @@ var mackintosh;
     //Perform code generation.
     class codeGenerator {
         static codeGeneration() {
-            debugger;
             let isGen = false;
             genErr = 0;
             genWarn = 0;

@@ -2,7 +2,6 @@ module mackintosh {
     //Perform code generation.
     export class codeGenerator {
         public static codeGeneration() : boolean {
-            debugger;
             let isGen = false;
             genErr = 0;
             genWarn = 0;

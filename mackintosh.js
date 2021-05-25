@@ -128,7 +128,6 @@ var mackintosh;
         function codeGenerator() {
         }
         codeGenerator.codeGeneration = function () {
-            debugger;
             var isGen = false;
             genErr = 0;
             genWarn = 0;
@@ -1905,7 +1904,6 @@ var mackintosh;
         function semanticAnalyser() {
         }
         semanticAnalyser.semanticAnalysis = function () {
-            debugger;
             scopePointer = 0;
             symbolTable = new mackintosh.symbolTableTree();
             semErr = 0;
