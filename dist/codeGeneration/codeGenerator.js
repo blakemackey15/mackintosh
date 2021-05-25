@@ -136,14 +136,6 @@ var mackintosh;
                 this.genIdAssignmentStatement(astNode, id, value, node);
             }
             else if (scope.getType() === "int") {
-                if (astNode.getChildren().length > 2) {
-                    for (let i = 2; i < astNode.getChildren().length; i++) {
-                        let num = Number(value);
-                        let nextNum = Number(astNode.getChildren()[i].getNodeName());
-                        let sum = num + nextNum;
-                        value = sum.toString();
-                    }
-                }
                 this.genIntAssignmentStatement(astNode, id, value, node);
             }
             else if (scope.getType() === "string") {
@@ -156,7 +148,7 @@ var mackintosh;
         static genIntAssignmentStatement(astNode, id, value, node) {
             _Functions.log("CODE GENERATOR - Int assignment statement found.");
             //Pass the value to be evaluated.
-            this.genIntExpr(astNode, node);
+            this.genIntExpr(astNode, node, value);
             let staticTableEntry = _staticTable.getByVarAndScope(id, node);
             this.sta(staticTableEntry.getTemp(), "XX");
             _Functions.log("CODE GENERATOR - Generated code for int assignment.");
@@ -188,16 +180,25 @@ var mackintosh;
             this.sta(staticTableEntry.getTemp(), "XX");
             _Functions.log("CODE GENERATOR - Generated code for ids assignment statement.");
         }
-        static genIntExpr(astNode, scope) {
+        static genIntExpr(astNode, scope, value) {
             //Only one int, load accumulator with it - base case.
-            if (astNode.getChildren().length == 2) {
-                this.ldaConst(this.leftPad(astNode.getChildren()[1].getNodeName(), 2));
+            if (astNode.getChildren().length <= 2) {
+                this.ldaConst(this.leftPad(value, 2));
             }
-            //Use recursion to evaluate an expression.
+            //Perform the addition.
             else {
-                this.genIntExpr(astNode.getChildren()[1], scope);
+                if (astNode.getChildren().length > 2) {
+                    for (let i = 2; i < astNode.getChildren().length; i++) {
+                        let num = Number(value);
+                        let nextNum = Number(astNode.getChildren()[i].getNodeName());
+                        let sum = num + nextNum;
+                        value = sum.toString();
+                    }
+                    //scope.setValue(value);
+                }
+                //this.genIntExpr(astNode.getChildren()[1], scope, value);
                 this.sta("00", "00");
-                this.ldaConst(this.leftPad(astNode.getChildren()[0].getNodeName(), 2));
+                this.ldaConst(this.leftPad(value, 2));
                 this.adc("00", "00");
             }
         }
@@ -310,56 +311,61 @@ var mackintosh;
         }
         static genPrintStatement(astNode, scope) {
             _Functions.log("CODE GENERATOR - Print statement found.");
-            let exprType = astNode.getChildren()[0].getNodeName();
-            //Check what we are trying to print.
-            if (digits.test(exprType)) {
-                //Generate the code for the int expr.
-                this.genIntExpr(astNode, scope);
-                this.sta("00", "00");
-                //Make print system call.
-                this.ldxConst("01");
-                this.ldyMem("00", "00");
-                this.sys();
+            if (astNode.getChildren().length == 0) {
+                //Print out nothing.
             }
-            else if (exprType == "true" || exprType == "false") {
-                let bool = astNode.getChildren()[0].getNodeName();
-                let location;
-                let boolInHeap = _executableImage.searchHeap(bool);
-                //Check if its in the heap.
-                if (boolInHeap == null) {
-                    location = _executableImage.addString(bool);
+            else {
+                let exprType = astNode.getChildren()[0].getNodeName();
+                //Check what we are trying to print.
+                if (digits.test(exprType)) {
+                    //Generate the code for the int expr.
+                    this.genIntExpr(astNode, scope, exprType);
+                    this.sta("00", "00");
+                    //Make print system call.
+                    this.ldxConst("01");
+                    this.ldyMem("00", "00");
+                    this.sys();
                 }
-                else {
-                    location = boolInHeap;
-                }
-                this.ldaConst(location.toString(16));
-                this.sta("00", "00");
-                this.ldxConst("02");
-                this.ldyMem("00", "00");
-                this.sys();
-            }
-            else if (characters.test(exprType) && exprType.length > 1) {
-                let pos;
-                pos = _executableImage.addString(astNode.getChildren()[0].getNodeName());
-                this.ldaConst(pos.toString(16));
-                this.sta("00", "00");
-                //Make print system call.
-                this.ldxConst("02");
-                this.ldyMem("00", "00");
-                this.sys();
-            }
-            else if (characters.test(exprType) && exprType.length == 1) {
-                let staticTableEntry = _staticTable.getByVarAndScope(exprType, scope);
-                this.ldyMem(staticTableEntry.getTemp(), "XX");
-                let idScope = scope.lookup(astNode.getChildren()[0].getNodeName());
-                if (idScope != null || idScope != undefined) {
-                    if (idScope.getType() == "int") {
-                        this.ldxConst("01");
+                else if (exprType == "true" || exprType == "false") {
+                    let bool = astNode.getChildren()[0].getNodeName();
+                    let location;
+                    let boolInHeap = _executableImage.searchHeap(bool);
+                    //Check if its in the heap.
+                    if (boolInHeap == null) {
+                        location = _executableImage.addString(bool);
                     }
                     else {
-                        this.ldxConst("02");
+                        location = boolInHeap;
                     }
+                    this.ldaConst(location.toString(16));
+                    this.sta("00", "00");
+                    this.ldxConst("02");
+                    this.ldyMem("00", "00");
                     this.sys();
+                }
+                else if (characters.test(exprType) && exprType.length > 1) {
+                    let pos;
+                    pos = _executableImage.addString(astNode.getChildren()[0].getNodeName());
+                    this.ldaConst(pos.toString(16));
+                    this.sta("00", "00");
+                    //Make print system call.
+                    this.ldxConst("02");
+                    this.ldyMem("00", "00");
+                    this.sys();
+                }
+                else if (characters.test(exprType) && exprType.length == 1) {
+                    let staticTableEntry = _staticTable.getByVarAndScope(exprType, scope);
+                    this.ldyMem(staticTableEntry.getTemp(), "XX");
+                    let idScope = scope.lookup(astNode.getChildren()[0].getNodeName());
+                    if (idScope != null || idScope != undefined) {
+                        if (idScope.getType() == "int") {
+                            this.ldxConst("01");
+                        }
+                        else {
+                            this.ldxConst("02");
+                        }
+                        this.sys();
+                    }
                 }
             }
             _Functions.log("CODE GENERATOR - Generated code for print statement.");
