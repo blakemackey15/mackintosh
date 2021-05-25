@@ -1,6 +1,6 @@
 var mackintosh;
 (function (mackintosh) {
-    //Class that represents parse/
+    //Class that represents parse
     class parse {
         //Recursive descent parser implimentation.
         static parse(parseTokens) {
@@ -112,6 +112,9 @@ var mackintosh;
             this.parseStatementList(parseTokens);
             this.parseCloseBrace(parseTokens);
             CSTTree.climbTree();
+            if (ASTTree.getRoot() != ASTTree.getCurNode()) {
+                ASTTree.climbTree();
+            }
         }
         //Expected tokens: statement statementList
         //OR - empty

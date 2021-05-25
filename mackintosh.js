@@ -1464,7 +1464,7 @@ var mackintosh;
 })(mackintosh || (mackintosh = {}));
 var mackintosh;
 (function (mackintosh) {
-    //Class that represents parse/
+    //Class that represents parse
     var parse = /** @class */ (function () {
         function parse() {
         }
@@ -1578,6 +1578,9 @@ var mackintosh;
             this.parseStatementList(parseTokens);
             this.parseCloseBrace(parseTokens);
             CSTTree.climbTree();
+            if (ASTTree.getRoot() != ASTTree.getCurNode()) {
+                ASTTree.climbTree();
+            }
         };
         //Expected tokens: statement statementList
         //OR - empty

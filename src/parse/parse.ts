@@ -1,7 +1,7 @@
 module mackintosh {
 
 
-    //Class that represents parse/
+    //Class that represents parse
     export class parse {
 
         //Recursive descent parser implimentation.
@@ -132,6 +132,9 @@ module mackintosh {
             this.parseStatementList(parseTokens);
             this.parseCloseBrace(parseTokens);
             CSTTree.climbTree();
+            if(ASTTree.getRoot() != ASTTree.getCurNode()) {
+                ASTTree.climbTree();
+            }
         }
 
         //Expected tokens: statement statementList
