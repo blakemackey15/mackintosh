@@ -264,22 +264,22 @@ module mackintosh {
 
             //Check what type of expr the left side is.
             if(digits.test(leftExprType)) {
-                this.ldxConst(this.leftPad(astNode.getChildren()[0].getNodeName(), 2));
-            }
-
-            else if(quotes.test(leftExprType)) {
-                //TODO: Figure out string comparison.
+                this.ldxConst(this.leftPad(leftExprType, 2));
             }
 
             else if(leftExprType === "true" || leftExprType === "false") {
                 //Check if true or false - 01 true and 00 false.
-                if(astNode.getChildren()[0].getNodeName() === "true") {
+                if(leftExprType === "true") {
                     this.ldxConst("01");
                 }
 
                 else {
                     this.ldxConst("00");
                 }
+            }
+
+            else if(characters.test(leftExprType) && leftExprType.length > 1) {
+                this.ldxConst(this.leftPad(leftExprType, 2));
             }
 
             //Handle id assignment.
@@ -293,18 +293,14 @@ module mackintosh {
             
             //Check what type of expr the right side is.
             if(digits.test(rightExprType)) {
-                this.ldaConst(this.leftPad(astNode.getChildren()[1].getNodeName(), 2));
+                this.ldaConst(this.leftPad(rightExprType, 2));
                 this.sta("00", "00");
                 this.cpx("00", "00");
             }
 
-            else if(quotes.test(rightExprType)) {
-
-            }
-
             else if(rightExprType === "true" || rightExprType === "false") {
                 //Check if true or false - 01 true and 00 false.
-                if(astNode.getChildren()[1].getNodeName() === "true") {
+                if(rightExprType === "true") {
                     this.ldxConst("01");
                 }
                 
@@ -313,8 +309,14 @@ module mackintosh {
                 }
             }
 
+            else if(characters.test(rightExprType) && rightExprType.length > 1) {
+                this.ldaConst(this.leftPad(rightExprType, 2));
+                this.sta("00", "00");
+                this.cpx("00", "00");
+            }
+
             else if(characters.test(rightExprType) && rightExprType.length == 1) {
-                let staticTableEntry = _staticTable.getByVarAndScope(astNode.getChildren()[1].getNodeName(), scope);
+                let staticTableEntry = _staticTable.getByVarAndScope(rightExprType, scope);
                 this.cpx(staticTableEntry.getTemp(), "00");
             }
         }
